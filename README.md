@@ -72,6 +72,41 @@ git remote add upstream https://github.com/gEDA-pcb-developers/pcb.git
 Reproducible Apple Silicon build commands will be documented when verified.
 There is no supported binary package from this project yet.
 
+## Release identity
+
+The authoritative version is the literal `AC_INIT` version in `configure.ac`.
+The initial development identity is `0.1.0-20261020`; this is not a working release.
+Versions follow `MAJOR.MINOR.PATCH-YYYYMMDD`, matching gEDA-ai's release format.
+
+```sh
+python3 tools/version.py show
+python3 tools/version.py set 0.1.1-20261021  # example next version
+python3 tools/version.py check
+```
+
+After changing the version, regenerate the build system and rebuild. Autoconf
+and Automake use it for `VERSION`, `PACKAGE_VERSION` and `make dist` archive names.
+The source version remains available in tarballs without Git or Python at build time.
+The Python helper is a maintainer tool.
+
+Development checkpoints may be tagged before the build works. The initial
+`0.1.0-20261020` tag records the version tooling; its build and release tarball
+are unverified. A tag does not establish a tested release.
+
+For a tested release, pass the build and acceptance tests, commit the sources,
+and create an annotated tag with the exact version printed by the helper
+(no `v` prefix). After `make dist`, validate both identities before publishing:
+
+```sh
+python3 tools/version.py check --tag --archive pcb-ai-0.1.0-20261020.tar.gz
+```
+
+`--tag` requires a clean checkout and the matching annotated tag at HEAD.
+`--archive` checks the filename, top directory and embedded source version.
+The helper never creates tags or pushes. Archive checks do not replace build,
+installation or physical print-scale tests. Run its regression tests with
+`python3 tools/test_version.py`.
+
 ## Support and contributions
 
 - [Issues and development discussion](https://github.com/tambotitree/pcb-ai/issues)

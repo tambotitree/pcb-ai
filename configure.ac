@@ -1,6 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([pcb], m4_esyscmd([git describe --abbrev=8 --always --tags | awk -F'-' '{printf "%s-%s", $1, $3}']))
+dnl Authoritative release identity; tools/version.py updates and validates it.
+AC_INIT([pcb-ai], [0.1.0-20261020],
+        [https://github.com/tambotitree/pcb-ai/issues], [pcb-ai])
 AC_CONFIG_SRCDIR([src/draw.c])
 AC_PREREQ([2.69])
 AM_INIT_AUTOMAKE([1.9])

@@ -17,3 +17,6 @@ MAINTAINERCLEANFILES= $(INTLTOOL_FILES)
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS := ${DISTCHECK_CONFIGURE_FLAGS} --disable-update-mime-database --disable-update-desktop-database GTK_UPDATE_ICON_THEME_BIN=true --with-gui=batch
 
+
+# Release tooling must also work in distributed sources without Git.
+EXTRA_DIST += README.md PCB_AI_PLAN.md tools/version.py tools/test_version.py
