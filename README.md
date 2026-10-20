@@ -27,13 +27,20 @@ Gerber/drill and milling workflows can follow once this path is verified.
 
 ## Current status
 
-**Project started; no working pcb-ai build or release is claimed yet.**
+**The batch/PostScript build succeeds; the GTK3 editor and a working release
+remain unverified.**
 Apple Silicon macOS is the initial target. Other platforms are not verified.
 
 - The upstream Git history is preserved, starting from revision
   `a38ac3e999f388219adadecee0add6b56eb36c6e`.
 - The untouched upstream `autogen.sh` was tried. `autopoint` completed, but
-  bootstrap stopped because `intltoolize` was not installed.
+  bootstrap stopped because `intltoolize` was not installed. The adapted
+  English-only `bootstrap.sh` now completes; an isolated batch/PostScript
+  configuration and metadata generation also pass. The batch/PostScript
+  executable builds and reports the expected version.
+- A two-resistor smoke test passes batch load/save/reopen, connection checking
+  (including a disconnected negative control), and PostScript/PDF export.
+  It uses test footprints; physical manufacture and printer scale are unverified.
 - Upstream GUI configuration still requests GTK2 and gtkglext. The GTK3 port
   has not yet been performed.
 - Upstream already contains PostScript/EPS, Gerber, and experimental G-code
@@ -58,7 +65,9 @@ Work proceeds in consultation with the maintainer, one reviewable step at a time
 - Bundle icons instead of relying on a desktop theme installation.
 - Keep debugging symbols and test open/edit/save/reopen and physical export scale.
 
-See [the project plan](PCB_AI_PLAN.md) for the acceptance criteria and work list.
+Track stage completion, decisions and test notes in the
+[upgrade tracker](UPDATE_PROJECT_TODO.md). See [the project plan](PCB_AI_PLAN.md)
+for the original scope and acceptance criteria.
 A successful compiler run alone will not count as a working board-production tool.
 
 ## Getting the source
@@ -69,18 +78,28 @@ cd pcb-ai
 git remote add upstream https://github.com/gEDA-pcb-developers/pcb.git
 ```
 
+Generate the English-only build system with `./bootstrap.sh` (the historical
+`./autogen.sh` delegates to it). It requires Autoconf 2.73, Automake and their
+normal macro dependencies, but does not run autopoint or intltoolize. Translation
+catalogs remain in `po/`. Configure requires GNU Bison 3.0 or newer.
+On macOS, `m4/pcb-macos.m4` prefers Homebrew's keg-only Bison, obtained with
+`brew install bison`, without changing your shell PATH. An explicit `YACC`
+override is honored but must pass the version check. Native-language support is deferred; `--enable-nls`
+is rejected and `--disable-nls` is accepted.
+
 Reproducible Apple Silicon build commands will be documented when verified.
 There is no supported binary package from this project yet.
 
 ## Release identity
 
 The authoritative version is the literal `AC_INIT` version in `configure.ac`.
-The initial development identity is `0.1.0-20261020`; this is not a working release.
+The current development checkpoint is `0.1.1-20261020`. The batch/PostScript
+smoke test passes; the GUI and manufacturing workflow remain unverified.
 Versions follow `MAJOR.MINOR.PATCH-YYYYMMDD`, matching gEDA-ai's release format.
 
 ```sh
 python3 tools/version.py show
-python3 tools/version.py set 0.1.1-20261021  # example next version
+python3 tools/version.py set 0.1.2-20261021  # example next version
 python3 tools/version.py check
 ```
 
@@ -98,7 +117,7 @@ and create an annotated tag with the exact version printed by the helper
 (no `v` prefix). After `make dist`, validate both identities before publishing:
 
 ```sh
-python3 tools/version.py check --tag --archive pcb-ai-0.1.0-20261020.tar.gz
+python3 tools/version.py check --tag --archive pcb-ai-0.1.1-20261020.tar.gz
 ```
 
 `--tag` requires a clean checkout and the matching annotated tag at HEAD.
