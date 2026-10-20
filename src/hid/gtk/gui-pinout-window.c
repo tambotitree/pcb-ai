@@ -74,7 +74,7 @@ ghid_pinout_window_show (GHidPort * out, ElementType * element)
   gtk_window_set_wmclass (GTK_WINDOW (top_window), "PCB_Pinout", "PCB");
   gtk_container_set_border_width (GTK_CONTAINER (top_window), 4);
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (top_window), vbox);
 
 

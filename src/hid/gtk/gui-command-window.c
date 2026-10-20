@@ -381,7 +381,7 @@ ghid_command_window_show (gboolean raise)
   gtk_window_set_wmclass (GTK_WINDOW (command_window), "PCB_Command", "PCB");
   gtk_window_set_resizable (GTK_WINDOW (command_window), FALSE);
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_container_add (GTK_CONTAINER (command_window), vbox);
 
@@ -397,7 +397,7 @@ ghid_command_window_show (gboolean raise)
    */
   expander = gtk_expander_new (_("Command Reference"));
   gtk_box_pack_start (GTK_BOX (vbox), expander, TRUE, TRUE, 2);
-  vbox1 = gtk_vbox_new (FALSE, 0);
+  vbox1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (expander), vbox1);
   gtk_widget_set_size_request (vbox1, -1, 350);
 

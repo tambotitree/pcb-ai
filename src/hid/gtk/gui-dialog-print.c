@@ -121,7 +121,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
-  main_vbox = gtk_vbox_new (FALSE, 6);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 6);
   gtk_container_add (GTK_CONTAINER (content_area), main_vbox);
 
@@ -148,7 +148,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  break;
 
 	case HID_Integer:
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	  /* 
@@ -167,7 +167,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  break;
 
 	case HID_Coord:
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	  entry = ghid_coord_entry_new (attrs[j].min_val, attrs[j].max_val,
@@ -187,7 +187,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  break;
 
 	case HID_Real:
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	  /* 
@@ -208,7 +208,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  break;
 
 	case HID_String:
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	  entry = gtk_entry_new ();
@@ -236,7 +236,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  break;
 
 	case HID_Enum:
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
         do_enum:
@@ -266,7 +266,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  break;
 
 	case HID_Mixed:
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
           
 	  /*
@@ -301,7 +301,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
           unit_list = get_unit_list ();
           n = get_n_units ();
 
-	  hbox = gtk_hbox_new (FALSE, 4);
+	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
 	  combo = gtk_combo_box_new_text ();
@@ -425,7 +425,7 @@ ghid_dialog_export (void)
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (export_dialog));
 
-  vbox = gtk_vbox_new (FALSE, 6);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_container_add (GTK_CONTAINER (content_area), vbox);
 

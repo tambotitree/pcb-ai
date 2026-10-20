@@ -88,7 +88,7 @@ ghid_log_window_create ()
                      ghidgui->log_window_width,
                      ghidgui->log_window_height);
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_container_add (GTK_CONTAINER (log_window), vbox);
 

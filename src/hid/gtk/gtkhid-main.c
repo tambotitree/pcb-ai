@@ -758,7 +758,7 @@ make_progress_dialog (void)
   pd->progress = gtk_progress_bar_new ();
   gtk_widget_set_size_request (pd->progress, -1, 26);
 
-  vbox = gtk_vbox_new (false, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), pd->message, true, true, 8);
   gtk_box_pack_start (GTK_BOX (vbox), pd->progress, false, true, 8);
 

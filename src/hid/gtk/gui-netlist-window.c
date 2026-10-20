@@ -717,10 +717,10 @@ ghid_netlist_window_create (GHidPort * out)
 
   gtk_container_set_border_width (GTK_CONTAINER (netlist_window), 2);
 
-  vbox = gtk_vbox_new (FALSE, 4);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_container_add (GTK_CONTAINER (netlist_window), vbox);
-  hbox = gtk_hbox_new (FALSE, 8);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 4);
 
 
@@ -782,13 +782,13 @@ ghid_netlist_window_create (GHidPort * out)
                            GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC,
                            node_selection_changed_cb, NULL);
 
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   label = gtk_label_new (_("Operations on selected 'Net Name':"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 4);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
 
   button = gtk_button_new_with_label (C_("netlist", "Select"));
@@ -815,7 +815,7 @@ ghid_netlist_window_create (GHidPort * out)
 			       FALSE, 0, netlist_disable_all_cb, NULL,
 			       _("Disable all nets for adding rats"));
 
-  sep = gtk_hseparator_new ();
+  sep = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start (GTK_BOX (vbox), sep, FALSE, FALSE, 3);
 
   hbox = gtk_hbutton_box_new ();

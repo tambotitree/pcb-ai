@@ -225,12 +225,12 @@ ghid_route_style_selector_edit_dialog (GHidRouteStyleSelector *rss)
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
-  hbox = gtk_hbox_new (FALSE, 4);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
   gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 4);
-  vbox = gtk_vbox_new (FALSE, 4);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
   gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 4);
 
-  hbox = gtk_hbox_new (FALSE, 4);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
   gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
   gtk_box_pack_start (GTK_BOX (hbox), select_box, TRUE, TRUE, 0);

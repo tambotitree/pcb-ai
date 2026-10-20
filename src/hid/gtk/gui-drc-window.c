@@ -751,7 +751,7 @@ ghid_drc_window_show (gboolean raise)
   gtk_window_resize (GTK_WINDOW (drc_window),
                      ghidgui->drc_window_width, ghidgui->drc_window_height);
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (drc_window), vbox);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_box_set_spacing (GTK_BOX (vbox), 6);

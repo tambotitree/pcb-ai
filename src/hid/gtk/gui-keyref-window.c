@@ -356,7 +356,7 @@ ghid_keyref_window_show (gboolean raise)
                      ghidgui->keyref_window_width,
                      ghidgui->keyref_window_height);
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_container_add (GTK_CONTAINER (keyref_window), vbox);
 

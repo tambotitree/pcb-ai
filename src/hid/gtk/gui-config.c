@@ -1050,7 +1050,7 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
    */
   if (!config_sizes_vbox)
     {
-      vbox = gtk_vbox_new (FALSE, 0);
+      vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
       gtk_box_pack_start (GTK_BOX (tab_vbox), vbox, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
       config_sizes_vbox = vbox;
@@ -1060,7 +1060,7 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
   /* ---- Board Size ---- */
   vbox = ghid_category_vbox (config_sizes_vbox, _("Board Size"),
 			     4, 2, TRUE, TRUE);
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   table = gtk_table_new (2, 2, FALSE);
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
@@ -1085,7 +1085,7 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
   /* ---- Text Scale ---- */
   vbox = ghid_category_vbox (config_sizes_vbox, _("Text Scale"),
 			     4, 2, TRUE, TRUE);
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   table = gtk_table_new (4, 2, FALSE);
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
@@ -1103,7 +1103,7 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
   /* ---- DRC Sizes ---- */
   vbox = ghid_category_vbox (config_sizes_vbox, _("Design Rule Checking"),
 			     4, 2, TRUE, TRUE);
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   table = gtk_table_new (4, 2, FALSE);
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
@@ -1180,7 +1180,7 @@ config_increments_tab_create (GtkWidget * tab_vbox)
    */
   if (!config_increments_vbox)
     {
-      vbox = gtk_vbox_new (FALSE, 0);
+      vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
       gtk_box_pack_start (GTK_BOX (tab_vbox), vbox, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
       config_increments_vbox = vbox;
@@ -1202,7 +1202,7 @@ config_increments_tab_create (GtkWidget * tab_vbox)
   /* ---- Metric Settings ---- */
   vbox = ghid_category_vbox (config_increments_vbox,
 			     _("Metric Increment Settings"), 4, 2, TRUE, TRUE);
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   table = gtk_table_new (4, 3, FALSE);
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
@@ -1223,7 +1223,7 @@ config_increments_tab_create (GtkWidget * tab_vbox)
 
   vbox = ghid_category_vbox (config_increments_vbox,
 			     _("Imperial Increment Settings"), 4, 2, TRUE, TRUE);
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   table = gtk_table_new (4, 3, FALSE);
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
@@ -1703,7 +1703,7 @@ config_layers_tab_create (GtkWidget * tab_vbox)
   gtk_container_add(GTK_CONTAINER(button), arrow);
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"c,up");
-  hbox = gtk_hbox_new(FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), hbox, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
@@ -1712,14 +1712,14 @@ config_layers_tab_create (GtkWidget * tab_vbox)
   gtk_container_add(GTK_CONTAINER(button), arrow);
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"c,down");
-  hbox = gtk_hbox_new(FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), hbox, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
   button = gtk_button_new_from_stock(GTK_STOCK_DELETE);
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"c,-1");
-  hbox = gtk_hbox_new(FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), hbox, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
@@ -1729,17 +1729,17 @@ config_layers_tab_create (GtkWidget * tab_vbox)
   button = gtk_button_new_from_stock(GTK_STOCK_ADD);
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"-1,c");
-  hbox = gtk_hbox_new(FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), hbox, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
 /* -- Groups tab */
   vbox = ghid_notebook_page (tabs, _("Groups"), 0, 6);
-  config_groups_vbox = gtk_vbox_new(FALSE, 0);
+  config_groups_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox), config_groups_vbox, FALSE, FALSE, 0);
   ghid_config_groups_changed();
   
-  sep = gtk_hseparator_new ();
+  sep = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start (GTK_BOX (vbox), sep, FALSE, FALSE, 4);
 
 #if FIXME
@@ -1927,7 +1927,7 @@ config_color_button_create (GtkWidget * box, ConfigColor * cc)
   HID_Attribute *ha = cc->attributes;
   gchar *title;
 
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 0);
 
   if (!cc->color_is_mapped)
@@ -1953,7 +1953,7 @@ config_colors_tab_create (GtkWidget * tab_vbox)
   GList *list;
   ConfigColor *cc;
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start (GTK_BOX (tab_vbox), vbox, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
 
@@ -1966,7 +1966,7 @@ config_colors_tab_create (GtkWidget * tab_vbox)
   /* ---- Main colors ---- */
   expander = gtk_expander_new (_("Main colors"));
   gtk_box_pack_start (GTK_BOX (scrolled_vbox), expander, FALSE, FALSE, 2);
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (expander), vbox);
   vbox = ghid_category_vbox (vbox, NULL, 0, 2, TRUE, FALSE);
 
@@ -1981,7 +1981,7 @@ config_colors_tab_create (GtkWidget * tab_vbox)
   /* ---- Layer colors ---- */
   expander = gtk_expander_new (_("Layer colors"));
   gtk_box_pack_start (GTK_BOX (scrolled_vbox), expander, FALSE, FALSE, 2);
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (expander), vbox);
   vbox = ghid_category_vbox (vbox, NULL, 0, 2, TRUE, FALSE);
 
@@ -1996,7 +1996,7 @@ config_colors_tab_create (GtkWidget * tab_vbox)
   /* ---- Selected colors ---- */
   expander = gtk_expander_new (_("Selected colors"));
   gtk_box_pack_start (GTK_BOX (scrolled_vbox), expander, FALSE, FALSE, 2);
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (expander), vbox);
   vbox = ghid_category_vbox (vbox, NULL, 0, 2, TRUE, FALSE);
 
@@ -2007,7 +2007,7 @@ config_colors_tab_create (GtkWidget * tab_vbox)
 	continue;
       config_color_button_create (vbox, cc);
     }
-  sep = gtk_hseparator_new ();
+  sep = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start (GTK_BOX (vbox), sep, FALSE, FALSE, 2);
   for (list = config_color_list; list; list = list->next)
     {
@@ -2025,7 +2025,7 @@ config_colors_tab_create (GtkWidget * tab_vbox)
   gtk_box_pack_start (GTK_BOX (config_colors_vbox), config_color_warn_label,
 		      FALSE, FALSE, 4);
 
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (config_colors_vbox), hbox, FALSE, FALSE, 6);
 
   config_color_file_label = gtk_label_new ("");
@@ -2067,7 +2067,7 @@ config_page_create (GtkTreeStore * tree, GtkTreeIter * iter,
   GtkWidget *vbox;
   gint page;
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_notebook_append_page (notebook, vbox, NULL);
   page = gtk_notebook_get_n_pages (notebook) - 1;
   gtk_tree_store_set (tree, iter, CONFIG_PAGE_COLUMN, page, -1);
@@ -2178,7 +2178,7 @@ ghid_config_window_show (void)
   gtk_window_set_wmclass (GTK_WINDOW (config_window), "Pcb_Conf", "PCB");
   gtk_container_set_border_width (GTK_CONTAINER (config_window), 2);
 
-  config_hbox = gtk_hbox_new (FALSE, 4);
+  config_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
   gtk_container_add (GTK_CONTAINER (config_window), config_hbox);
 
   scrolled = gtk_scrolled_window_new (NULL, NULL);
@@ -2186,7 +2186,7 @@ ghid_config_window_show (void)
 				  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   gtk_box_pack_start (GTK_BOX (config_hbox), scrolled, FALSE, FALSE, 0);
 
-  main_vbox = gtk_vbox_new (FALSE, 4);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
   gtk_box_pack_start (GTK_BOX (config_hbox), main_vbox, TRUE, TRUE, 0);
 
   widget = gtk_notebook_new ();
