@@ -1,12 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Authoritative release identity; tools/version.py updates and validates it.
-AC_INIT([pcb-ai], [0.1.0-20261020],
-        [https://github.com/tambotitree/pcb-ai/issues], [pcb-ai])
+AC_INIT([pcb-ai],[0.1.1-20261020],[https://github.com/tambotitree/pcb-ai/issues],[pcb-ai])
 AC_CONFIG_SRCDIR([src/draw.c])
-AC_PREREQ([2.69])
+AC_PREREQ([2.73])
 AM_INIT_AUTOMAKE([1.9])
-AC_GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_HEADERS([config.h])
 
 ##########################################################################
@@ -107,6 +106,7 @@ AC_DEFINE_UNQUOTED(PCB_PATH_DELIMETER,"$PCB_PATH_DELIMETER",[Search path separat
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
+AM_PROG_AR
 
 if test "x$WIN32" = "xyes" ; then
 	AC_CHECK_TOOL(WINDRES, windres, [no])
@@ -121,37 +121,14 @@ AH_TEMPLATE([GETTEXT_PACKAGE], [Name of this program's gettext domain])
 AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], ["$GETTEXT_PACKAGE"])
 AC_SUBST(GETTEXT_PACKAGE)
 
-AM_GNU_GETTEXT_VERSION([0.19.3])
-AM_GNU_GETTEXT
-
-AC_MSG_CHECKING([if $MSGFMT understands msgctxt (message context)])
-cat > conftest.po <<EOF
-[#]line __oline__ "configure"
-[#]. -- Info tab
-[#]: myfile.c:lineno
-msgctxt "tab"
-msgid "Info"
-msgstr ""
-EOF
-if ($MSGFMT -o conftest.gmo conftest.po >/dev/null; exit) 2>&AS_MESSAGE_LOG_FD
-then
-dnl
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-  AC_MSG_ERROR([It appears that your gettext tools ($MSGFMT) is too old.
-You should install a newer gettext tools (>= 0.19.3 suggested).  You may
-specify the location of the msgfmt executible with MSGFMT=/path/to/msgfmt
-on the configure command line.
-])
-fi
-rm -f conftest.po conftest.gmo
-
-IT_PROG_INTLTOOL([0.35.0])
+dnl English-only baseline: leave ENABLE_NLS undefined (some callers use #ifdef).
+AC_ARG_ENABLE([nls],
+  [AS_HELP_STRING([--enable-nls], [translations are not supported in this baseline])],
+  [AS_IF([test "x$enableval" != xno],
+    [AC_MSG_ERROR([This baseline supports only --disable-nls])])])
 
 AC_C_INLINE
-AC_PROG_CC_STDC
-AC_PROG_CC_C99
+dnl AC_PROG_CC above selects a supported modern C dialect.
 AM_PROG_CC_C_O
 AC_PROG_CPP
 
@@ -176,14 +153,7 @@ ftp://ftp.gnu.org/pub/non-gnu/flex/
 fi
 
 
-AC_PROG_YACC
-AC_PATH_PROG(YACC_PATH, $YACC, [notfound])
-if test "$YACC_PATH" = "notfound" ; then
-	AC_MSG_ERROR([Couldn't find a usable yacc program.
-Please install bison which is available from
-ftp://ftp.gnu.org/pub/gnu/bison/
-])
-fi
+PCB_PROG_BISON
 
 AC_PROG_INSTALL
 AC_PROG_RANLIB
@@ -543,8 +513,7 @@ fi
 AC_SUBST(KDEDATADIR)
 
 AC_ARG_ENABLE(update-desktop-database,
-	AC_HELP_STRING([--disable-update-desktop-database],
-	[do not update desktop database after installation]),,
+	AS_HELP_STRING([--disable-update-desktop-database],[do not update desktop database after installation]),,
 	enable_update_desktop_database=yes)
 
 AM_CONDITIONAL(ENABLE_UPDATE_DESKTOP_DATABASE, test x$enable_update_desktop_database = xyes)
@@ -557,8 +526,7 @@ if test x$enable_update_desktop_database = xyes ; then
 fi
 
 AC_ARG_ENABLE(update-mime-database,
-	AC_HELP_STRING([--disable-update-mime-database],
-	[do not update mime database after installation]),,
+	AS_HELP_STRING([--disable-update-mime-database],[do not update mime database after installation]),,
 	enable_update_mime_database=yes)
 
 AM_CONDITIONAL(ENABLE_UPDATE_MIME_DATABASE, test x$enable_update_mime_database = xyes)
@@ -734,7 +702,10 @@ libiberty_NEED_DECLARATION(canonicalize_file_name)
 # for pcb_spawnvp in action.c on Windows
 AC_CHECK_FUNCS(_spawnvp)
 
-AC_HEADER_STDC
+dnl Preserve standard-header checks for the legacy getline fallback.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_CHECK_HEADERS(limits.h locale.h string.h sys/types.h regex.h pwd.h)
 AC_CHECK_HEADERS(sys/socket.h netinet/in.h netdb.h sys/param.h sys/times.h sys/wait.h)
 AC_CHECK_HEADERS(dlfcn.h)
@@ -1163,7 +1134,7 @@ AC_DEFINE_UNQUOTED([COORD_MAX],[$COORD_MAX],
 # ------------- Complete set of CPPFLAGS and LIBS -------------------
 
 CPPFLAGS="$CPPFLAGS $X_CFLAGS $DBUS_CFLAGS $GDLIB_CFLAGS $GLIB_CFLAGS $GTK_CFLAGS $GD_CFLAGS $CAIRO_CFLAGS $GTKGLEXT_CFLAGS $GLU_CFLAGS $GL_CFLAGS"
-LIBS="$LIBS $XM_LIBS $DBUS_LIBS $X_LIBS $GDLIB_LDFLAGS $GDLIB_LIBS $GLIB_LIBS $GTK_LIBS $DMALLOC_LIBS $GD_LIBS $INTLLIBS $CAIRO_LIBS $GTKGLEXT_LIBS $GLU_LIBS $GL_LIBS"
+LIBS="$LIBS $XM_LIBS $DBUS_LIBS $X_LIBS $GDLIB_LDFLAGS $GDLIB_LIBS $GLIB_LIBS $GTK_LIBS $DMALLOC_LIBS $GD_LIBS $CAIRO_LIBS $GTKGLEXT_LIBS $GLU_LIBS $GL_LIBS"
 
 
 # if we have gcc then add -Wall
@@ -1293,7 +1264,7 @@ do
 done
 AC_SUBST(TOPDIRS)
 
-AC_CONFIG_FILES(Makefile data/Makefile intl/Makefile po/Makefile.in)
+AC_CONFIG_FILES(Makefile data/Makefile)
 
 if test -d $srcdir/README_FILES; then
    AC_CONFIG_FILES(README_FILES/Makefile)

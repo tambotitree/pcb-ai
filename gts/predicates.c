@@ -958,10 +958,7 @@ static REAL orient2dadapt(REAL *pa, REAL *pb, REAL *pc, REAL detsum)
   return(D[Dlength - 1]);
 }
 
-REAL orient2d(pa, pb, pc)
-REAL *pa;
-REAL *pb;
-REAL *pc;
+REAL orient2d (REAL *pa, REAL *pb, REAL *pc)
 {
   REAL detleft, detright, det;
   REAL detsum, errbound;
@@ -1433,11 +1430,7 @@ static REAL orient3dadapt(REAL *pa, REAL *pb, REAL *pc, REAL *pd,
   return finnow[finlength - 1];
 }
 
-REAL orient3d(pa, pb, pc, pd)
-REAL *pa;
-REAL *pb;
-REAL *pc;
-REAL *pd;
+REAL orient3d (REAL *pa, REAL *pb, REAL *pc, REAL *pd)
 {
   REAL adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz;
   REAL bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
@@ -2082,11 +2075,7 @@ static REAL incircleadapt(REAL *pa, REAL *pb, REAL *pc, REAL *pd,
   return finnow[finlength - 1];
 }
 
-REAL incircle(pa, pb, pc, pd)
-REAL *pa;
-REAL *pb;
-REAL *pc;
-REAL *pd;
+REAL incircle (REAL *pa, REAL *pb, REAL *pc, REAL *pd)
 {
   REAL adx, bdx, cdx, ady, bdy, cdy;
   REAL bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady;
@@ -2628,12 +2617,7 @@ static REAL insphereadapt(REAL *pa, REAL *pb, REAL *pc, REAL *pd, REAL *pe,
   return insphereexact(pa, pb, pc, pd, pe);
 }
 
-REAL insphere(pa, pb, pc, pd, pe)
-REAL *pa;
-REAL *pb;
-REAL *pc;
-REAL *pd;
-REAL *pe;
+REAL insphere (REAL *pa, REAL *pb, REAL *pc, REAL *pd, REAL *pe)
 {
   REAL aex, bex, cex, dex;
   REAL aey, bey, cey, dey;

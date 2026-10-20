@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 class pcb_pcb(object):
   def __init__(self, x=2500, y=2000, name=None):

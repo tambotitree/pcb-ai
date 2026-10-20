@@ -42,12 +42,21 @@ desktopdir=$(xdgdatadir)/applications
 desktop_in_files = pcb.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 
-@INTLTOOL_XML_RULE@
+
 appdatadir = $(datadir)/metainfo
 appdata_DATA = $(appdata_in_files:.xml.in=.xml)
 appdata_in_files = pcb.appdata.xml.in
 
-@INTLTOOL_DESKTOP_RULE@
+# Strip translation markers only; keep the original English text and templates.
+pcb.desktop: pcb.desktop.in
+	$(AM_V_GEN)sed 's/^_//' $< > $@.tmp && mv $@.tmp $@
+
+pcb.xml: pcb.xml.in
+	$(AM_V_GEN)sed -e 's/<_/</g' -e 's|</_|</|g' $< > $@.tmp && mv $@.tmp $@
+
+pcb.appdata.xml: pcb.appdata.xml.in
+	$(AM_V_GEN)sed -e 's/<_/</g' -e 's|</_|</|g' $< > $@.tmp && mv $@.tmp $@
+
 
 
 mimedir = $(xdgdatadir)/mime
@@ -68,7 +77,7 @@ install_icon_exec = \
 	-s $(srcdir) \
 	-d "x$(DESTDIR)" \
 	-b $(themedir) \
-	-m "$(mkinstalldirs)" \
+	-m "$(install_sh) -d" \
 	-x "$(INSTALL_DATA)"
 
 install-data-local:
