@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-20",
+  "project_version": "0.1.0-20261020",
+  "source_schematic": "../utils/examples/gsch2pcb/connected.sch",
+  "binary": "upgrade_data/scratch/build-batch/src/pcb",
+  "checks": {
+    "schematic_conversion": "2 test footprints; LINK connects R1-2 and R2-1",
+    "batch_load_save_reopen": "passed; resistor references, values and net retained",
+    "routed_fixture_airwires": 0,
+    "trace_removed_airwires": 1,
+    "postscript_export": "passed",
+    "pdf_conversion": "passed",
+    "expected_copper_bounds_mm": [
+      0.254,
+      11.43
+    ],
+    "rendered_copper_bounds_mm": [
+      0.254,
+      11.43
+    ],
+    "measurement": "600 dpi raster threshold; tolerance 0.12 mm long axis, 0.08 mm short axis",
+    "visual_inspection": "copper-only PDF rendered and inspected"
+  },
+  "artifacts": {
+    "directory": "upgrade_data/scratch/two-resistor-test",
+    "pdf": "output/pdf/two-resistor-copper-test.pdf"
+  },
+  "limitations": [
+    "TEST_RESISTOR is a conversion-test footprint, not a manufacturing footprint",
+    "Placement and top trace prepared by text transformation of converted board; interactive routing not tested",
+    "No physical print test; no verified real part dimensions",
+    "PDF is unmirrored top copper; toner-transfer orientation not validated",
+    "Batch emits unknown PointCursor action warnings",
+    "Uninstalled runtime library-helper path requires --lib-command-dir pointing at build/lib"
+  ],
+  "checkpoint_retest": {
+    "project_version": "0.1.1-20261020",
+    "checks": [
+      "version output matches",
+      "connected board loaded/saved with zero rats",
+      "make clean passed afterwards"
+    ],
+    "original_export_version": "0.1.0-20261020"
+  }
+}
