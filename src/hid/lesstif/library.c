@@ -180,10 +180,10 @@ lesstif_show_library ()
 }
 
 HID_Action lesstif_library_action_list[] = {
-  {"LibraryChanged", 0, LibraryChanged,
-   librarychanged_help, librarychanged_syntax},
-  {"LibraryShow", 0, LibraryShow,
-   libraryshow_help, libraryshow_syntax},
+  {.name = "LibraryChanged", .need_coord_msg = 0, .trigger_cb = LibraryChanged,
+   .description = librarychanged_help, .syntax = librarychanged_syntax},
+  {.name = "LibraryShow", .need_coord_msg = 0, .trigger_cb = LibraryShow,
+   .description = libraryshow_help, .syntax = libraryshow_syntax},
 };
 
 REGISTER_ACTIONS (lesstif_library_action_list)

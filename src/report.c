@@ -1033,11 +1033,11 @@ Report (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action report_action_list[] = {
-  {"ReportObject", N_("Click on an object"), ReportDialog,
-   reportdialog_help, reportdialog_syntax}
+  {.name = "ReportObject", .need_coord_msg = N_("Click on an object"), .trigger_cb = ReportDialog,
+   .description = reportdialog_help, .syntax = reportdialog_syntax}
   ,
-  {"Report", 0, Report,
-   report_help, report_syntax}
+  {.name = "Report", .need_coord_msg = 0, .trigger_cb = Report,
+   .description = report_help, .syntax = report_syntax}
 };
 
 REGISTER_ACTIONS (report_action_list)

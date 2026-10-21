@@ -158,6 +158,7 @@ command_history_add (gchar * cmd)
   GList *list;
   gchar *s;
   gint i;
+  guint history_limit = ghidgui->history_size > 0 ? (guint) ghidgui->history_size : 0;
 
   if (!cmd || !*cmd)
     return;
@@ -172,9 +173,9 @@ command_history_add (gchar * cmd)
 	{
 	  history_list = g_list_remove (history_list, s);
 	  history_list = g_list_prepend (history_list, s);
-	  gtk_combo_box_remove_text (GTK_COMBO_BOX
+	  gtk_combo_box_text_remove (GTK_COMBO_BOX_TEXT
 				     (ghidgui->command_combo_box), i);
-	  gtk_combo_box_prepend_text (GTK_COMBO_BOX
+	  gtk_combo_box_text_prepend_text (GTK_COMBO_BOX_TEXT
 				      (ghidgui->command_combo_box), s);
 	  return;
 	}
@@ -184,16 +185,15 @@ command_history_add (gchar * cmd)
    */
   s = g_strdup (cmd);
   history_list = g_list_prepend (history_list, s);
-  gtk_combo_box_prepend_text (GTK_COMBO_BOX (ghidgui->command_combo_box), s);
+  gtk_combo_box_text_prepend_text (GTK_COMBO_BOX_TEXT (ghidgui->command_combo_box), s);
 
   /* And keep the lists trimmed!
    */
-  if (g_list_length (history_list) > ghidgui->history_size)
+  while (g_list_length (history_list) > history_limit)
     {
-      s = (gchar *) g_list_nth_data (history_list, ghidgui->history_size);
+      s = (gchar *) g_list_nth_data (history_list, history_limit);
       history_list = g_list_remove (history_list, s);
-      gtk_combo_box_remove_text (GTK_COMBO_BOX (ghidgui->command_combo_box),
-				 ghidgui->history_size);
+      gtk_combo_box_text_remove (GTK_COMBO_BOX_TEXT (ghidgui->command_combo_box), (gint) history_limit);
       g_free (s);
     }
 }
@@ -210,7 +210,7 @@ command_history_add (gchar * cmd)
  * can be returned from ghid_command_entry_get()
  */
 static void
-command_entry_activate_cb (GtkWidget * widget, gpointer data)
+command_entry_activate_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   gchar *command;
 
@@ -252,7 +252,7 @@ command_entry_activate_cb (GtkWidget * widget, gpointer data)
 static void
 command_combo_box_entry_create (void)
 {
-  ghidgui->command_combo_box = gtk_combo_box_entry_new_text ();
+  ghidgui->command_combo_box = gtk_combo_box_text_new_with_entry ();
   ghidgui->command_entry =
     GTK_ENTRY (gtk_bin_get_child (GTK_BIN (ghidgui->command_combo_box)));
 
@@ -262,7 +262,7 @@ command_combo_box_entry_create (void)
   g_signal_connect (G_OBJECT (ghidgui->command_entry), "activate",
 		    G_CALLBACK (command_entry_activate_cb), NULL);
 
-  g_object_ref (G_OBJECT (ghidgui->command_combo_box));	/* so can move it */
+  g_object_ref_sink (ghidgui->command_combo_box);	/* so can move it */
 }
 
 
@@ -279,7 +279,7 @@ command_window_disconnect_combobox ()
 
 
 static void
-command_window_close_cb (GtkWidget * widget, gpointer data)
+command_window_close_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   command_window_disconnect_combobox();
   gtk_widget_destroy (command_window);
@@ -287,8 +287,8 @@ command_window_close_cb (GtkWidget * widget, gpointer data)
 
 
 static gboolean
-command_window_delete_event_cb (GtkWidget * widget, GdkEvent * event,
-                                gpointer data)
+command_window_delete_event_cb (GtkWidget * widget G_GNUC_UNUSED, GdkEvent * event G_GNUC_UNUSED,
+                                gpointer data G_GNUC_UNUSED)
 {
   command_window_disconnect_combobox();
   return FALSE;
@@ -296,18 +296,18 @@ command_window_delete_event_cb (GtkWidget * widget, GdkEvent * event,
 
 
 static void
-command_destroy_cb (GtkWidget * widget, gpointer data)
+command_destroy_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   command_window = NULL;
 }
 
 
 static gboolean
-command_escape_cb (GtkWidget * widget, GdkEventKey * kev, gpointer data)
+command_escape_cb (GtkWidget * widget G_GNUC_UNUSED, GdkEventKey * kev, gpointer data G_GNUC_UNUSED)
 {
   gint ksym = kev->keyval;
 
-  if (ksym != GDK_Escape)
+  if (ksym != GDK_KEY_Escape)
     return FALSE;
 
   if (command_window) {
@@ -362,7 +362,7 @@ void
 ghid_command_window_show (gboolean raise)
 {
   GtkWidget *vbox, *vbox1, *hbox, *button, *expander, *text;
-  gint i;
+  gsize i;
 
   if (command_window)
     {
@@ -378,7 +378,6 @@ ghid_command_window_show (gboolean raise)
   g_signal_connect (G_OBJECT (command_window), "key_press_event",
 		    G_CALLBACK (command_escape_cb), NULL);
   gtk_window_set_title (GTK_WINDOW (command_window), _("PCB Command Entry"));
-  gtk_window_set_wmclass (GTK_WINDOW (command_window), "PCB_Command", "PCB");
   gtk_window_set_resizable (GTK_WINDOW (command_window), FALSE);
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -403,15 +402,15 @@ ghid_command_window_show (gboolean raise)
 
   text = ghid_scrolled_text_view (vbox1, NULL,
 				  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  for (i = 0; i < sizeof (command_ref_text) / sizeof (gchar *); ++i)
+  for (i = 0; i < G_N_ELEMENTS (command_ref_text); ++i)
     ghid_text_view_append (text, _(command_ref_text[i]));
 
   /* The command window close button.
    */
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
+  button = gtk_button_new_with_mnemonic (_("_Close"));
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (command_window_close_cb), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);

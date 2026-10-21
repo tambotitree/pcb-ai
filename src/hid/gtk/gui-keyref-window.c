@@ -308,8 +308,8 @@ static gchar *key_ref_text[] = {
   /* Remember user window resizes.
    */
 static gint
-keyref_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev,
-				  gpointer data)
+keyref_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev G_GNUC_UNUSED,
+				  gpointer data G_GNUC_UNUSED)
 {
   GtkAllocation allocation;
 
@@ -321,14 +321,14 @@ keyref_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev,
 }
 
 static void
-keyref_close_cb (gpointer data)
+keyref_close_cb (gpointer data G_GNUC_UNUSED)
 {
   gtk_widget_destroy (keyref_window);
   keyref_window = NULL;
 }
 
 static void
-keyref_destroy_cb (GtkWidget * widget, gpointer data)
+keyref_destroy_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   keyref_window = NULL;
 }
@@ -337,7 +337,7 @@ void
 ghid_keyref_window_show (gboolean raise)
 {
   GtkWidget *vbox, *hbox, *button, *text;
-  gint i;
+  gsize i;
 
   if (keyref_window)
     {
@@ -351,7 +351,6 @@ ghid_keyref_window_show (gboolean raise)
   g_signal_connect (G_OBJECT (keyref_window), "configure_event",
 		    G_CALLBACK (keyref_window_configure_event_cb), NULL);
   gtk_window_set_title (GTK_WINDOW (keyref_window), _("PCB Key Reference"));
-  gtk_window_set_wmclass (GTK_WINDOW (keyref_window), "PCB_Keyref", "PCB");
   gtk_window_resize (GTK_WINDOW (keyref_window),
                      ghidgui->keyref_window_width,
                      ghidgui->keyref_window_height);
@@ -362,15 +361,15 @@ ghid_keyref_window_show (gboolean raise)
 
   text = ghid_scrolled_text_view (vbox, NULL,
 				  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  for (i = 0; i < sizeof (key_ref_text) / sizeof (gchar *); ++i)
+  for (i = 0; i < G_N_ELEMENTS (key_ref_text); ++i)
     ghid_text_view_append (text, _(key_ref_text[i]));
 
   /* The keyref window close button.
    */
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
+  button = gtk_button_new_with_mnemonic (_("_Close"));
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (keyref_close_cb), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);

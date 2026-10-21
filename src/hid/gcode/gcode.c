@@ -179,9 +179,9 @@ Parameter @code{<string>} can include a path.
 @end ftable
 %end-doc
 */
-  {"basename", "File name prefix and suffix,\n"
+  {.name = "basename", .help_text = "File name prefix and suffix,\n"
                "layer names will be inserted before the suffix.",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_basename 0
 
 /* %start-doc options "85 G-code Options"
@@ -195,8 +195,8 @@ Parameter @code{<unit>} can be @samp{km}, @samp{m}, @samp{cm}, @samp{mm},
 @end ftable
 %end-doc
 */
-  {"measurement-unit", "Measurement unit used in the G-code output.",
-   HID_Unit, 0, 0, {3, 0, 0}, NULL, 0},
+  {.name = "measurement-unit", .help_text = "Measurement unit used in the G-code output.",
+   .type = HID_Unit, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 3, .str_value = 0, .real_value = 0}, .enumerations = NULL, .value = 0},
 #define HA_unit 1
 
 /* %start-doc options "85 G-code Options"
@@ -206,8 +206,8 @@ Accuracy of the mill path generation in pixels/inch.
 @end ftable
 %end-doc
 */
-  {"dpi", "Accuracy of the mill path generation in pixels/inch.",
-   HID_Integer, 0, 2000, {600, 0, 0}, 0, 0},
+  {.name = "dpi", .help_text = "Accuracy of the mill path generation in pixels/inch.",
+   .type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 2000 }, .default_val = {.int_value = 600, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_dpi 2
 
 /* %start-doc options "85 G-code Options"
@@ -217,8 +217,8 @@ Safe Z for traverse movements of all operations.
 @end ftable
 %end-doc
 */
-  {"safe-Z", "Safe Z for traverse movements of all operations.",
-   HID_Real, -1000, 10000, {0, 0, 2}, 0, 0},
+  {.name = "safe-Z", .help_text = "Safe Z for traverse movements of all operations.",
+   .type = HID_Real, .min_val = { .real_value = -1000 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 2}, .enumerations = 0, .value = 0},
 #define HA_safeZ 3
 
 /* %start-doc options "85 G-code Options"
@@ -228,8 +228,8 @@ Isolation milling depth.
 @end ftable
 %end-doc
 */
-  {"iso-mill-depth", "Isolation milling depth.",
-   HID_Real, -1000, 1000, {0, 0, -0.05}, 0, 0},
+  {.name = "iso-mill-depth", .help_text = "Isolation milling depth.",
+   .type = HID_Real, .min_val = { .real_value = -1000 }, .max_val = { .real_value = 1000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = -0.05}, .enumerations = 0, .value = 0},
 #define HA_cutdepth 4
 
 /* %start-doc options "85 G-code Options"
@@ -239,8 +239,8 @@ Isolation milling tool diameter.
 @end ftable
 %end-doc
 */
-  {"iso-tool-diameter", "Isolation milling tool diameter.",
-   HID_Real, 0, 10000, {0, 0, 0.2}, 0, 0},
+  {.name = "iso-tool-diameter", .help_text = "Isolation milling tool diameter.",
+   .type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0.2}, .enumerations = 0, .value = 0},
 #define HA_tooldiameter 5
 
 /* %start-doc options "85 G-code Options"
@@ -250,9 +250,9 @@ Isolation milling feedrate when plunging into the material.
 @end ftable
 %end-doc
 */
-  {"iso-tool-plunge", "Isolation milling feedrate when plunging into\n"
+  {.name = "iso-tool-plunge", .help_text = "Isolation milling feedrate when plunging into\n"
                       "the material.",
-   HID_Real, 0.1, 10000, {0, 0, 25.}, 0, 0},
+   .type = HID_Real, .min_val = { .real_value = 0.1 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 25.}, .enumerations = 0, .value = 0},
 #define HA_isoplunge 6
 
 /* %start-doc options "85 G-code Options"
@@ -262,8 +262,8 @@ Isolation milling feedrate.
 @end ftable
 %end-doc
 */
-  {"iso-tool-feedrate", "Isolation milling feedrate.",
-   HID_Real, 0.1, 10000, {0, 0, 50.}, 0, 0},
+  {.name = "iso-tool-feedrate", .help_text = "Isolation milling feedrate.",
+   .type = HID_Real, .min_val = { .real_value = 0.1 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 50.}, .enumerations = 0, .value = 0},
 #define HA_isofeedrate 7
 
 /* %start-doc options "85 G-code Options"
@@ -275,10 +275,10 @@ This feature eases and enhances accuracy of manual drilling.
 @end ftable
 %end-doc
 */
-  {"predrill", "Whether to pre-drill all drill spots with the isolation milling\n"
+  {.name = "predrill", .help_text = "Whether to pre-drill all drill spots with the isolation milling\n"
                "tool. Drill depth is iso-mill-depth here. This feature eases\n"
                "and enhances accuracy of manual drilling.",
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_predrill 8
 
 /* %start-doc options "85 G-code Options"
@@ -288,8 +288,8 @@ Drilling depth.
 @end ftable
 %end-doc
 */
-  {"drill-depth", "Drilling depth.",
-   HID_Real, -10000, 10000, {0, 0, -2}, 0, 0},
+  {.name = "drill-depth", .help_text = "Drilling depth.",
+   .type = HID_Real, .min_val = { .real_value = -10000 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = -2}, .enumerations = 0, .value = 0},
 #define HA_drilldepth 9
 
 /* %start-doc options "85 G-code Options"
@@ -299,8 +299,8 @@ Drilling feedrate.
 @end ftable
 %end-doc
 */
-  {"drill-feedrate", "Drilling feedrate.",
-   HID_Real, 0.1, 10000, {0, 0, 50.}, 0, 0},
+  {.name = "drill-feedrate", .help_text = "Drilling feedrate.",
+   .type = HID_Real, .min_val = { .real_value = 0.1 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 50.}, .enumerations = 0, .value = 0},
 #define HA_drillfeedrate 10
 
 /* %start-doc options "85 G-code Options"
@@ -313,11 +313,11 @@ changing the tool.
 @end ftable
 %end-doc
 */
-  {"drill-mill", "Whether to produce drill holes equal or bigger than the\n"
+  {.name = "drill-mill", .help_text = "Whether to produce drill holes equal or bigger than the\n"
                  "milling tool diameter with the milling tool.\n"
                  "With the milling tool bigger holes can be accurately sized\n"
                  "without changing the tool.",
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_drillmill 11
 
 /* %start-doc options "85 G-code Options"
@@ -329,10 +329,10 @@ polygonal outlines or holes.
 @end ftable
 %end-doc
 */
-  {"outline-mill-depth", "Milling depth when milling the outline.\n"
+  {.name = "outline-mill-depth", .help_text = "Milling depth when milling the outline.\n"
                          "Currently, only the rectangular extents of the\n"
                          "board are milled, no polygonal outlines or holes.",
-   HID_Real, -10000, 10000, {0, 0, -1}, 0, 0},
+   .type = HID_Real, .min_val = { .real_value = -10000 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = -1}, .enumerations = 0, .value = 0},
 #define HA_milldepth 12
 
 /* %start-doc options "85 G-code Options"
@@ -342,8 +342,8 @@ Diameter of the tool used for outline milling.
 @end ftable
 %end-doc
 */
-  {"outline-tool-diameter", "Diameter of the tool used for outline milling.",
-   HID_Real, 0, 10000, {0, 0, 1}, 0, 0},
+  {.name = "outline-tool-diameter", .help_text = "Diameter of the tool used for outline milling.",
+   .type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1}, .enumerations = 0, .value = 0},
 #define HA_milltooldiameter 13
 
 /* %start-doc options "85 G-code Options"
@@ -353,9 +353,9 @@ Outline milling feedrate when plunging into the material.
 @end ftable
 %end-doc
 */
-  {"outline-mill-plunge", "Outline milling feedrate when plunging into\n"
+  {.name = "outline-mill-plunge", .help_text = "Outline milling feedrate when plunging into\n"
                           "the material.",
-   HID_Real, 0.1, 10000, {0, 0, 25.}, 0, 0},
+   .type = HID_Real, .min_val = { .real_value = 0.1 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 25.}, .enumerations = 0, .value = 0},
 #define HA_millplunge 14
 
 /* %start-doc options "85 G-code Options"
@@ -365,8 +365,8 @@ Outline milling feedrate.
 @end ftable
 %end-doc
 */
-  {"outline-mill-feedrate", "Outline milling feedrate.",
-   HID_Real, 0.1, 10000, {0, 0, 50.}, 0, 0},
+  {.name = "outline-mill-feedrate", .help_text = "Outline milling feedrate.",
+   .type = HID_Real, .min_val = { .real_value = 0.1 }, .max_val = { .real_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 50.}, .enumerations = 0, .value = 0},
 #define HA_millfeedrate 15
 
 /* %start-doc options "85 G-code Options"
@@ -379,11 +379,11 @@ hand-editing of the resulting files.
 @end ftable
 %end-doc
 */
-  {"advanced-gcode", "Whether to produce G-code for advanced interpreters,\n"
+  {.name = "advanced-gcode", .help_text = "Whether to produce G-code for advanced interpreters,\n"
                      "like using variables or drill cycles. Not all\n"
                      "machine controllers understand this, but it allows\n"
                      "better hand-editing of the resulting files.",
-   HID_Boolean, 0, 0, {-1, 0, 0}, 0, 0},
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = -1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_advanced 16
 };
 
@@ -1782,4 +1782,3 @@ hid_gcode_init ()
 
 #include "gcode_lists.h"
 }
-

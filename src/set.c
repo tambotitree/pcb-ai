@@ -367,11 +367,11 @@ SetLocalRef (Coord X, Coord Y, bool Showing)
  */
 
 /* %start-doc actions SetupRouteStyle
- 
+
  Sets the parameters of a route style.
- 
+
  TODO: Doesn't currently update the GUI widgets.
- 
+
  %end-doc */
 
 static const char setup_route_style_syntax[] =
@@ -393,13 +393,13 @@ setup_route_style_action (int argc, char **argv, Coord x, Coord y)
   char *keepaway = ARG(5);
   char *mask_aperture = ARG(6);
   char *units = ARG(7);
-  
+
   int n;
-  
+
   bool absolute;
-  
+
   n = atoi(nstyle);
-  
+
   if (argc > 2)
   {
     /* we got the datams as parameters */
@@ -421,8 +421,8 @@ setup_route_style_action (int argc, char **argv, Coord x, Coord y)
 
 static HID_Action set_action_list[] =
 {
-  {"SetupRouteStyle", NULL, setup_route_style_action,
-    setup_route_style_help, setup_route_style_syntax}
+  {.name = "SetupRouteStyle", .need_coord_msg = NULL, .trigger_cb = setup_route_style_action,
+    .description = setup_route_style_help, .syntax = setup_route_style_syntax}
 };
 
 REGISTER_ACTIONS (set_action_list)

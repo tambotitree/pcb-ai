@@ -736,22 +736,22 @@ lesstif_update_widget_flags ()
 /*-----------------------------------------------------------------------------*/
 
 HID_Action lesstif_menu_action_list[] = {
-  {"DumpKeys", 0, DumpKeys,
-   dumpkeys_help, dumpkeys_syntax},
-  {"Debug", 0, Debug,
-   debug_help, debug_syntax},
-  {"DebugXY", "Click X,Y for Debug", Debug,
-   debugxy_help, debugxy_syntax},
-  {"GetXY", "", GetXY,
-   getxy_help, getxy_syntax},
-  {"Return", 0, Return,
-   return_help, return_syntax},
-  {"LayersChanged", 0, LayersChanged,
-   layerschanged_help, layerschanged_syntax},
-  {"ToggleView", 0, ToggleView,
-   toggleview_help, toggleview_syntax},
-  {"SelectLayer", 0, SelectLayer,
-   selectlayer_help, selectlayer_syntax}
+  {.name = "DumpKeys", .need_coord_msg = 0, .trigger_cb = DumpKeys,
+   .description = dumpkeys_help, .syntax = dumpkeys_syntax},
+  {.name = "Debug", .need_coord_msg = 0, .trigger_cb = Debug,
+   .description = debug_help, .syntax = debug_syntax},
+  {.name = "DebugXY", .need_coord_msg = "Click X,Y for Debug", .trigger_cb = Debug,
+   .description = debugxy_help, .syntax = debugxy_syntax},
+  {.name = "GetXY", .need_coord_msg = "", .trigger_cb = GetXY,
+   .description = getxy_help, .syntax = getxy_syntax},
+  {.name = "Return", .need_coord_msg = 0, .trigger_cb = Return,
+   .description = return_help, .syntax = return_syntax},
+  {.name = "LayersChanged", .need_coord_msg = 0, .trigger_cb = LayersChanged,
+   .description = layerschanged_help, .syntax = layerschanged_syntax},
+  {.name = "ToggleView", .need_coord_msg = 0, .trigger_cb = ToggleView,
+   .description = toggleview_help, .syntax = toggleview_syntax},
+  {.name = "SelectLayer", .need_coord_msg = 0, .trigger_cb = SelectLayer,
+   .description = selectlayer_help, .syntax = selectlayer_syntax}
 };
 
 REGISTER_ACTIONS (lesstif_menu_action_list)
@@ -1270,7 +1270,6 @@ add_resource_to_menu (Widget menu, Resource * node, XtCallbackProc callback)
       {
       case 101:		/* named subnode */
 	n = 0;
-	stdarg (XmNtearOffModel, XmTEAR_OFF_ENABLED);
 	sub = XmCreatePulldownMenu (menu, node->v[i].name, args, n);
 	XtSetValues (sub, args, n);
 	n = 0;
@@ -1324,7 +1323,6 @@ add_resource_to_menu (Widget menu, Resource * node, XtCallbackProc callback)
 	if (node->v[i].subres->flags & FLAG_S)
 	  {
 	    int nn = n;
-	    stdarg (XmNtearOffModel, XmTEAR_OFF_ENABLED);
 	    sub = XmCreatePulldownMenu (menu, v, args + nn, n - nn);
 	    n = nn;
 	    stdarg (XmNsubMenuId, sub);
@@ -1468,9 +1466,9 @@ lesstif_menu (Widget parent, char *name, Arg * margs, int mn)
     {
       Message ("Warning:  could not determine home directory (from HOME)\n");
     }
-  else 
+  else
     {
-      home_pcbmenu = Concat (home, PCB_DIR_SEPARATOR_S, ".pcb", 
+      home_pcbmenu = Concat (home, PCB_DIR_SEPARATOR_S, ".pcb",
          PCB_DIR_SEPARATOR_S, "pcb-menu.res", NULL);
     }
 

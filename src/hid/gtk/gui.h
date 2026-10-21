@@ -35,8 +35,11 @@
 #include "data.h"
 #include "misc.h"
 #include <sys/stat.h>
+#include <time.h>
 
 #include <gtk/gtk.h>
+#include <cairo-gobject.h>
+#include "pcb-cairo.h"
 #include "ghid-coord-entry.h"
 #include "ghid-main-menu.h"
 #include "gui-pinout-preview.h"
@@ -76,7 +79,7 @@
 /*
  * Used to intercept "special" hotkeys that gtk doesn't usually pass
  * on to the menu hotkeys.  We catch them and put them back where we
- * want them. 
+ * want them.
  */
 
 /* The modifier keys */
@@ -116,11 +119,12 @@ typedef struct
   GtkWidget *vbox_middle;
 
   GtkWidget *info_bar;
-  GTimeVal our_mtime;
-  GTimeVal last_seen_mtime;
+  bool has_known_mtime;
+  struct timespec our_mtime;
+  struct timespec last_seen_mtime;
 
   GtkWidget *h_range, *v_range;
-  GtkObject *h_adjustment, *v_adjustment;
+  GtkAdjustment *h_adjustment, *v_adjustment;
 
   GdkPixbuf *bg_pixbuf;
 
@@ -179,15 +183,14 @@ typedef struct
 {
   GtkWidget *top_window,	/* toplevel widget              */
    *drawing_area;		/* and its drawing area */
-  GdkPixmap *pixmap, *mask;
-  GdkDrawable *drawable;	/* Current drawable for drawing routines */
+  cairo_surface_t *pixmap, *mask;
+  cairo_surface_t *drawable;	/* Current drawable for drawing routines */
   gint width, height;
 
   struct render_priv *render_priv;
 
-  GdkColor bg_color, offlimits_color, grid_color;
+  GdkRGBA bg_color, offlimits_color, grid_color;
 
-  GdkColormap *colormap;
 
   GdkCursor *X_cursor;		/* used X cursor */
   GdkCursorType X_cursor_shape;	/* and its shape */
@@ -297,7 +300,7 @@ gboolean ghid_port_button_release_cb (GtkWidget * drawing_area,
 
 gint ghid_port_window_enter_cb (GtkWidget * widget,
 			   GdkEventCrossing * ev, GHidPort * out);
-gint ghid_port_window_leave_cb (GtkWidget * widget, 
+gint ghid_port_window_leave_cb (GtkWidget * widget,
                            GdkEventCrossing * ev, GHidPort * out);
 gint ghid_port_window_motion_cb (GtkWidget * widget,
 				 GdkEventMotion * ev, GHidPort * out);
@@ -367,8 +370,8 @@ gboolean ghid_mod1_is_pressed (void);
 gboolean ghid_shift_is_pressed (void);
 
 void ghid_draw_area_update (GHidPort * out, GdkRectangle * rect);
-gchar *ghid_get_color_name (GdkColor * color);
-void ghid_map_color_string (gchar * color_string, GdkColor * color);
+gchar *ghid_get_color_name (GdkRGBA * color);
+void ghid_map_color_string (gchar * color_string, GdkRGBA * color);
 gchar *ghid_entry_get_text (GtkWidget * entry);
 void ghid_check_button_connected (GtkWidget * box, GtkWidget ** button,
 				  gboolean active, gboolean pack_start,
@@ -479,6 +482,7 @@ void ghid_pinout_window_show (GHidPort *out, ElementType *Element);
 
 /* gtkhid-gdk.c AND gtkhid-gl.c */
 int ghid_set_layer (const char *name, int group, int empty);
+void ghid_set_special_colors (HID_Attribute *ha);
 hidGC ghid_make_gc (void);
 void ghid_destroy_gc (hidGC);
 void ghid_use_mask (enum mask_mode mode);
@@ -503,11 +507,11 @@ void ghid_shutdown_renderer (GHidPort *);
 void ghid_init_drawing_widget (GtkWidget *widget, GHidPort *);
 void ghid_drawing_area_configure_hook (GHidPort *port);
 void ghid_screen_update (void);
-gboolean ghid_drawing_area_expose_cb (GtkWidget *, GdkEventExpose *,
+gboolean ghid_drawing_area_expose_cb (GtkWidget *, cairo_t *,
                                       GHidPort *);
 void ghid_port_drawing_realize_cb (GtkWidget *, gpointer);
-gboolean ghid_pinout_preview_expose (GtkWidget * widget, GdkEventExpose * ev);
-GdkPixmap *ghid_render_pixmap (int cx, int cy, double zoom,
+gboolean ghid_pinout_preview_expose (GtkWidget * widget, cairo_t * ev);
+cairo_surface_t *ghid_render_pixmap (int cx, int cy, double zoom,
                                int width, int height, int depth);
 HID_DRAW *ghid_request_debug_draw (void);
 void ghid_flush_debug_draw (void);
@@ -528,9 +532,9 @@ gint PCBChanged (int argc, char **argv, Coord x, Coord y);
 
 
 
-extern GdkPixmap *XC_hand_source, *XC_hand_mask;
-extern GdkPixmap *XC_lock_source, *XC_lock_mask;
-extern GdkPixmap *XC_clock_source, *XC_clock_mask;
+extern GdkCursor *XC_hand_cursor;
+extern GdkCursor *XC_lock_cursor;
+extern GdkCursor *XC_clock_cursor;
 
 
 /* Coordinate conversions */

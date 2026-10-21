@@ -1135,7 +1135,7 @@ find_pairs ()
     box.Y2 = MAX(pad->Point1.Y, pad->Point2.Y) + pad->Thickness/2;
     r_search (CURRENT->line_tree, &box, NULL, find_pair_padline_callback, pad);
     r_search (CURRENT->arc_tree, &box, NULL, find_pair_padarc_callback, pad);
-    
+
   } ENDALL_LOOP;
 
   g_hash_table_foreach (lines, (GHFunc)null_multi_next_ends, NULL);
@@ -1274,7 +1274,7 @@ print_extra (Extra *e, Extra *prev)
 	 e->end.at_pin ? "A" : "-",
 	 e->end.is_pad ? "P" : "-",
 	 e->end.pending ? "p" : "-");
-	 
+
   if (EXTRA_IS_LINE (e))
     {
       LineType *line = EXTRA2LINE (e);
@@ -1741,7 +1741,7 @@ gp_arc_cb (const BoxType *b, void *cb)
 
   if (e->start.next || e->end.next)
     return 0;
-    
+
   gp_point (e->start.x, e->start.y, a->Thickness/2, 0);
   gp_point (e->end.x, e->end.y, a->Thickness/2, 0);
   return 0;
@@ -2101,7 +2101,7 @@ maybe_pull_1 (LineType *line)
       && start_extra->end.waiting_for->pending)
     return;
 #endif
-  
+
   if (start_line->Thickness != end_line->Thickness)
     return;
   thickness = (start_line->Thickness + 1)/2 + PCB->Bloat;
@@ -2432,7 +2432,7 @@ maybe_pull_1 (LineType *line)
     {
       ex = end_line->Point2.X;
       ey = end_line->Point2.Y;
-    }	
+    }
 #if TRACE1
   pcb_printf("new point %#mS\n", ex, ey);
 #endif
@@ -2703,10 +2703,10 @@ GlobalPuller(int argc, char **argv, Coord x, Coord y)
 /*                             Actions                                       */
 
 HID_Action puller_action_list[] = {
-  {"Puller", "Click on a line-arc intersection or line segment", Puller,
-   puller_help, puller_syntax},
-  {"GlobalPuller", 0, GlobalPuller,
-   globalpuller_help, globalpuller_syntax}
+  {.name = "Puller", .need_coord_msg = "Click on a line-arc intersection or line segment", .trigger_cb = Puller,
+   .description = puller_help, .syntax = puller_syntax},
+  {.name = "GlobalPuller", .need_coord_msg = 0, .trigger_cb = GlobalPuller,
+   .description = globalpuller_help, .syntax = globalpuller_syntax}
 };
 
 REGISTER_ACTIONS (puller_action_list)

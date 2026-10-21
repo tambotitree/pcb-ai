@@ -628,10 +628,10 @@ DrawShortestRats (NetListType *Netl, void (*funcp) (register ConnectionType *, r
 	   * Note the shortest distance we find.
 	   */
 	  next = &Netl->Net[j];
-	  for (n = subnet->ConnectionN - 1; n != -1; n--)
+	  for (n = subnet->ConnectionN; n-- > 0;)
 	    {
 	      conn1 = &subnet->Connection[n];
-	      for (m = next->ConnectionN - 1; m != -1; m--)
+	      for (m = next->ConnectionN; m-- > 0;)
 		{
 		  conn2 = &next->Connection[m];
 		  /*
@@ -807,7 +807,7 @@ AddAllRats (bool SelectedOnly, void (*funcp) (register ConnectionType *, registe
   if (changed)
     {
       IncrementUndoSerialNumber ();
-      if (PCB->Data->RatN > 0) 
+      if (PCB->Data->RatN > 0)
 	{
 	  Message ("%d rat line%s remaining\n", PCB->Data->RatN,
 		   PCB->Data->RatN > 1 ? "s" : "");

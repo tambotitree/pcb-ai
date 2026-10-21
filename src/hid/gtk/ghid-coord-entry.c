@@ -74,6 +74,8 @@ struct _GHidCoordEntryClass
   void (* change_unit) (GHidCoordEntry *, const Unit *);
 };
 
+G_DEFINE_TYPE (GHidCoordEntry, ghid_coord_entry, GTK_TYPE_SPIN_BUTTON)
+
 /* SIGNAL HANDLERS */
 
 /*!
@@ -84,7 +86,7 @@ menu_item_activate_cb (GtkMenuItem *item, GHidCoordEntry *ce)
 {
   const char *text = gtk_menu_item_get_label (item);
   const Unit *unit = get_unit_struct (text);
-  
+
   g_signal_emit (ce, ghid_coord_entry_signals[UNIT_CHANGE_SIGNAL], 0, unit);
 }
 
@@ -97,6 +99,9 @@ ghid_coord_entry_popup_cb (GHidCoordEntry *ce, GtkMenu *menu, gpointer data)
   int i, n;
   const Unit *unit_list;
   GtkWidget *menu_item, *submenu;
+
+  /* This signal has no caller state. */
+  (void) data;
 
   /* Build submenu */
   n = get_n_units ();
@@ -133,18 +138,21 @@ ghid_coord_entry_output_cb (GHidCoordEntry *ce, gpointer data)
   double value = gtk_adjustment_get_value (adj);
   gchar *text;
 
+  /* The output signal needs only the entry itself. */
+  (void) data;
+
   text = pcb_g_strdup_printf ("%.*f %s", ce->unit->default_prec, value, ce->unit->suffix);
   gtk_entry_set_text (GTK_ENTRY (ce), text);
   g_free (text);
-   
+
   return TRUE;
 }
 
 /*!
  * \brief Callback for user input.
  */
-static gboolean
-ghid_coord_text_changed_cb (GHidCoordEntry *entry, gpointer data)
+static void
+ghid_coord_update_unit (GHidCoordEntry *entry)
 {
   const char *text;
   char *suffix;
@@ -161,13 +169,24 @@ ghid_coord_text_changed_cb (GHidCoordEntry *entry, gpointer data)
       g_signal_emit (entry, ghid_coord_entry_signals[UNIT_CHANGE_SIGNAL], 0, new_unit);
     }
 
+}
+
+/*! \brief Reconcile typed units when focus leaves the entry. */
+static gboolean
+ghid_coord_focus_out_cb (GHidCoordEntry *entry, GdkEventFocus *event,
+                         gpointer data)
+{
+  /* Focus details and caller state do not affect unit parsing. */
+  (void) event;
+  (void) data;
+  ghid_coord_update_unit (entry);
   return FALSE;
 }
 
 /*!
  * \brief Callback for change in value (input or ^v clicks).
  */
-static gboolean
+static void
 ghid_coord_value_changed_cb (GHidCoordEntry *ce, gpointer data)
 {
   GtkAdjustment *adj = gtk_spin_button_get_adjustment (GTK_SPIN_BUTTON (ce));
@@ -176,9 +195,8 @@ ghid_coord_value_changed_cb (GHidCoordEntry *ce, gpointer data)
   double value = gtk_adjustment_get_value (adj);
   ce->value = unit_to_coord (ce->unit, value);
   /* Handle potential unit changes */
-  ghid_coord_text_changed_cb (ce, data);
-
-  return FALSE;
+  (void) data;
+  ghid_coord_update_unit (ce);
 }
 
 /*! \brief Change the unit used by a coord entry.
@@ -212,13 +230,13 @@ ghid_coord_entry_change_unit (GHidCoordEntry *ce, const Unit *new_unit)
                              new_unit->default_prec + strlen (new_unit->suffix));
 }
 
-/* CONSTRUCTOR */
+/*! \brief Connect coordinate entry signals. */
 static void
 ghid_coord_entry_init (GHidCoordEntry *ce)
 {
   /* Hookup signal handlers */
   g_signal_connect (G_OBJECT (ce), "focus_out_event",
-                    G_CALLBACK (ghid_coord_text_changed_cb), NULL);
+                    G_CALLBACK (ghid_coord_focus_out_cb), NULL);
   g_signal_connect (G_OBJECT (ce), "value_changed",
                     G_CALLBACK (ghid_coord_value_changed_cb), NULL);
   g_signal_connect (G_OBJECT (ce), "populate_popup",
@@ -227,6 +245,7 @@ ghid_coord_entry_init (GHidCoordEntry *ce)
                     G_CALLBACK (ghid_coord_entry_output_cb), NULL);
 }
 
+/*! \brief Register the coordinate entry unit-change signal. */
 static void
 ghid_coord_entry_class_init (GHidCoordEntryClass *klass)
 {
@@ -246,35 +265,6 @@ ghid_coord_entry_class_init (GHidCoordEntryClass *klass)
 }
 
 /* PUBLIC FUNCTIONS */
-GType
-ghid_coord_entry_get_type (void)
-{
-  static GType ce_type = 0;
-
-  if (!ce_type)
-    {
-      const GTypeInfo ce_info =
-      {
-	sizeof (GHidCoordEntryClass),
-	NULL, /* base_init */
-	NULL, /* base_finalize */
-	(GClassInitFunc) ghid_coord_entry_class_init,
-	NULL, /* class_finalize */
-	NULL, /* class_data */
-	sizeof (GHidCoordEntry),
-	0,    /* n_preallocs */
-	(GInstanceInitFunc) ghid_coord_entry_init,
-      };
-
-      ce_type = g_type_register_static (GTK_TYPE_SPIN_BUTTON,
-                                        "GHidCoordEntry",
-                                        &ce_info,
-                                        0);
-    }
-
-  return ce_type;
-}
-
 /*!
  * \brief Create a new GHidCoordEntry.
  *
@@ -353,4 +343,3 @@ ghid_coord_entry_set_value (GHidCoordEntry *ce, Coord val)
   gtk_spin_button_set_value (GTK_SPIN_BUTTON (ce),
                              coord_to_unit (ce->unit, val));
 }
-

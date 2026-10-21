@@ -22,8 +22,8 @@ def main(kind, transform, default_tool):
   args = parser.parse_args()
   root = pathlib.Path(__file__).resolve().parents[1]
   inventory = json.loads((root / 'upgrade_data/source_inventory.json').read_text())
-  languages = {'python': ('Python',), 'autoconf': ('Autoconf',),
-               'c': ('C', 'C header'), 'c-signatures': ('C',), 'scheme': ('Scheme',)}[kind]
+  languages = {'render-cache': ('C',), 'layer-loops': ('C header',), 'reverse-loops': ('C', 'C header'), 'dialog-stock': ('C',), 'array-loops': ('C',), 'desktop-hints': ('C',), 'combos': ('C',), 'benchmark': ('C',), 'hid-flags': ('C header',), 'hid-bounds': ('C', 'C header'), 'hid-initializers': ('C',), 'pointer': ('C',), 'callbacks': ('C',), 'dialog-layout': ('C', 'C header'), 'selector-actions': ('C', 'C header'), 'menu-actions': ('C', 'C header'), 'gtype': ('C',), 'menus': ('C', 'C header'), 'python': ('Python',), 'autoconf': ('Autoconf',), 'gtk3-build': ('Autoconf',),
+               'c': ('C', 'C header'), 'drawing': ('C', 'C header'), 'gtk-api': ('C', 'C header'), 'timestamps': ('C', 'C header', 'Autoconf'), 'c-signatures': ('C',), 'visibility-renderer': ('C',), 'struct-macros': ('C header',), 'scheme': ('Scheme',)}[kind]
   entries = [entry for entry in inventory['files'] if entry['language'] in languages]
   if args.path:
     unknown = set(args.path) - {entry['path'] for entry in entries}

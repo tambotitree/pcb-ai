@@ -52,15 +52,17 @@ G_BEGIN_DECLS  /* keep c++ happy */
 typedef struct _GHidMainMenu       GHidMainMenu;
 typedef struct _GHidMainMenuClass  GHidMainMenuClass;
 
+typedef void (*GHidMenuActivateFunc) (GtkWidget *, const Resource *);
+
 GType ghid_main_menu_get_type (void);
-GtkWidget *ghid_main_menu_new (GCallback action_cb,
+GtkWidget *ghid_main_menu_new (GHidMenuActivateFunc action_cb,
                                void (*special_key_cb) (const char *accel,
-                                                       GtkAction *action,
+                                                       GtkWidget *action,
                                                        const Resource *node));
 void ghid_main_menu_add_resource (GHidMainMenu *menu, const Resource *res);
 GtkAccelGroup *ghid_main_menu_get_accel_group (GHidMainMenu *menu);
 void ghid_main_menu_update_toggle_state (GHidMainMenu *menu,
-                                         void (*cb) (GtkAction *,
+                                         void (*cb) (GtkWidget *,
                                                      const char *toggle_flag,
                                                      const char *active_flag));
 

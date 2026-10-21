@@ -244,7 +244,7 @@ Save (int argc, char **argv, Coord x, Coord y)
     hid_actionv ("SaveTo", argc, argv);
 
   function = argc ? argv[0] : "Layout";
-  
+
   if (strcasecmp (function, "Layout") == 0)
     if (PCB->Filename)
       return hid_actionl ("SaveTo", "Layout", PCB->Filename, NULL);
@@ -278,9 +278,9 @@ Save (int argc, char **argv, Coord x, Coord y)
     hid_actionl ("PasteBuffer", "Save", name, NULL);
   else
     {
-      /* 
+      /*
        * if we got this far and the function is Layout, then
-       * we really needed it to be a LayoutAs.  Otherwise 
+       * we really needed it to be a LayoutAs.  Otherwise
        * ActionSaveTo() will ignore the new file name we
        * just obtained.
        */
@@ -441,7 +441,7 @@ lesstif_confirm_dialog (char *msg, ...)
       confirm_ok = XmMessageBoxGetChild (confirm_dialog, XmDIALOG_OK_BUTTON);
       confirm_label =
 	XmMessageBoxGetChild (confirm_dialog, XmDIALOG_MESSAGE_LABEL);
-      /* The dialog has a help button that we don't want, so 
+      /* The dialog has a help button that we don't want, so
        * hide (unmanage) it. */
       XtUnmanageChild (XmMessageBoxGetChild
 		       (confirm_dialog, XmDIALOG_HELP_BUTTON));
@@ -1030,12 +1030,12 @@ Print (int argc, char **argv, Coord x, Coord y)
 
 static HID_Attribute
 printer_calibrate_attrs[] = {
-  {"Enter Values here:", "",
-   HID_Label, 0, 0, {0, 0, 0}, 0, 0},
-  {"x-calibration", "X scale for calibrating your printer",
-   HID_Real, 0.5, 25, {0, 0, 1.00}, 0, 0},
-  {"y-calibration", "Y scale for calibrating your printer",
-   HID_Real, 0.5, 25, {0, 0, 1.00}, 0, 0}
+  {.name = "Enter Values here:", .help_text = "",
+   .type = HID_Label, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
+  {.name = "x-calibration", .help_text = "X scale for calibrating your printer",
+   .type = HID_Real, .min_val = { .real_value = 0.5 }, .max_val = { .real_value = 25 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1.00}, .enumerations = 0, .value = 0},
+  {.name = "y-calibration", .help_text = "Y scale for calibrating your printer",
+   .type = HID_Real, .min_val = { .real_value = 0.5 }, .max_val = { .real_value = 25 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1.00}, .enumerations = 0, .value = 0}
 };
 static HID_Attr_Val printer_calibrate_values[3];
 
@@ -2109,31 +2109,31 @@ ImportGUI (int argc, char **argv, Coord x, Coord y)
 /* ------------------------------------------------------------ */
 
 HID_Action lesstif_dialog_action_list[] = {
-  {"Load", 0, Load,
-   load_help, load_syntax},
-  {"LoadVendor", 0, LoadVendor,
-   loadvendor_help, loadvendor_syntax},
-  {"Save", 0, Save,
-   save_help, save_syntax},
-  {"DoWindows", 0, DoWindows,
-   dowindows_help, dowindows_syntax},
-  {"PromptFor", 0, PromptFor,
-   promptfor_help, promptfor_syntax},
-  {"Confirm", 0, ConfirmAction},
-  {"About", 0, About,
-   about_help, about_syntax},
-  {"Print", 0, Print,
-   print_help, print_syntax},
-  {"PrintCalibrate", 0, PrintCalibrate,
-   printcalibrate_help, printcalibrate_syntax},
-  {"Export", 0, Export,
-   export_help, export_syntax},
-  {"AdjustSizes", 0, AdjustSizes,
-   adjustsizes_help, adjustsizes_syntax},
-  {"EditLayerGroups", 0, EditLayerGroups,
-   editlayergroups_help, editlayergroups_syntax},
-  {"ImportGUI", 0, ImportGUI,
-   importgui_help, importgui_syntax},
+  {.name = "Load", .need_coord_msg = 0, .trigger_cb = Load,
+   .description = load_help, .syntax = load_syntax},
+  {.name = "LoadVendor", .need_coord_msg = 0, .trigger_cb = LoadVendor,
+   .description = loadvendor_help, .syntax = loadvendor_syntax},
+  {.name = "Save", .need_coord_msg = 0, .trigger_cb = Save,
+   .description = save_help, .syntax = save_syntax},
+  {.name = "DoWindows", .need_coord_msg = 0, .trigger_cb = DoWindows,
+   .description = dowindows_help, .syntax = dowindows_syntax},
+  {.name = "PromptFor", .need_coord_msg = 0, .trigger_cb = PromptFor,
+   .description = promptfor_help, .syntax = promptfor_syntax},
+  {.name = "Confirm", .need_coord_msg = 0, .trigger_cb = ConfirmAction},
+  {.name = "About", .need_coord_msg = 0, .trigger_cb = About,
+   .description = about_help, .syntax = about_syntax},
+  {.name = "Print", .need_coord_msg = 0, .trigger_cb = Print,
+   .description = print_help, .syntax = print_syntax},
+  {.name = "PrintCalibrate", .need_coord_msg = 0, .trigger_cb = PrintCalibrate,
+   .description = printcalibrate_help, .syntax = printcalibrate_syntax},
+  {.name = "Export", .need_coord_msg = 0, .trigger_cb = Export,
+   .description = export_help, .syntax = export_syntax},
+  {.name = "AdjustSizes", .need_coord_msg = 0, .trigger_cb = AdjustSizes,
+   .description = adjustsizes_help, .syntax = adjustsizes_syntax},
+  {.name = "EditLayerGroups", .need_coord_msg = 0, .trigger_cb = EditLayerGroups,
+   .description = editlayergroups_help, .syntax = editlayergroups_syntax},
+  {.name = "ImportGUI", .need_coord_msg = 0, .trigger_cb = ImportGUI,
+   .description = importgui_help, .syntax = importgui_syntax},
 };
 
 REGISTER_ACTIONS (lesstif_dialog_action_list)

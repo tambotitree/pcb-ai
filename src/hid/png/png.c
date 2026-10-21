@@ -114,7 +114,6 @@ static FILE *f = 0;
 static int linewidth = -1;
 static int lastgroup = -1;
 static gdImagePtr lastbrush = (gdImagePtr)((void *) -1);
-static int lastcap = -1;
 static int print_group[MAX_GROUP];
 static int print_layer[MAX_ALL_LAYER];
 
@@ -244,8 +243,8 @@ Parameter @code{<string>} can include a path.
 @end ftable
 %end-doc
 */
-  {"outfile", "Graphics output file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "outfile", .help_text = "Graphics output file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_pngfile 0
 
 /* %start-doc options "93 PNG Options"
@@ -255,8 +254,8 @@ Scale factor in pixels/inch. Set to 0 to scale to size specified in the layout.
 @end ftable
 %end-doc
 */
-  {"dpi", "Scale factor (pixels/inch). 0 to scale to specified size",
-   HID_Integer, 0, 10000, {100, 0, 0}, 0, 0},
+  {.name = "dpi", .help_text = "Scale factor (pixels/inch). 0 to scale to specified size",
+   .type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 10000 }, .default_val = {.int_value = 100, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_dpi 1
 
 /* %start-doc options "93 PNG Options"
@@ -266,8 +265,8 @@ Width of the png image in pixels. No constraint, when set to 0.
 @end ftable
 %end-doc
 */
-  {"x-max", "Maximum width (pixels).  0 to not constrain",
-   HID_Integer, 0, 10000, {0, 0, 0}, 0, 0},
+  {.name = "x-max", .help_text = "Maximum width (pixels).  0 to not constrain",
+   .type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_xmax 2
 
 /* %start-doc options "93 PNG Options"
@@ -277,8 +276,8 @@ Height of the png output in pixels. No constraint, when set to 0.
 @end ftable
 %end-doc
 */
-  {"y-max", "Maximum height (pixels).  0 to not constrain",
-   HID_Integer, 0, 10000, {0, 0, 0}, 0, 0},
+  {.name = "y-max", .help_text = "Maximum height (pixels).  0 to not constrain",
+   .type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_ymax 3
 
 /* %start-doc options "93 PNG Options"
@@ -288,8 +287,8 @@ Maximum width and height of the PNG output in pixels. No constraint, when set to
 @end ftable
 %end-doc
 */
-  {"xy-max", "Maximum width and height (pixels).  0 to not constrain",
-   HID_Integer, 0, 10000, {0, 0, 0}, 0, 0},
+  {.name = "xy-max", .help_text = "Maximum width and height (pixels).  0 to not constrain",
+   .type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 10000 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_xymax 4
 
 /* %start-doc options "93 PNG Options"
@@ -299,8 +298,8 @@ Export layers in the order shown on screen.
 @end ftable
 %end-doc
 */
-  {"screen-layer-order", "Export layers in the order shown on screen",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "screen-layer-order", .help_text = "Export layers in the order shown on screen",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_as_shown 5
 
 /* %start-doc options "93 PNG Options"
@@ -310,8 +309,8 @@ Convert output to monochrome.
 @end ftable
 %end-doc
 */
-  {"monochrome", "Convert to monochrome",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "monochrome", .help_text = "Convert to monochrome",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_mono 6
 
 /* %start-doc options "93 PNG Options"
@@ -321,8 +320,8 @@ Limit the bounds of the exported PNG image to the visible items.
 @end ftable
 %end-doc
 */
-  {"only-visible", "Limit the bounds of the PNG image to the visible items",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "only-visible", .help_text = "Limit the bounds of the PNG image to the visible items",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_only_visible 7
 
 /* %start-doc options "93 PNG Options"
@@ -332,8 +331,8 @@ Make the background and any holes transparent.
 @end ftable
 %end-doc
 */
-  {"use-alpha", "Make the background and any holes transparent",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "use-alpha", .help_text = "Make the background and any holes transparent",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_use_alpha 8
 
 /* %start-doc options "93 PNG Options"
@@ -343,8 +342,8 @@ Drill holes in pins/pads are filled, not hollow.
 @end ftable
 %end-doc
 */
-  {"fill-holes", "Drill holes in pins/pads are filled, not hollow",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "fill-holes", .help_text = "Drill holes in pins/pads are filled, not hollow",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_fill_holes 9
 
 /* %start-doc options "93 PNG Options"
@@ -355,8 +354,8 @@ File format to be exported. Parameter @code{<string>} can be @samp{PNG},
 @end ftable
 %end-doc
 */
-  {"format", "Export file format",
-   HID_Enum, 0, 0, {0, 0, 0}, filetypes, 0},
+  {.name = "format", .help_text = "Export file format",
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = filetypes, .value = 0},
 #define HA_filetype 10
 
 /* %start-doc options "93 PNG Options"
@@ -368,8 +367,8 @@ Amount of extra thickness to add to traces, pads, or pin edges. The parameter
 @end ftable
 %end-doc
 */
-  {"png-bloat", "Amount (in/mm/mil/pix) to add to trace/pad/pin edges (1 = 1/100 mil)",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "png-bloat", .help_text = "Amount (in/mm/mil/pix) to add to trace/pad/pin edges (1 = 1/100 mil)",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_bloat 11
 
 /* %start-doc options "93 PNG Options"
@@ -380,8 +379,8 @@ Export a photo realistic image of the layout.
 @end ftable
 %end-doc
 */
-  {"photo-mode", "Photo-realistic export mode",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "photo-mode", .help_text = "Photo-realistic export mode",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_photo_mode 12
 
 /* %start-doc options "93 PNG Options"
@@ -391,8 +390,8 @@ In photo-realistic mode, export the reverse side of the layout. Left-right flip.
 @end ftable
 %end-doc
 */
-  {"photo-flip-x", "Show reverse side of the board, left-right flip",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "photo-flip-x", .help_text = "Show reverse side of the board, left-right flip",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_photo_flip_x 13
 
 /* %start-doc options "93 PNG Options"
@@ -402,8 +401,8 @@ In photo-realistic mode, export the reverse side of the layout. Up-down flip.
 @end ftable
 %end-doc
 */
-  {"photo-flip-y", "Show reverse side of the board, up-down flip",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "photo-flip-y", .help_text = "Show reverse side of the board, up-down flip",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_photo_flip_y 14
 
 /* %start-doc options "93 PNG Options"
@@ -416,8 +415,8 @@ Parameter @code{<colour>} can be @samp{green}, @samp{red}, @samp{blue},
 @end ftable
 %end-doc
 */
-  {"photo-mask-colour", "Colour for the exported colour mask",
-   HID_Enum, 0, 0, {0, 0, 0}, mask_colour_names, 0},
+  {.name = "photo-mask-colour", .help_text = "Colour for the exported colour mask",
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = mask_colour_names, .value = 0},
 #define HA_photo_mask_colour 15
 
 /* %start-doc options "93 PNG Options"
@@ -430,8 +429,8 @@ of plating. Parameter @code{<colour>} can be @samp{tinned}, @samp{gold},
 @end ftable
 %end-doc
 */
-  {"photo-plating", "Type of plating applied to exposed copper in photo-mode",
-   HID_Enum, 0, 0, {0, 0, 0}, plating_type_names, 0},
+  {.name = "photo-plating", .help_text = "Type of plating applied to exposed copper in photo-mode",
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = plating_type_names, .value = 0},
 #define HA_photo_plating 16
 
 /* %start-doc options "93 PNG Options"
@@ -443,20 +442,20 @@ In photo-realistic mode, export the silk screen as this colour. Parameter
 @end ftable
 %end-doc
 */
-  {"photo-silk-colour", "Colour for the exported colour mask",
-   HID_Enum, 0, 0, {0, 0, 0}, silk_colour_names, 0},
+  {.name = "photo-silk-colour", .help_text = "Colour for the exported colour mask",
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = silk_colour_names, .value = 0},
 #define HA_photo_silk_colour 17
 
-  {"ben-mode", ATTR_UNDOCUMENTED,
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "ben-mode", .help_text = ATTR_UNDOCUMENTED,
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_ben_mode 12
 
-  {"ben-flip-x", ATTR_UNDOCUMENTED,
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "ben-flip-x", .help_text = ATTR_UNDOCUMENTED,
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_ben_flip_x 13
 
-  {"ben-flip-y", ATTR_UNDOCUMENTED,
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "ben-flip-y", .help_text = ATTR_UNDOCUMENTED,
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_ben_flip_y 14
 };
 
@@ -562,7 +561,7 @@ png_hid_export_to_file (FILE * the_file, HID_Attr_Val * options)
   region.Y2 = PCB->MaxHeight;
 
   if (options[HA_only_visible].int_value)
-    bounds = GetDataBoundingBox (PCB->Data);    
+    bounds = GetDataBoundingBox (PCB->Data);
   else
     bounds = &region;
 
@@ -641,7 +640,6 @@ png_hid_export_to_file (FILE * the_file, HID_Attr_Val * options)
     } // end if (!options[HA_as_shown].int_value)
   linewidth = -1;
   lastbrush = (gdImagePtr)((void *) -1);
-  lastcap = -1;
   lastgroup = -1;
   show_bottom_side = Settings.ShowBottomSide;
 
@@ -668,7 +666,7 @@ png_hid_export_to_file (FILE * the_file, HID_Attr_Val * options)
 /*!
  * \brief Clip RGB values.
  *
- * Red, Green and Blue values are clipped to a maximum value of 255. 
+ * Red, Green and Blue values are clipped to a maximum value of 255.
  */
 static void
 clip (color_struct *dest, color_struct *source)
@@ -720,7 +718,7 @@ multiply (color_struct *dest, color_struct *a, color_struct *b)
  * \param b color.
  * \param a_amount weighing value for color \c a.
  * \param b_amount weighing value for color \c b.
- * 
+ *
  * The result is clipped.
  */
 static void
@@ -740,7 +738,7 @@ add (color_struct *dest, double a_amount, const color_struct *a, double b_amount
  * \param b color.
  * \param a_amount weighing value for color \c a.
  * \param b_amount weighing value for color \c b.
- * 
+ *
  * The result is clipped.
  */
 static void
@@ -952,7 +950,7 @@ png_do_export (HID_Attr_Val * options)
       fprintf (stderr, "ERROR:  xmax and ymax may not be < 0\n");
       return;
     }
-    
+
   if (dpi > 0)
     {
       /*
@@ -971,8 +969,8 @@ png_do_export (HID_Attr_Val * options)
     }
   else
     {
-      if (ymax == 0 
-	  || ( (xmax > 0) 
+      if (ymax == 0
+	  || ( (xmax > 0)
 	       && ((w / xmax) > (h / ymax)) ) )
 	{
 	  scale = w / xmax;
@@ -988,17 +986,17 @@ png_do_export (HID_Attr_Val * options)
     }
 
   im = gdImageCreate (w, h);
-  if (im == NULL) 
+  if (im == NULL)
     {
       Message ("%s():  gdImageCreate(%d, %d) returned NULL.  Aborting export.\n", __FUNCTION__, w, h);
       return;
     }
-  
+
   master_im = im;
 
   parse_bloat (options[HA_bloat].str_value);
 
-  /* 
+  /*
    * Allocate white and black -- the first color allocated
    * becomes the background color
    */
@@ -1010,7 +1008,7 @@ png_do_export (HID_Attr_Val * options)
   else
     white->a = 0;
   white->c = gdImageColorAllocateAlpha (im, white->r, white->g, white->b, white->a);
-  if (white->c == BADC) 
+  if (white->c == BADC)
     {
       Message ("%s():  gdImageColorAllocateAlpha() returned NULL.  Aborting export.\n", __FUNCTION__);
       return;
@@ -1021,7 +1019,7 @@ png_do_export (HID_Attr_Val * options)
   black = (color_struct *) malloc (sizeof (color_struct));
   black->r = black->g = black->b = black->a = 0;
   black->c = gdImageColorAllocate (im, black->r, black->g, black->b);
-  if (black->c == BADC) 
+  if (black->c == BADC)
     {
       Message ("%s():  gdImageColorAllocateAlpha() returned NULL.  Aborting export.\n", __FUNCTION__);
       return;
@@ -1076,7 +1074,7 @@ png_do_export (HID_Attr_Val * options)
       }
 
 
-      for (x=0; x<gdImageSX (im); x++) 
+      for (x=0; x<gdImageSX (im); x++)
 	{
 	  for (y=0; y<gdImageSY (im); y++)
 	    {
@@ -1084,9 +1082,9 @@ png_do_export (HID_Attr_Val * options)
 	      color_struct mask_colour, silk_colour;
 	      int cc, mask, silk;
 	      int transparent;
-	     
+
 	      if (photo_outline && have_outline) {
-		transparent=gdImageGetPixel(photo_outline, x, y);	      
+		transparent=gdImageGetPixel(photo_outline, x, y);
 	      } else {
 		transparent=0;
 	      }
@@ -1102,7 +1100,7 @@ png_do_export (HID_Attr_Val * options)
 
 	      if (photo_ngroups == 2)
 		blend (&cop, 0.3, &cop, &fr4);
-	      
+
               if (photo_copper[photo_groups[0]])
                 cc = gdImageGetPixel (photo_copper[photo_groups[0]], x, y);
               else
@@ -1111,7 +1109,7 @@ png_do_export (HID_Attr_Val * options)
 	      if (cc)
 		{
 		  int r;
-		  
+
 		  if (mask)
 		    rgb (&cop, 220, 145, 230);
 		  else
@@ -1155,15 +1153,15 @@ png_do_export (HID_Attr_Val * options)
 			    blend (&cop, 0.7, &cop, &white);
 			}
 		    }
-		  
+
 		  if (cc == TOP_SHADOW)
 		    blend (&cop, 0.7, &cop, &white);
 		  if (cc == BOTTOM_SHADOW)
 		    blend (&cop, 0.7, &cop, &black);
 		}
 
-	      if (photo_drill && !gdImageGetPixel (photo_drill, x, y)) 
-		{		
+	      if (photo_drill && !gdImageGetPixel (photo_drill, x, y))
+		{
 		  rgb (&p, 0, 0, 0);
 		  transparent=1;
 		}
@@ -1189,7 +1187,7 @@ png_do_export (HID_Attr_Val * options)
 		}
 	      else
 		p = cop;
-	      
+
 	      if (options[HA_use_alpha].int_value) {
 
 		cc = (transparent)?\
@@ -1200,7 +1198,7 @@ png_do_export (HID_Attr_Val * options)
 		cc = (transparent)?\
 		  gdImageColorResolve(im, 0, 0, 0):\
 		  gdImageColorResolve(im, p.r, p.g, p.b);
-	      }		  
+	      }
 
 	      if (photo_flip == PHOTO_FLIP_X)
 		gdImageSetPixel (im, gdImageSX (im) - x - 1, y, cc);
@@ -1350,9 +1348,9 @@ png_set_layer (const char *name, int group, int empty)
 	{
 	  static color_struct *black = NULL, *white = NULL;
 	  *photo_im = gdImageCreate (gdImageSX (im), gdImageSY (im));
-          if (photo_im == NULL) 
+          if (photo_im == NULL)
 	    {
-	      Message ("%s():  gdImageCreate(%d, %d) returned NULL.  Aborting export.\n", __FUNCTION__, 
+	      Message ("%s():  gdImageCreate(%d, %d) returned NULL.  Aborting export.\n", __FUNCTION__,
 		       gdImageSX (im), gdImageSY (im));
 	      return 0;
 	    }
@@ -1362,7 +1360,7 @@ png_set_layer (const char *name, int group, int empty)
 	  white->r = white->g = white->b = 255;
 	  white->a = 0;
 	  white->c = gdImageColorAllocate (*photo_im, white->r, white->g, white->b);
-	  if (white->c == BADC) 
+	  if (white->c == BADC)
 	    {
 	      Message ("%s():  gdImageColorAllocate() returned NULL.  Aborting export.\n", __FUNCTION__);
 	      return 0;
@@ -1371,7 +1369,7 @@ png_set_layer (const char *name, int group, int empty)
 	  black = (color_struct *) malloc (sizeof (color_struct));
 	  black->r = black->g = black->b = black->a = 0;
 	  black->c = gdImageColorAllocate (*photo_im, black->r, black->g, black->b);
-	  if (black->c == BADC) 
+	  if (black->c == BADC)
 	    {
 	      Message ("%s(): gdImageColorAllocate() returned NULL.  Aborting export.\n", __FUNCTION__);
 	      return 0;
@@ -1516,7 +1514,7 @@ png_set_color (hidGC gc, const char *name)
 	      &(gc->color->b));
       gc->color->c =
 	gdImageColorAllocate (master_im, gc->color->r, gc->color->g, gc->color->b);
-      if (gc->color->c == BADC) 
+      if (gc->color->c == BADC)
 	{
 	  Message ("%s():  gdImageColorAllocate() returned NULL.  Aborting export.\n", __FUNCTION__);
 	  return;
@@ -1612,22 +1610,22 @@ use_gc (hidGC gc)
 	{
 	  int bg, fg;
 	  gc->brush = gdImageCreate (r, r);
-	  if (gc->brush == NULL) 
+	  if (gc->brush == NULL)
 	    {
 	      Message ("%s():  gdImageCreate(%d, %d) returned NULL.  Aborting export.\n", __FUNCTION__, r, r);
 	      return;
 	    }
 
 	  bg = gdImageColorAllocate (gc->brush, 255, 255, 255);
-	  if (bg == BADC) 
+	  if (bg == BADC)
 	    {
 	      Message ("%s():  gdImageColorAllocate() returned NULL.  Aborting export.\n", __FUNCTION__);
 	      return;
 	    }
 	  fg =
 	    gdImageColorAllocateAlpha (gc->brush, gc->color->r, gc->color->g,
-				       gc->color->b, 0); 
-	  if (fg == BADC) 
+				       gc->color->b, 0);
+	  if (fg == BADC)
 	    {
 	      Message ("%s():  gdImageColorAllocate() returned NULL.  Aborting export.\n", __FUNCTION__);
 	      return;
@@ -1773,7 +1771,7 @@ png_draw_arc (hidGC gc, Coord cx, Coord cy, Coord width, Coord height,
     return;
   }
 
-  /* 
+  /*
    * in gdImageArc, 0 degrees is to the right and +90 degrees is down
    * in pcb, 0 degrees is to the left and +90 degrees is down
    */
@@ -1795,7 +1793,7 @@ png_draw_arc (hidGC gc, Coord cx, Coord cy, Coord width, Coord height,
       ea = start_angle;
     }
 
-  /* 
+  /*
    * make sure we start between 0 and 360 otherwise gd does
    * strange things
    */

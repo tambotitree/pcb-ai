@@ -1,0 +1,9 @@
+<!-- gEDA-AI artwork, GPL-2.0-or-later. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <title>Insert image</title>
+  <rect x="2" y="3" width="18" height="16" rx="1" fill="#fff" stroke="#3465a4" stroke-width="2"/>
+  <circle cx="7" cy="8" r="2" fill="#edd400"/>
+  <path d="M3 17 9 11 12 14 15 10 19 15V18H3Z" fill="#4e9a06"/>
+  <circle cx="18" cy="18" r="5" fill="#fff"/>
+  <path d="M18 14V22M14 18H22" fill="none" stroke="#3465a4" stroke-width="2"/>
+</svg>

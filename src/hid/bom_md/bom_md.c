@@ -67,8 +67,8 @@ Parameter @code{<string>} can include a path.
 @end ftable
 %end-doc
 */
-  {"bomfile", "Name of the BOM MarkDown output file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "bomfile", .help_text = "Name of the BOM MarkDown output file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_bom_md_file 0
 
 /* %start-doc options "82 BOM MarkDown Creation"
@@ -88,8 +88,8 @@ vendor_part_number
 @end ftable
 %end-doc
 */
-  {"attrs", "Name of the attributes input file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "attrs", .help_text = "Name of the attributes input file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_attrs 1
 
 };
@@ -155,7 +155,7 @@ bom_md_clean_string (char *in)
       exit (1);
     }
 
-  /* 
+  /*
    * Copy over in to out with some character conversions.
    * Go all the way to then end to get the terminating \0
    */

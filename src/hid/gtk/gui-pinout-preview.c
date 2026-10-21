@@ -80,8 +80,8 @@ pinout_set_data (GhidPinoutPreview * pinout, ElementType * element)
       return;
     }
 
-  /* 
-   * copy element data 
+  /*
+   * copy element data
    * enable output of pin and padnames
    * move element to a 5% offset from zero position
    * set all package lines/arcs to zero width
@@ -116,7 +116,7 @@ pinout_set_data (GhidPinoutPreview * pinout, ElementType * element)
 
   ARC_LOOP (pinout->element);
   {
-    /* 
+    /*
      * for whatever reason setting a thickness of 0 causes the arcs to
      * not display so pick 1 which does display but is still quite
      * thin.
@@ -223,7 +223,7 @@ ghid_pinout_preview_set_property (GObject * object, guint property_id,
  */
 static void
 ghid_pinout_preview_get_property (GObject * object, guint property_id,
-				  GValue * value, GParamSpec * pspec)
+				  GValue * value G_GNUC_UNUSED, GParamSpec * pspec)
 {
   switch (property_id)
     {
@@ -253,7 +253,7 @@ ghid_pinout_preview_class_init (GhidPinoutPreviewClass * klass)
   gobject_class->get_property = ghid_pinout_preview_get_property;
   gobject_class->constructed = ghid_pinout_preview_constructed;
 
-  gtk_widget_class->expose_event = ghid_pinout_preview_expose;
+  gtk_widget_class->draw = ghid_pinout_preview_expose;
 
   ghid_pinout_preview_parent_class = (GObjectClass *)g_type_class_peek_parent (klass);
 
@@ -274,6 +274,14 @@ ghid_pinout_preview_class_init (GhidPinoutPreviewClass * klass)
  *
  *  \return the GType identifier associated with GhidPinoutPreview.
  */
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+ghid_pinout_preview_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  ghid_pinout_preview_class_init ((GhidPinoutPreviewClass *) klass);
+}
+
 GType
 ghid_pinout_preview_get_type ()
 {
@@ -285,12 +293,13 @@ ghid_pinout_preview_get_type ()
 	sizeof (GhidPinoutPreviewClass),
 	NULL,			/* base_init */
 	NULL,			/* base_finalize */
-	(GClassInitFunc) ghid_pinout_preview_class_init,
+	ghid_pinout_preview_class_init_adapter,
 	NULL,			/* class_finalize */
 	NULL,			/* class_data */
 	sizeof (GhidPinoutPreview),
 	0,			/* n_preallocs */
 	NULL,			/* instance_init */
+        NULL /* value_table */
       };
 
       ghid_pinout_preview_type =

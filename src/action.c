@@ -779,7 +779,7 @@ GetFunctionID (String Ident)
 	  fprintf(stderr, _("Error: function hash type too small (%d vs %lu at %s:%d)\n"),
 		  256, (unsigned long) ENTRIES (Functions), __FILE__,  __LINE__);
 	  exit(1);
-	  
+
 	}
       for (i=ENTRIES (Functions)-1; i>=0; i--)
 	{
@@ -1373,7 +1373,7 @@ NotifyMode (void)
       /* do update of position */
       NotifyBlock ();
 
-      /* create rectangle if both corners are determined 
+      /* create rectangle if both corners are determined
        * and width, height are != 0
        */
       if (Crosshair.AttachedBox.State == STATE_THIRD &&
@@ -2037,7 +2037,7 @@ There are 5 possibilities:
 4 - 45 degree fingers with rounded corners,
 5 - horizontal & vertical fingers with rounded corners.
 
-Pins and Vias may have thermals whether or not there is a polygon available 
+Pins and Vias may have thermals whether or not there is a polygon available
 to connect with. However, they will have no effect without the polygon.
 %end-doc */
 
@@ -2199,7 +2199,7 @@ ActionSetValue (int argc, char **argv, Coord x, Coord y)
               if (value == 0)
                 value = val[0] == '-' ? -Settings.increments->grid
                                       :  Settings.increments->grid;
-              /* On the way down, short against the minimum 
+              /* On the way down, short against the minimum
                * PCB drawing unit */
               if ((value + PCB->Grid) < 1)
                 SetGrid (1, false);
@@ -2406,7 +2406,7 @@ ActionDisperseElements (int argc, char **argv, Coord x, Coord y)
 
   ELEMENT_LOOP (PCB->Data);
   {
-    /* 
+    /*
      * If we want to disperse selected elements, maybe we need smarter
      * code here to avoid putting components on top of others which
      * are not selected.  For now, I'm assuming that this is typically
@@ -2422,7 +2422,7 @@ ActionDisperseElements (int argc, char **argv, Coord x, Coord y)
 	/* snap to the grid */
 	dx -= (element->MarkX + dx) % PCB->Grid;
 
-	/* 
+	/*
 	 * and add one grid size so we make sure we always space by GAP or
 	 * more
 	 */
@@ -3113,7 +3113,7 @@ ActionMode (int argc, char **argv, Coord x, Coord y)
 		    SetMode (RECTANGLE_MODE);
 		  }
 		break;
-	  
+
 	      case POLYGON_MODE:
 		if (Crosshair.AttachedLine.State == STATE_FIRST)
 		  SetMode (ARROW_MODE);
@@ -3143,16 +3143,16 @@ ActionMode (int argc, char **argv, Coord x, Coord y)
 		    SetMode (ARC_MODE);
 		  }
 		break;
-		
+
 	      case ARROW_MODE:
 		break;
-		
+
 	      default:
 		break;
 	      }
 	  }
 	  break;
-	  
+
 	case F_Notify:
 	  NotifyMode ();
 	  break;
@@ -3303,7 +3303,7 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
     {
       /*
        * We deal with the case where name already exists in this
-       * function so the GUI doesn't need to deal with it 
+       * function so the GUI doesn't need to deal with it
        */
       name = gui->fileselect (_("Save Renumber Annotation File As ..."),
 			      _("Choose a file to record the renumbering to.\n"
@@ -3346,7 +3346,7 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
 	free (name);
       return 1;
     }
-  
+
   if (free_name && name)
     free (name);
 
@@ -3378,7 +3378,7 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
   {
     if (TEST_FLAG (LOCKFLAG, element->Name) || TEST_FLAG (LOCKFLAG, element))
       {
-	/* 
+	/*
 	 * add to the list of locked elements which we won't try to
 	 * renumber and whose reference designators are now reserved.
 	 */
@@ -3399,7 +3399,7 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
 	while (element_list[i] && element->MarkY > element_list[i]->MarkY)
 	  i++;
 
-	/* 
+	/*
 	 * We have found the position where we have the first element that
 	 * has the same Y value or a lower Y value.  Now move forward if
 	 * needed through the X values
@@ -3419,12 +3419,12 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
   END_LOOP;
 
 
-  /* 
+  /*
    * Now that the elements are sorted by board position, we go through
    * and renumber them.
    */
 
-  /* 
+  /*
    * turn off the flag which requires unique names so it doesn't get
    * in our way.  When we're done with the renumber we will have unique
    * names.
@@ -3469,9 +3469,9 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
 		}
 	    }
 
-	  /* 
+	  /*
 	   * start a new counter if we don't have a counter for this
-	   * prefix 
+	   * prefix
 	   */
 	  if (!cnt_list[j].name)
 	    {
@@ -3502,9 +3502,9 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
 	      tmps = (char *)malloc (sz * sizeof (char));
 	      sprintf (tmps, "%s%d", cnt_list[j].name, (int) cnt_list[j].cnt);
 
-	      /* 
+	      /*
 	       * now compare to the list of reserved (by locked
-	       * elements) names 
+	       * elements) names
 	       */
 	      for (k = 0; k < lock_cnt; k++)
 		{
@@ -3583,7 +3583,7 @@ ActionRenumber (int argc, char **argv, Coord x, Coord y)
 		{
 		  /*
 		   * if the pin needs to change, change it and quit
-		   * searching in the list. 
+		   * searching in the list.
 		   */
 		  if (strcmp (tmps, was[k]) == 0)
 		    {
@@ -4340,7 +4340,7 @@ ActionMinMaskGap (int argc, char **argv, Coord x, Coord y)
       if (!TEST_FLAGS (flags, pin) || ! pin->Mask) continue;
 
       thickness = pin->DrillingHole;
-      
+
       if (pin->Thickness > thickness) thickness = pin->Thickness;
 
       thickness += value;
@@ -4540,7 +4540,7 @@ ActionChangePinName (int argc, char **argv, Coord x, Coord y)
 	      AddObjectToChangeNameUndoList (PIN_TYPE, NULL, NULL,
 					     pin, pin->Name);
 	      /*
-	       * Note:  we can't free() pin->Name first because 
+	       * Note:  we can't free() pin->Name first because
 	       * it is used in the undo list
 	       */
 	      pin->Name = strdup (pinname);
@@ -4556,8 +4556,8 @@ ActionChangePinName (int argc, char **argv, Coord x, Coord y)
 	    {
 	      AddObjectToChangeNameUndoList (PAD_TYPE, NULL, NULL,
 					     pad, pad->Name);
-	      /* 
-	       * Note:  we can't free() pad->Name first because 
+	      /*
+	       * Note:  we can't free() pad->Name first because
 	       * it is used in the undo list
 	       */
 	      pad->Name = strdup (pinname);
@@ -4569,7 +4569,7 @@ ActionChangePinName (int argc, char **argv, Coord x, Coord y)
       }
   }
   END_LOOP;
-  /* 
+  /*
    * done with our action so increment the undo # if we actually
    * changed anything
    */
@@ -4693,7 +4693,7 @@ static const char morphpolygon_syntax[] = N_("MorphPolygon(Object|Selected)");
 static const char morphpolygon_help[] =
   N_("Converts dead polygon islands into separate polygons.");
 
-/* %start-doc actions MorphPolygon 
+/* %start-doc actions MorphPolygon
 
 If a polygon is divided into unconnected "islands", you can use
 this command to convert the otherwise disappeared islands into
@@ -5757,7 +5757,7 @@ ActionSaveTo (int argc, char **argv, Coord x, Coord y)
   char *name;
 
   function = ARG (0);
-  
+
   if ( ! function || strcasecmp (function, "Layout") == 0)
     {
       if (SavePCB (PCB->Filename) == 0)
@@ -6154,7 +6154,7 @@ ActionPasteBuffer (int argc, char **argv, Coord x, Coord y)
 		}
 	      free_name = 1;
 	    }
-	      
+
 	  else
 	    name = argv[1];
 
@@ -6943,7 +6943,7 @@ ActionExecuteFile (int argc, char **argv, Coord x, Coord y)
       while (*sp && (*sp == ' ' || *sp == '\t'))
 	sp++;
 
-      /* 
+      /*
        * if we have anything left and its not a comment line
        * then execute it
        */
@@ -7376,9 +7376,9 @@ pcb_spawnvp (char **argv)
 
 /* ---------------------------------------------------------------- */
 
-/*! 
+/*!
  * \brief Creates a new temporary file name.
- * 
+ *
  * Hopefully the operating system provides a mkdtemp() function to
  * securily create a temporary directory with mode 0700.\n
  * If so then that directory is created and the returned string is made
@@ -7390,7 +7390,7 @@ pcb_spawnvp (char **argv)
  *
  * If mkdtemp() is not available then 'name' is ignored and the
  * insecure tmpnam() function is used.
- *  
+ *
  * Files/names created with tempfile_name_new() should be unlinked
  * with tempfile_unlink to make sure the temporary directory is also
  * removed when mkdtemp() is used.
@@ -7408,25 +7408,25 @@ tempfile_name_new (char * name)
 
 #ifdef HAVE_MKDTEMP
 #define TEMPLATE "pcb.XXXXXXXX"
-    
-  
+
+
   tmpdir = getenv ("TMPDIR");
 
   /* FIXME -- what about win32? */
   if (tmpdir == NULL) {
     tmpdir = "/tmp";
   }
-  
-  mytmpdir = (char *) malloc (sizeof(char) * 
-			      (strlen (tmpdir) + 
+
+  mytmpdir = (char *) malloc (sizeof(char) *
+			      (strlen (tmpdir) +
 			       1 +
-			       strlen (TEMPLATE) + 
+			       strlen (TEMPLATE) +
 			       1));
   if (mytmpdir == NULL) {
     fprintf (stderr, "%s(): malloc failed()\n", __FUNCTION__);
     exit (1);
   }
-  
+
   *mytmpdir = '\0';
   (void)strcat (mytmpdir, tmpdir);
   (void)strcat (mytmpdir, PCB_DIR_SEPARATOR_S);
@@ -7450,7 +7450,7 @@ tempfile_name_new (char * name)
   (void)strcat (tmpfile, mytmpdir);
   (void)strcat (tmpfile, PCB_DIR_SEPARATOR_S);
   (void)strcat (tmpfile, name);
-  
+
   free (mytmpdir);
 #undef TEMPLATE
 #else
@@ -7477,7 +7477,7 @@ tempfile_name_new (char * name)
 
 /*!
  * \brief Unlink a temporary file.
- * 
+ *
  * If we have mkdtemp() then our temp file lives in a temporary
  * directory and we need to remove that directory too.
  */
@@ -7500,12 +7500,12 @@ tempfile_unlink (char * name)
   /* now figure out the directory name to remove */
   e = strlen (name) - 1;
   while (e > 0 && name[e] != PCB_DIR_SEPARATOR_C) {e--;}
-  
+
   dname = strdup (name);
   dname[e] = '\0';
 
-  /* 
-   * at this point, e *should* point to the end of the directory part 
+  /*
+   * at this point, e *should* point to the end of the directory part
    * but lets make sure.
    */
   if (e > 0) {
@@ -7517,7 +7517,7 @@ tempfile_unlink (char * name)
   } else {
     fprintf (stderr, _("%s():  Unable to determine temp directory name from the temp file\n"),
 	     __FUNCTION__);
-    fprintf (stderr, "%s():  \"%s\"\n", 
+    fprintf (stderr, "%s():  \"%s\"\n",
 	     __FUNCTION__, name);
     rc2 = -1;
   }
@@ -7528,7 +7528,7 @@ tempfile_unlink (char * name)
 
   /*
    * FIXME - should also return -1 if the temp file exists and was not
-   * removed.  
+   * removed.
    */
   if (rc2 != 0) {
     return -1;
@@ -8069,7 +8069,7 @@ ActionImport (int argc, char **argv, Coord x, Coord y)
 
 #ifdef DEBUG
       printf("ActionImport:  ===========  About to run gnetlist  ============\n");
-      printf("%s %s %s %s %s %s %s ...\n", 
+      printf("%s %s %s %s %s %s %s ...\n",
 	     cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6]);
 #endif
 
@@ -8133,7 +8133,7 @@ ActionImport (int argc, char **argv, Coord x, Coord y)
 	    strcat (srclist, " ");
 	  strcat (srclist, sources[i]);
 	}
-      
+
       cmd[0] = Settings.MakeProgram;
       cmd[1] = "-s";
       cmd[2] = Concat ("PCB=", PCB->Filename, NULL);
@@ -8459,198 +8459,197 @@ ActionSetViaLayers (int argc, char **argv, Coord x, Coord y)
 /* --------------------------------------------------------------------------- */
 
 HID_Action action_action_list[] = {
-  {"AddRats", 0, ActionAddRats,
-   addrats_help, addrats_syntax}
+  {.name = "AddRats", .need_coord_msg = 0, .trigger_cb = ActionAddRats,
+   .description = addrats_help, .syntax = addrats_syntax}
   ,
-  {"Attributes", 0, ActionAttributes,
-   attributes_help, attributes_syntax}
+  {.name = "Attributes", .need_coord_msg = 0, .trigger_cb = ActionAttributes,
+   .description = attributes_help, .syntax = attributes_syntax}
   ,
-  {"Atomic", 0, ActionAtomic,
-   atomic_help, atomic_syntax}
+  {.name = "Atomic", .need_coord_msg = 0, .trigger_cb = ActionAtomic,
+   .description = atomic_help, .syntax = atomic_syntax}
   ,
-  {"AutoPlaceSelected", 0, ActionAutoPlaceSelected,
-   autoplace_help, autoplace_syntax}
+  {.name = "AutoPlaceSelected", .need_coord_msg = 0, .trigger_cb = ActionAutoPlaceSelected,
+   .description = autoplace_help, .syntax = autoplace_syntax}
   ,
-  {"AutoRoute", 0, ActionAutoRoute,
-   autoroute_help, autoroute_syntax}
+  {.name = "AutoRoute", .need_coord_msg = 0, .trigger_cb = ActionAutoRoute,
+   .description = autoroute_help, .syntax = autoroute_syntax}
   ,
-  {"ChangeClearSize", 0, ActionChangeClearSize,
-   changeclearsize_help, changeclearsize_syntax}
+  {.name = "ChangeClearSize", .need_coord_msg = 0, .trigger_cb = ActionChangeClearSize,
+   .description = changeclearsize_help, .syntax = changeclearsize_syntax}
   ,
-  {"ChangeDrillSize", 0, ActionChange2ndSize,
-   changedrillsize_help, changedrillsize_syntax}
+  {.name = "ChangeDrillSize", .need_coord_msg = 0, .trigger_cb = ActionChange2ndSize,
+   .description = changedrillsize_help, .syntax = changedrillsize_syntax}
   ,
-  {"ChangeHole", 0, ActionChangeHole,
-   changehold_help, changehold_syntax}
+  {.name = "ChangeHole", .need_coord_msg = 0, .trigger_cb = ActionChangeHole,
+   .description = changehold_help, .syntax = changehold_syntax}
   ,
-  {"ChangeJoin", 0, ActionChangeJoin,
-   changejoin_help, changejoin_syntax}
+  {.name = "ChangeJoin", .need_coord_msg = 0, .trigger_cb = ActionChangeJoin,
+   .description = changejoin_help, .syntax = changejoin_syntax}
   ,
-  {"ChangeName", 0, ActionChangeName,
-   changename_help, changename_syntax}
+  {.name = "ChangeName", .need_coord_msg = 0, .trigger_cb = ActionChangeName,
+   .description = changename_help, .syntax = changename_syntax}
   ,
-  {"ChangePaste", 0, ActionChangePaste,
-   changepaste_help, changepaste_syntax}
+  {.name = "ChangePaste", .need_coord_msg = 0, .trigger_cb = ActionChangePaste,
+   .description = changepaste_help, .syntax = changepaste_syntax}
   ,
-  {"ChangePinName", 0, ActionChangePinName,
-   changepinname_help, changepinname_syntax}
+  {.name = "ChangePinName", .need_coord_msg = 0, .trigger_cb = ActionChangePinName,
+   .description = changepinname_help, .syntax = changepinname_syntax}
   ,
-  {"ChangeSize", 0, ActionChangeSize,
-   changesize_help, changesize_syntax}
+  {.name = "ChangeSize", .need_coord_msg = 0, .trigger_cb = ActionChangeSize,
+   .description = changesize_help, .syntax = changesize_syntax}
   ,
-  {"ChangeSquare", 0, ActionChangeSquare,
-   changesquare_help, changesquare_syntax}
+  {.name = "ChangeSquare", .need_coord_msg = 0, .trigger_cb = ActionChangeSquare,
+   .description = changesquare_help, .syntax = changesquare_syntax}
   ,
-  {"ChangeOctagon", 0, ActionChangeOctagon,
-   changeoctagon_help, changeoctagon_syntax}
+  {.name = "ChangeOctagon", .need_coord_msg = 0, .trigger_cb = ActionChangeOctagon,
+   .description = changeoctagon_help, .syntax = changeoctagon_syntax}
   ,
-  {"ClearSquare", 0, ActionClearSquare,
-   clearsquare_help, clearsquare_syntax}
+  {.name = "ClearSquare", .need_coord_msg = 0, .trigger_cb = ActionClearSquare,
+   .description = clearsquare_help, .syntax = clearsquare_syntax}
   ,
-  {"ClearOctagon", 0, ActionClearOctagon,
-   clearoctagon_help, clearoctagon_syntax}
+  {.name = "ClearOctagon", .need_coord_msg = 0, .trigger_cb = ActionClearOctagon,
+   .description = clearoctagon_help, .syntax = clearoctagon_syntax}
   ,
-  {"Connection", 0, ActionConnection,
-   connection_help, connection_syntax}
+  {.name = "Connection", .need_coord_msg = 0, .trigger_cb = ActionConnection,
+   .description = connection_help, .syntax = connection_syntax}
   ,
-  {"Delete", 0, ActionDelete,
-   delete_help, delete_syntax}
+  {.name = "Delete", .need_coord_msg = 0, .trigger_cb = ActionDelete,
+   .description = delete_help, .syntax = delete_syntax}
   ,
-  {"DeleteRats", 0, ActionDeleteRats,
-   deleterats_help, deleterats_syntax}
+  {.name = "DeleteRats", .need_coord_msg = 0, .trigger_cb = ActionDeleteRats,
+   .description = deleterats_help, .syntax = deleterats_syntax}
   ,
-  {"DisperseElements", 0, ActionDisperseElements,
-   disperseelements_help, disperseelements_syntax}
+  {.name = "DisperseElements", .need_coord_msg = 0, .trigger_cb = ActionDisperseElements,
+   .description = disperseelements_help, .syntax = disperseelements_syntax}
   ,
-  {"Display", 0, ActionDisplay,
-   display_help, display_syntax}
+  {.name = "Display", .need_coord_msg = 0, .trigger_cb = ActionDisplay,
+   .description = display_help, .syntax = display_syntax}
   ,
-  {"DumpLibrary", 0, ActionDumpLibrary,
-   dumplibrary_help, dumplibrary_syntax}
+  {.name = "DumpLibrary", .need_coord_msg = 0, .trigger_cb = ActionDumpLibrary,
+   .description = dumplibrary_help, .syntax = dumplibrary_syntax}
   ,
-  {"ExecuteFile", 0, ActionExecuteFile,
-   executefile_help, executefile_syntax}
+  {.name = "ExecuteFile", .need_coord_msg = 0, .trigger_cb = ActionExecuteFile,
+   .description = executefile_help, .syntax = executefile_syntax}
   ,
-  {"Flip", N_("Click on Object or Flip Point"), ActionFlip,
-   flip_help, flip_syntax}
+  {.name = "Flip", .need_coord_msg = N_("Click on Object or Flip Point"), .trigger_cb = ActionFlip,
+   .description = flip_help, .syntax = flip_syntax}
   ,
-  {"LoadFrom", 0, ActionLoadFrom,
-   loadfrom_help, loadfrom_syntax}
+  {.name = "LoadFrom", .need_coord_msg = 0, .trigger_cb = ActionLoadFrom,
+   .description = loadfrom_help, .syntax = loadfrom_syntax}
   ,
-  {"MarkCrosshair", 0, ActionMarkCrosshair,
-   markcrosshair_help, markcrosshair_syntax}
+  {.name = "MarkCrosshair", .need_coord_msg = 0, .trigger_cb = ActionMarkCrosshair,
+   .description = markcrosshair_help, .syntax = markcrosshair_syntax}
   ,
-  {"Message", 0, ActionMessage,
-   message_help, message_syntax}
+  {.name = "Message", .need_coord_msg = 0, .trigger_cb = ActionMessage,
+   .description = message_help, .syntax = message_syntax}
   ,
-  {"MinMaskGap", 0, ActionMinMaskGap,
-   minmaskgap_help, minmaskgap_syntax}
+  {.name = "MinMaskGap", .need_coord_msg = 0, .trigger_cb = ActionMinMaskGap,
+   .description = minmaskgap_help, .syntax = minmaskgap_syntax}
   ,
-  {"MinClearGap", 0, ActionMinClearGap,
-   mincleargap_help, mincleargap_syntax}
+  {.name = "MinClearGap", .need_coord_msg = 0, .trigger_cb = ActionMinClearGap,
+   .description = mincleargap_help, .syntax = mincleargap_syntax}
   ,
-  {"Mode", 0, ActionMode,
-   mode_help, mode_syntax}
+  {.name = "Mode", .need_coord_msg = 0, .trigger_cb = ActionMode,
+   .description = mode_help, .syntax = mode_syntax}
   ,
-  {"MorphPolygon", 0, ActionMorphPolygon,
-   morphpolygon_help, morphpolygon_syntax}
+  {.name = "MorphPolygon", .need_coord_msg = 0, .trigger_cb = ActionMorphPolygon,
+   .description = morphpolygon_help, .syntax = morphpolygon_syntax}
   ,
-  {"PasteBuffer", 0, ActionPasteBuffer,
-   pastebuffer_help, pastebuffer_syntax}
+  {.name = "PasteBuffer", .need_coord_msg = 0, .trigger_cb = ActionPasteBuffer,
+   .description = pastebuffer_help, .syntax = pastebuffer_syntax}
   ,
-  {"Quit", 0, ActionQuit,
-   quit_help, quit_syntax}
+  {.name = "Quit", .need_coord_msg = 0, .trigger_cb = ActionQuit,
+   .description = quit_help, .syntax = quit_syntax}
   ,
-  {"RemoveSelected", 0, ActionRemoveSelected,
-   removeselected_help, removeselected_syntax}
+  {.name = "RemoveSelected", .need_coord_msg = 0, .trigger_cb = ActionRemoveSelected,
+   .description = removeselected_help, .syntax = removeselected_syntax}
   ,
-  {"Renumber", 0, ActionRenumber,
-   renumber_help, renumber_syntax}
+  {.name = "Renumber", .need_coord_msg = 0, .trigger_cb = ActionRenumber,
+   .description = renumber_help, .syntax = renumber_syntax}
   ,
-  {"RipUp", 0, ActionRipUp,
-   ripup_help, ripup_syntax}
+  {.name = "RipUp", .need_coord_msg = 0, .trigger_cb = ActionRipUp,
+   .description = ripup_help, .syntax = ripup_syntax}
   ,
-  {"Select", 0, ActionSelect,
-   select_help, select_syntax}
+  {.name = "Select", .need_coord_msg = 0, .trigger_cb = ActionSelect,
+   .description = select_help, .syntax = select_syntax}
   ,
-  {"Unselect", 0, ActionUnselect,
-   unselect_help, unselect_syntax}
+  {.name = "Unselect", .need_coord_msg = 0, .trigger_cb = ActionUnselect,
+   .description = unselect_help, .syntax = unselect_syntax}
   ,
-  {"SaveSettings", 0, ActionSaveSettings,
-   savesettings_help, savesettings_syntax}
+  {.name = "SaveSettings", .need_coord_msg = 0, .trigger_cb = ActionSaveSettings,
+   .description = savesettings_help, .syntax = savesettings_syntax}
   ,
-  {"SaveTo", 0, ActionSaveTo,
-   saveto_help, saveto_syntax}
+  {.name = "SaveTo", .need_coord_msg = 0, .trigger_cb = ActionSaveTo,
+   .description = saveto_help, .syntax = saveto_syntax}
   ,
-  {"SetSquare", 0, ActionSetSquare,
-   setsquare_help, setsquare_syntax}
+  {.name = "SetSquare", .need_coord_msg = 0, .trigger_cb = ActionSetSquare,
+   .description = setsquare_help, .syntax = setsquare_syntax}
   ,
-  {"SetOctagon", 0, ActionSetOctagon,
-   setoctagon_help, setoctagon_syntax}
+  {.name = "SetOctagon", .need_coord_msg = 0, .trigger_cb = ActionSetOctagon,
+   .description = setoctagon_help, .syntax = setoctagon_syntax}
   ,
-  {"SetThermal", 0, ActionSetThermal,
-   setthermal_help, setthermal_syntax}
+  {.name = "SetThermal", .need_coord_msg = 0, .trigger_cb = ActionSetThermal,
+   .description = setthermal_help, .syntax = setthermal_syntax}
   ,
-  {"SetValue", 0, ActionSetValue,
-   setvalue_help, setvalue_syntax}
+  {.name = "SetValue", .need_coord_msg = 0, .trigger_cb = ActionSetValue,
+   .description = setvalue_help, .syntax = setvalue_syntax}
   ,
-  {"ToggleHideName", 0, ActionToggleHideName,
-   togglehidename_help, togglehidename_syntax}
+  {.name = "ToggleHideName", .need_coord_msg = 0, .trigger_cb = ActionToggleHideName,
+   .description = togglehidename_help, .syntax = togglehidename_syntax}
   ,
-  {"Undo", 0, ActionUndo,
-   undo_help, undo_syntax}
+  {.name = "Undo", .need_coord_msg = 0, .trigger_cb = ActionUndo,
+   .description = undo_help, .syntax = undo_syntax}
   ,
-  {"Redo", 0, ActionRedo,
-   redo_help, redo_syntax}
+  {.name = "Redo", .need_coord_msg = 0, .trigger_cb = ActionRedo,
+   .description = redo_help, .syntax = redo_syntax}
   ,
-  {"SetSame", N_("Select item to use attributes from"), ActionSetSame,
-   setsame_help, setsame_syntax}
+  {.name = "SetSame", .need_coord_msg = N_("Select item to use attributes from"), .trigger_cb = ActionSetSame,
+   .description = setsame_help, .syntax = setsame_syntax}
   ,
-  {"SetFlag", 0, ActionSetFlag,
-   setflag_help, setflag_syntax}
+  {.name = "SetFlag", .need_coord_msg = 0, .trigger_cb = ActionSetFlag,
+   .description = setflag_help, .syntax = setflag_syntax}
   ,
-  {"ClrFlag", 0, ActionClrFlag,
-   clrflag_help, clrflag_syntax}
+  {.name = "ClrFlag", .need_coord_msg = 0, .trigger_cb = ActionClrFlag,
+   .description = clrflag_help, .syntax = clrflag_syntax}
   ,
-  {"ChangeFlag", 0, ActionChangeFlag,
-   changeflag_help, changeflag_syntax}
+  {.name = "ChangeFlag", .need_coord_msg = 0, .trigger_cb = ActionChangeFlag,
+   .description = changeflag_help, .syntax = changeflag_syntax}
   ,
-  {"Polygon", 0, ActionPolygon,
-   polygon_help, polygon_syntax}
+  {.name = "Polygon", .need_coord_msg = 0, .trigger_cb = ActionPolygon,
+   .description = polygon_help, .syntax = polygon_syntax}
   ,
-  {"RouteStyle", 0, ActionRouteStyle,
-   routestyle_help, routestyle_syntax}
+  {.name = "RouteStyle", .need_coord_msg = 0, .trigger_cb = ActionRouteStyle,
+   .description = routestyle_help, .syntax = routestyle_syntax}
   ,
-  {"MoveObject", N_("Select an Object"), ActionMoveObject,
-   moveobject_help, moveobject_syntax}
+  {.name = "MoveObject", .need_coord_msg = N_("Select an Object"), .trigger_cb = ActionMoveObject,
+   .description = moveobject_help, .syntax = moveobject_syntax}
   ,
-  {"MoveToCurrentLayer", 0, ActionMoveToCurrentLayer,
-   movetocurrentlayer_help, movetocurrentlayer_syntax}
+  {.name = "MoveToCurrentLayer", .need_coord_msg = 0, .trigger_cb = ActionMoveToCurrentLayer,
+   .description = movetocurrentlayer_help, .syntax = movetocurrentlayer_syntax}
   ,
-  {"New", 0, ActionNew,
-   new_help, new_syntax}
+  {.name = "New", .need_coord_msg = 0, .trigger_cb = ActionNew,
+   .description = new_help, .syntax = new_syntax}
   ,
-  {"pscalib", 0, ActionPSCalib}
+  {.name = "pscalib", .need_coord_msg = 0, .trigger_cb = ActionPSCalib}
   ,
-  {"ElementList", 0, ActionElementList,
-   elementlist_help, elementlist_syntax}
+  {.name = "ElementList", .need_coord_msg = 0, .trigger_cb = ActionElementList,
+   .description = elementlist_help, .syntax = elementlist_syntax}
   ,
-  {"ElementSetAttr", 0, ActionElementSetAttr,
-   elementsetattr_help, elementsetattr_syntax}
+  {.name = "ElementSetAttr", .need_coord_msg = 0, .trigger_cb = ActionElementSetAttr,
+   .description = elementsetattr_help, .syntax = elementsetattr_syntax}
   ,
-  {"ExecCommand", 0, ActionExecCommand,
-   execcommand_help, execcommand_syntax}
+  {.name = "ExecCommand", .need_coord_msg = 0, .trigger_cb = ActionExecCommand,
+   .description = execcommand_help, .syntax = execcommand_syntax}
   ,
-  {"ImportTinyCAD", 0, ActionImportTinyCAD,
-   tcad_import_help, tcad_import_syntax}
+  {.name = "ImportTinyCAD", .need_coord_msg = 0, .trigger_cb = ActionImportTinyCAD,
+   .description = tcad_import_help, .syntax = tcad_import_syntax}
   ,
-  {"Import", 0, ActionImport,
-   import_help, import_syntax}
+  {.name = "Import", .need_coord_msg = 0, .trigger_cb = ActionImport,
+   .description = import_help, .syntax = import_syntax}
   ,
-  {"SetViaLayers", 0, ActionSetViaLayers,
-   setvialayers_help, setvialayers_syntax}
+  {.name = "SetViaLayers", .need_coord_msg = 0, .trigger_cb = ActionSetViaLayers,
+   .description = setvialayers_help, .syntax = setvialayers_syntax}
   ,
 };
 
 REGISTER_ACTIONS (action_action_list)
-

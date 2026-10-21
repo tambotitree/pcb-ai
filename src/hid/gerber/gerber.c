@@ -123,7 +123,7 @@ typedef struct aperture
 }
 Aperture;
 
-typedef struct 
+typedef struct
 {
   Aperture *data;
   int count;
@@ -312,7 +312,8 @@ static int finding_apertures = 0;
 static int pagecount = 0;
 static int linewidth = -1;
 static int lastgroup = -1;
-static int lastcap = -1;
+static EndCapStyle lastcap = Trace_Cap;
+static bool lastcap_valid = false;
 static int print_group[MAX_GROUP];
 static int print_layer[MAX_ALL_LAYER];
 static int lastX, lastY;	/* the last X and Y coordinate */
@@ -354,8 +355,8 @@ Gerber output file prefix. Parameter @code{<string>} can include a path.
 @end ftable
 %end-doc
 */
-  {"gerberfile", "Gerber output file base",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "gerberfile", .help_text = "Gerber output file base",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_gerberfile 0
 
 /* %start-doc options "90 Gerber Export"
@@ -365,8 +366,8 @@ Output contains all layers, even empty ones.
 @end ftable
 %end-doc
 */
-  {"all-layers", "Output all layers, even empty ones",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "all-layers", .help_text = "Output all layers, even empty ones",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_all_layers 1
 
 /* %start-doc options "90 Gerber Export"
@@ -376,8 +377,8 @@ Print file names and aperture counts on stdout.
 @end ftable
 %end-doc
 */
-  {"verbose", "Print file names and aperture counts on stdout",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "verbose", .help_text = "Print file names and aperture counts on stdout",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_verbose 2
 
 /* %start-doc options "90 Gerber Export"
@@ -387,8 +388,8 @@ Generate metric Gerber and drill files
 @end ftable
 %end-doc
 */
-  {"metric", "Generate metric Gerber and drill files",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "metric", .help_text = "Generate metric Gerber and drill files",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_metric 3
 
 /* %start-doc options "90 Gerber Export"
@@ -400,8 +401,8 @@ Parameter @code{<string>} can be @samp{none}, @samp{mask},
 @end ftable
 %end-doc
 */
-  {"copy-outline", "Copy outline onto other layers",
-   HID_Enum, 0, 0, {0, 0, 0}, copy_outline_names, 0},
+  {.name = "copy-outline", .help_text = "Copy outline onto other layers",
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = copy_outline_names, .value = 0},
 #define HA_copy_outline 4
 
 /* %start-doc options "90 Gerber Export"
@@ -413,8 +414,8 @@ Parameter @code{<string>} can be @samp{fixed}, @samp{single},
 @end ftable
 %end-doc
 */
-  {"name-style", "Naming style for individual gerber files",
-   HID_Enum, 0, 0, {0, 0, 0}, name_style_names, 0},
+  {.name = "name-style", .help_text = "Naming style for individual gerber files",
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = name_style_names, .value = 0},
 #define HA_name_style 5
 };
 
@@ -754,7 +755,7 @@ gerber_do_export (HID_Attr_Val * options)
   memcpy (saved_layer_stack, LayerStack, sizeof (LayerStack));
   qsort (LayerStack, max_copper_layer, sizeof (LayerStack[0]), layer_stack_sort);
   linewidth = -1;
-  lastcap = -1;
+  lastcap_valid = false;
   lastgroup = -1;
 
   region.X1 = 0;
@@ -870,7 +871,7 @@ gerber_set_layer (const char *name, int group, int empty)
       lastX = -1;
       lastY = -1;
       linewidth = -1;
-      lastcap = -1;
+      lastcap_valid = false;
 
       aptr_list = setLayerApertureList (layer_list_idx++);
 
@@ -886,7 +887,7 @@ gerber_set_layer (const char *name, int group, int empty)
       pagecount++;
       assign_file_suffix (filesuff, idx, name);
       f = fopen (filename, "wb");   /* Binary needed to force CR-LF */
-      if (f == NULL) 
+      if (f == NULL)
 	{
 	  Message ( "Error:  Could not open %s for writing.\n", filename);
 	  return 1;
@@ -1087,7 +1088,7 @@ use_gc (hidGC gc, int radius)
   if (radius)
     {
       radius *= 2;
-      if (radius != linewidth || lastcap != Round_Cap)
+      if (radius != linewidth || !lastcap_valid || lastcap != Round_Cap)
 	{
 	  Aperture *aptr = findAperture (curr_aptr_list, radius, ROUND);
 	  if (aptr == NULL)
@@ -1096,15 +1097,17 @@ use_gc (hidGC gc, int radius)
 	    fprintf (f, "G54D%d*", aptr->dCode);
 	  linewidth = radius;
 	  lastcap = Round_Cap;
+	  lastcap_valid = true;
 	}
     }
-  else if (linewidth != gc->width || lastcap != gc->cap)
+  else if (linewidth != gc->width || !lastcap_valid || lastcap != gc->cap)
     {
       Aperture *aptr;
       ApertureShape shape;
 
       linewidth = gc->width;
       lastcap = gc->cap;
+      lastcap_valid = true;
       switch (gc->cap)
 	{
 	case Round_Cap:

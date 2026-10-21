@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Authoritative release identity; tools/version.py updates and validates it.
-AC_INIT([pcb-ai],[0.1.1-20261020],[https://github.com/tambotitree/pcb-ai/issues],[pcb-ai])
+AC_INIT([pcb-ai],[0.1.2-20261021],[https://github.com/tambotitree/pcb-ai/issues],[pcb-ai])
 AC_CONFIG_SRCDIR([src/draw.c])
 AC_PREREQ([2.73])
 AM_INIT_AUTOMAKE([1.9])
@@ -106,6 +106,9 @@ AC_DEFINE_UNQUOTED(PCB_PATH_DELIMETER,"$PCB_PATH_DELIMETER",[Search path separat
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
+dnl File timestamps: Linux st_mtim or macOS st_mtimespec, as in gschem.
+AC_CHECK_MEMBERS([struct stat.st_mtim, struct stat.st_mtimespec], [], [],
+                [[#include <sys/stat.h>]])
 AM_PROG_AR
 
 if test "x$WIN32" = "xyes" ; then
@@ -762,15 +765,17 @@ for e in $HIDLIST; do
 		AC_MSG_ERROR([Cannot find pkg-config, make sure it is installed and in your PATH])
 	fi
 
-	PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.18.0, ,
-		[AC_MSG_ERROR([Cannot find gtk+ >= 2.18.0, install it and rerun ./configure
+	PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.24.0, ,
+		[AC_MSG_ERROR([Cannot find GTK3 >= 3.24.0, install it and rerun ./configure
 Please review the following errors:
 $GTK_PKG_ERRORS])]
 	)
-	GTK_VERSION=`$PKG_CONFIG gtk+-2.0 --modversion`
+	GTK_VERSION=`$PKG_CONFIG gtk+-3.0 --modversion`
 	GLIB_VERSION=`$PKG_CONFIG glib-2.0 --modversion`
 
 	if test "x$enable_gl" = "xyes"; then
+		# The legacy gtkglext backend depends on GTK2; never link it into GTK3.
+        AC_MSG_ERROR([GTK3 OpenGL backend is not ported; configure with --disable-gl])
 		# Check for GtkGLExt
 		PKG_CHECK_MODULES(GTKGLEXT, gtkglext-1.0 >= 1.0.0, , [AC_MSG_ERROR([
 *** Required version of gtkglext is not installed - please install first ***

@@ -405,7 +405,7 @@ AdjustStyle (int argc, char **argv, Coord x, Coord y)
       {
 	      style_values[i] = style_value (i);
       }
-      
+
       for (i = 0; i < NUM_STYLES; i++)
       {
         name_hashes[i] = hash (PCB->RouteStyle[i].Name);
@@ -473,10 +473,10 @@ lesstif_insert_style_buttons (Widget menu)
 }
 
 HID_Action lesstif_styles_action_list[] = {
-  {"AdjustStyle", 0, AdjustStyle,
-   adjuststyle_help, adjuststyle_syntax},
-  {"RouteStylesChanged", 0, RouteStylesChanged,
-   routestyleschanged_help, routestyleschanged_syntax}
+  {.name = "AdjustStyle", .need_coord_msg = 0, .trigger_cb = AdjustStyle,
+   .description = adjuststyle_help, .syntax = adjuststyle_syntax},
+  {.name = "RouteStylesChanged", .need_coord_msg = 0, .trigger_cb = RouteStylesChanged,
+   .description = routestyleschanged_help, .syntax = routestyleschanged_syntax}
 };
 
 REGISTER_ACTIONS (lesstif_styles_action_list)

@@ -150,8 +150,8 @@ Name of the postscript output file. Can contain a path.
 @end ftable
 %end-doc
 */
-  {N_("psfile"), N_("Postscript output file"),
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("psfile"), .help_text = N_("Postscript output file"),
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_psfile 0
 
 /* %start-doc options "91 Postscript Export"
@@ -162,8 +162,8 @@ Print a centering target in large drill holes.
 @end ftable
 %end-doc
 */
-  {N_("drill-helper"), N_("Print a centering target in large drill holes"),
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("drill-helper"), .help_text = N_("Print a centering target in large drill holes"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_drillhelper 1
 
 /* %start-doc options "91 Postscript Export"
@@ -174,8 +174,8 @@ Print alignment marks on each sheet. This is meant to ease alignment during expo
 @end ftable
 %end-doc
 */
-  {N_("align-marks"), N_("Print alignment marks on each sheet"),
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+  {.name = N_("align-marks"), .help_text = N_("Print alignment marks on each sheet"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_alignmarks 2
 
 /* %start-doc options "91 Postscript Export"
@@ -185,8 +185,8 @@ Print the contents of the outline layer on each sheet.
 @end ftable
 %end-doc
 */
-  {N_("outline"), N_("Print outline on each sheet"),
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+  {.name = N_("outline"), .help_text = N_("Print outline on each sheet"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_outline 3
 /* %start-doc options "91 Postscript Export"
 @ftable @code
@@ -195,8 +195,8 @@ Print mirror image.
 @end ftable
 %end-doc
 */
-  {N_("mirror"), N_("Print mirror image of every page"),
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("mirror"), .help_text = N_("Print mirror image of every page"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_mirror 4
 
 /* %start-doc options "91 Postscript Export"
@@ -206,8 +206,8 @@ Scale output to make the board fit the page.
 @end ftable
 %end-doc
 */
-  {N_("fill-page"), N_("Scale board to fill page"),
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("fill-page"), .help_text = N_("Scale board to fill page"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_fillpage 5
 
 /* %start-doc options "91 Postscript Export"
@@ -217,8 +217,8 @@ Print mirror image of appropriate layers.
 @end ftable
 %end-doc
 */
-  {N_("auto-mirror"), N_("Print mirror image of appropriate layers"),
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+  {.name = N_("auto-mirror"), .help_text = N_("Print mirror image of appropriate layers"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_automirror 6
 
 /* %start-doc options "91 Postscript Export"
@@ -228,8 +228,8 @@ Postscript output in color.
 @end ftable
 %end-doc
 */
-  {N_("ps-color"), N_("Prints in color"),
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("ps-color"), .help_text = N_("Prints in color"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_color 7
 
 /* %start-doc options "91 Postscript Export"
@@ -240,8 +240,8 @@ Amount to add to trace/pad/pin edges.
 @end ftable
 %end-doc
 */
-  {N_("ps-bloat"), N_("Amount to add to trace/pad/pin edges"),
-   HID_Coord, -MIL_TO_COORD (100), MIL_TO_COORD (100), {0, 0, 0}, 0, 0},
+  {.name = N_("ps-bloat"), .help_text = N_("Amount to add to trace/pad/pin edges"),
+   .type = HID_Coord, .min_val = { .coord_value = -MIL_TO_COORD (100) }, .max_val = { .coord_value = MIL_TO_COORD (100) }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_psbloat 8
 
 /* %start-doc options "91 Postscript Export"
@@ -252,8 +252,8 @@ Draw objects as white-on-black.
 @end ftable
 %end-doc
 */
- {N_("ps-invert"), N_("Draw objects as white-on-black"),
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+ {.name = N_("ps-invert"), .help_text = N_("Draw objects as white-on-black"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_psinvert 9
 
 /* %start-doc options "91 Postscript Export"
@@ -268,8 +268,8 @@ to @samp{A10}, @samp{B0} to @samp{B10}, @samp{Letter}, @samp{11x17},
 @end ftable
 %end-doc
 */
-  {N_("media"), N_("Media type"),
-   HID_Enum, 0, 0, {22, 0, 0}, medias, 0},
+  {.name = N_("media"), .help_text = N_("Media type"),
+   .type = HID_Enum, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 22, .str_value = 0, .real_value = 0}, .enumerations = medias, .value = 0},
 #define HA_media 10
 
 /* %start-doc options "91 Postscript Export"
@@ -280,9 +280,9 @@ Fade amount for assembly drawings (0.0=missing, 1.0=solid).
 @end ftable
 %end-doc
 */
-  {N_("psfade"),
-   N_("Fade amount for assembly drawings (0.0=missing, 1.0=solid)"),
-   HID_Real, 0, 1, {0, 0, 0.40}, 0, 0},
+  {.name = N_("psfade"),
+   .help_text = N_("Fade amount for assembly drawings (0.0=missing, 1.0=solid)"),
+   .type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 1 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0.40}, .enumerations = 0, .value = 0},
 #define HA_psfade 11
 
 /* %start-doc options "91 Postscript Export"
@@ -292,9 +292,9 @@ Scale value to compensate for printer sizing errors (1.0 = full scale).
 @end ftable
 %end-doc
 */
-  {N_("scale"),
-   N_("Scale value to compensate for printer sizing errors (1.0 = full scale)"),
-   HID_Real, 0.01, 4, {0, 0, 1.00}, 0, 0},
+  {.name = N_("scale"),
+   .help_text = N_("Scale value to compensate for printer sizing errors (1.0 = full scale)"),
+   .type = HID_Real, .min_val = { .real_value = 0.01 }, .max_val = { .real_value = 4 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1.00}, .enumerations = 0, .value = 0},
 #define HA_scale 12
 
 /* %start-doc options "91 Postscript Export"
@@ -305,9 +305,9 @@ Produce multiple files, one per page, instead of a single multi page file.
 @end ftable
 %end-doc
 */
-  {N_("multi-file"),
-   N_("Produce multiple files, one per page, instead of a single file"),
-   HID_Boolean, 0, 0, {0, 0, 0.40}, 0, 0},
+  {.name = N_("multi-file"),
+   .help_text = N_("Produce multiple files, one per page, instead of a single file"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0.40}, .enumerations = 0, .value = 0},
 #define HA_multifile 13
 
 /* %start-doc options "91 Postscript Export"
@@ -317,8 +317,8 @@ Paper width. Used for x-Axis calibration.
 @end ftable
 %end-doc
 */
-  {N_("xcalib"), N_("Paper width. Used for x-Axis calibration"),
-   HID_Real, 0, 0, {0, 0, 1.0}, 0, 0},
+  {.name = N_("xcalib"), .help_text = N_("Paper width. Used for x-Axis calibration"),
+   .type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1.0}, .enumerations = 0, .value = 0},
 #define HA_xcalib 14
 
 /* %start-doc options "91 Postscript Export"
@@ -328,8 +328,8 @@ Paper height. Used for y-Axis calibration.
 @end ftable
 %end-doc
 */
-  {N_("ycalib"), N_("Paper height. Used for y-Axis calibration"),
-   HID_Real, 0, 0, {0, 0, 1.0}, 0, 0},
+  {.name = N_("ycalib"), .help_text = N_("Paper height. Used for y-Axis calibration"),
+   .type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1.0}, .enumerations = 0, .value = 0},
 #define HA_ycalib 15
 
 /* %start-doc options "91 Postscript Export"
@@ -339,9 +339,9 @@ Draw drill holes in pins / vias, instead of leaving solid copper.
 @end ftable
 %end-doc
 */
-  {N_("drill-copper"),
-   N_("Draw drill holes in pins / vias, instead of leaving solid copper"),
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+  {.name = N_("drill-copper"),
+   .help_text = N_("Draw drill holes in pins / vias, instead of leaving solid copper"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_drillcopper 16
 
 /* %start-doc options "91 Postscript Export"
@@ -352,8 +352,8 @@ Print file name and scale on printout.
 @end ftable
 %end-doc
 */
-  {N_("show-legend"), N_("Print file name and scale on printout"),
-   HID_Boolean, 0, 0, {1, 0, 0}, 0, 0},
+  {.name = N_("show-legend"), .help_text = N_("Print file name and scale on printout"),
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 1, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_legend 17
 };
 
@@ -1080,12 +1080,14 @@ ps_set_draw_faded (hidGC gc, int faded)
 static void
 use_gc (hidGC gc)
 {
-  static int lastcap = -1;
+  static EndCapStyle lastcap = Trace_Cap;
+  static bool lastcap_valid = false;
   static int lastcolor = -1;
 
   if (gc == NULL)
     {
-      lastcap = lastcolor = -1;
+      lastcap_valid = false;
+      lastcolor = -1;
       return;
     }
   if (gc->me_pointer != &ps_hid)
@@ -1099,7 +1101,7 @@ use_gc (hidGC gc)
                    gc->width + (gc->erase ? -2 : 2) * global.bloat);
       global.linewidth = gc->width;
     }
-  if (lastcap != gc->cap)
+  if (!lastcap_valid || lastcap != gc->cap)
     {
       int c;
       switch (gc->cap)
@@ -1115,6 +1117,7 @@ use_gc (hidGC gc)
 	}
       fprintf (global.f, "%d setlinecap %d setlinejoin\n", c, c);
       lastcap = gc->cap;
+      lastcap_valid = true;
     }
 #define CBLEND(gc) (((gc->r)<<24)|((gc->g)<<16)|((gc->b)<<8)|(gc->faded))
   if (lastcolor != CBLEND (gc))
@@ -1328,6 +1331,7 @@ ps_fill_rect (hidGC gc, Coord x1, Coord y1, Coord x2, Coord y2)
     {
       linewidth = 1000;
       lastcap = Round_Cap;
+      lastcap_valid = true;
       fprintf(f, "1000 setlinewidth 1 setlinecap 1 setlinejoin\n");
       fprintf(f, "%d %d moveto %d %d lineto %d %d lineto %d %d lineto closepath stroke\n",
 	      x1+500-bloat, y1+500-bloat,
@@ -1343,8 +1347,8 @@ ps_fill_rect (hidGC gc, Coord x1, Coord y1, Coord x2, Coord y2)
 }
 
 HID_Attribute ps_calib_attribute_list[] = {
-  {N_("lprcommand"), N_("Command to print"),
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("lprcommand"), .help_text = N_("Command to print"),
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 };
 
 static const char * const calib_lines[] = {

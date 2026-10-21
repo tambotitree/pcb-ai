@@ -183,21 +183,21 @@
 #define NETLIST_LOOP(top) do   {                         \
         Cardinal        n;                                      \
         NetListType *netlist;                                   \
-        for (n = (top)->NetListN-1; n != -1; n--)               \
+        for (n = (top)->NetListN; n-- > 0;)               \
         {                                                       \
                 netlist = &(top)->NetList[n]
 
 #define NET_LOOP(top) do   {                             \
         Cardinal        n;                                      \
         NetType *net;                                           \
-        for (n = (top)->NetN-1; n != -1; n--)                   \
+        for (n = (top)->NetN; n-- > 0;)                   \
         {                                                       \
                 net = &(top)->Net[n]
 
 #define CONNECTION_LOOP(net) do {                         \
         Cardinal        n;                                      \
         ConnectionType *connection;                             \
-        for (n = (net)->ConnectionN-1; n != -1; n--)            \
+        for (n = (net)->ConnectionN; n-- > 0;)            \
         {                                                       \
                 connection = & (net)->Connection[n]
 
@@ -220,7 +220,7 @@
 #define	ELEMENTTEXT_LOOP(element) do { 	\
 	Cardinal	n;				\
 	TextType *text;					\
-	for (n = MAX_ELEMENTNAMES-1; n != -1; n--)	\
+	for (n = MAX_ELEMENTNAMES; n-- > 0;)	\
 	{						\
 		text = &(element)->Name[n]
 
@@ -228,7 +228,7 @@
 #define	ELEMENTNAME_LOOP(element) do	{ 			\
 	Cardinal	n;					\
 	char		*textstring;				\
-	for (n = MAX_ELEMENTNAMES-1; n != -1; n--)		\
+	for (n = MAX_ELEMENTNAMES; n-- > 0;)		\
 	{							\
 		textstring = (element)->Name[n].TextString
 
@@ -299,7 +299,7 @@
 #define	POLYGONPOINT_LOOP(polygon) do	{	\
 	Cardinal			n;		\
 	PointType *point;				\
-	for (n = (polygon)->PointN-1; n != -1; n--)	\
+	for (n = (polygon)->PointN; n-- > 0;)	\
 	{						\
 		point = &(polygon)->Points[n]
 
@@ -314,49 +314,49 @@
 	  PAD_LOOP(element)
 
 #define	ALLLINE_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
 		LINE_LOOP(layer)
 
 #define ALLARC_LOOP(top) do {		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l =0; l < max_copper_layer + SILK_LAYER; l++, layer++)		\
 	{ \
 		ARC_LOOP(layer)
 
 #define	ALLPOLYGON_LOOP(top)	do {		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
 		POLYGON_LOOP(layer)
 
 #define	COPPERLINE_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer; l++, layer++)	\
 	{ \
 		LINE_LOOP(layer)
 
 #define COPPERARC_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l =0; l < max_copper_layer; l++, layer++)		\
 	{ \
 		ARC_LOOP(layer)
 
 #define	COPPERPOLYGON_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer; l++, layer++)	\
 	{ \
 		POLYGON_LOOP(layer)
 
 #define	SILKLINE_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	layer += max_copper_layer + BOTTOM_SILK_LAYER;			\
 	for (l = 0; l < 2; l++, layer++)		\
@@ -364,7 +364,7 @@
 		LINE_LOOP(layer)
 
 #define SILKARC_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	layer += max_copper_layer + BOTTOM_SILK_LAYER;			\
 	for (l = 0; l < 2; l++, layer++)		\
@@ -372,7 +372,7 @@
 		ARC_LOOP(layer)
 
 #define	SILKPOLYGON_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	layer += max_copper_layer + BOTTOM_SILK_LAYER;			\
 	for (l = 0; l < 2; l++, layer++)		\
@@ -380,14 +380,14 @@
 		POLYGON_LOOP(layer)
 
 #define	ALLTEXT_LOOP(top)	do {		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
 		TEXT_LOOP(layer)
 
 #define	VISIBLELINE_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
@@ -395,7 +395,7 @@
 			LINE_LOOP(layer)
 
 #define	VISIBLEARC_LOOP(top) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
@@ -403,7 +403,7 @@
 			ARC_LOOP(layer)
 
 #define	VISIBLETEXT_LOOP(board) do	{		\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (board)->Data->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
@@ -411,7 +411,7 @@
                   if (TEXT_IS_VISIBLE((board), layer, text))
 
 #define	VISIBLEPOLYGON_LOOP(top) do	{	\
-	Cardinal		l;			\
+	int		l;			\
 	LayerType *layer = (top)->Layer;		\
 	for (l = 0; l < max_copper_layer + SILK_LAYER; l++, layer++)	\
 	{ \
@@ -421,21 +421,21 @@
 #define POINTER_LOOP(top) do	{	\
 	Cardinal	n;			\
 	void	**ptr;				\
-	for (n = (top)->PtrN-1; n != -1; n--)	\
+	for (n = (top)->PtrN; n-- > 0;)	\
 	{					\
 		ptr = &(top)->Ptr[n]
 
 #define MENU_LOOP(top)	do {	\
 	Cardinal	l;			\
 	LibraryMenuType *menu;			\
-	for (l = (top)->MenuN-1; l != -1; l--)	\
+	for (l = (top)->MenuN; l-- > 0;)	\
 	{					\
 		menu = &(top)->Menu[l]
 
 #define ENTRY_LOOP(top) do	{	\
 	Cardinal	n;			\
 	LibraryEntryType *entry;		\
-	for (n = (top)->EntryN-1; n != -1; n--)	\
+	for (n = (top)->EntryN; n-- > 0;)	\
 	{					\
 		entry = &(top)->Entry[n]
 
@@ -451,13 +451,13 @@
 		layer = &data->Layer[number];
 
 #define LAYER_LOOP(data, ml) do { \
-        Cardinal n; \
+        int n; \
 	for (n = 0; n < ml; n++) \
 	{ \
 	   LayerType *layer = (&data->Layer[(n)]);
 
 #define LAYER_TYPE_LOOP(data, ml, type) do { \
-        Cardinal n; \
+        int n; \
         for (n = 0; n < ml; n++) { \
           LayerType *layer = (&data->Layer[(n)]); \
           if (layer->Type != (type)) \

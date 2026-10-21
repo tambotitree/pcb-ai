@@ -48,14 +48,14 @@
 #endif
 
 static void
-pinout_close_cb (GtkWidget * widget, GtkWidget *top_window)
+pinout_close_cb (GtkWidget * widget G_GNUC_UNUSED, GtkWidget *top_window)
 {
   gtk_widget_destroy (top_window);
 }
 
 
 void
-ghid_pinout_window_show (GHidPort * out, ElementType * element)
+ghid_pinout_window_show (GHidPort * out G_GNUC_UNUSED, ElementType * element)
 {
   GtkWidget *button, *vbox, *hbox, *preview, *top_window;
   gchar *title;
@@ -71,7 +71,6 @@ ghid_pinout_window_show (GHidPort * out, ElementType * element)
   top_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (top_window), title);
   g_free (title);
-  gtk_window_set_wmclass (GTK_WINDOW (top_window), "PCB_Pinout", "PCB");
   gtk_container_set_border_width (GTK_CONTAINER (top_window), 4);
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
@@ -86,10 +85,10 @@ ghid_pinout_window_show (GHidPort * out, ElementType * element)
 
   gtk_window_resize (GTK_WINDOW (top_window), width + 50, height + 50);
 
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
+  button = gtk_button_new_with_mnemonic (_("_Close"));
   g_signal_connect (G_OBJECT (button), "clicked",
                     G_CALLBACK (pinout_close_cb), top_window);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);

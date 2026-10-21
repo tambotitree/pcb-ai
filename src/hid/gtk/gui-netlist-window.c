@@ -24,7 +24,7 @@
  *
  */
 
-/* 
+/*
  * This file written by Bill Wilson for the PCB Gtk port
  */
 
@@ -123,7 +123,7 @@ static LibraryMenuType *node_selected_net;
    |  contains an allocated array of LibraryMenuType structs.  Each of these
    |  structs represents a net in the netlist and contains an array
    |  of LibraryEntryType structs which represent the nodes connecting to
-   |  the net.  So we have: 
+   |  the net.  So we have:
    |
    |                      Nets              Nodes
    |       LibraryType    LibraryMenuType   LibraryEntryType
@@ -220,7 +220,7 @@ toggle_pin_selected (LibraryEntryType *entry)
 /* Callback when the user clicks on a PCB node in the right node treeview.
  */
 static void
-node_selection_changed_cb (GtkTreeSelection * selection, gpointer data)
+node_selection_changed_cb (GtkTreeSelection * selection, gpointer data G_GNUC_UNUSED)
 {
   GtkTreeIter iter;
   GtkTreeModel *model;
@@ -436,7 +436,7 @@ net_model_create (void)
  */
 static void
 net_selection_double_click_cb (GtkTreeView * treeview, GtkTreePath * path,
-			       GtkTreeViewColumn * col, gpointer data)
+			       GtkTreeViewColumn * col G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   GtkTreeModel *model;
   GtkTreeIter iter;
@@ -473,7 +473,7 @@ net_selection_double_click_cb (GtkTreeView * treeview, GtkTreePath * path,
 /* Called when the user clicks on a net in the left treeview.
  */
 static void
-net_selection_changed_cb (GtkTreeSelection * selection, gpointer data)
+net_selection_changed_cb (GtkTreeSelection * selection, gpointer data G_GNUC_UNUSED)
 {
   GtkTreeIter iter;
   GtkTreeModel *model;
@@ -500,7 +500,7 @@ net_selection_changed_cb (GtkTreeSelection * selection, gpointer data)
 }
 
 static void
-netlist_disable_all_cb (GtkToggleButton * button, gpointer data)
+netlist_disable_all_cb (GtkToggleButton * button, gpointer data G_GNUC_UNUSED)
 {
   GtkTreeIter iter;
   gboolean active = gtk_toggle_button_get_active (button);
@@ -524,7 +524,7 @@ netlist_disable_all_cb (GtkToggleButton * button, gpointer data)
 /* Select on the layout the current net treeview selection
  */
 static void
-netlist_select_cb (GtkWidget * widget, gpointer data)
+netlist_select_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data)
 {
   LibraryEntryType *entry;
   ConnectionType conn;
@@ -551,7 +551,7 @@ netlist_select_cb (GtkWidget * widget, gpointer data)
 }
 
 static void
-netlist_find_cb (GtkWidget * widget, gpointer data)
+netlist_find_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   char *name = NULL;
 
@@ -604,7 +604,7 @@ typedef struct {
 } node_get_node_from_name_state;
 
 static gboolean
-node_get_node_from_name_helper (GtkTreeModel *model, GtkTreePath *path,
+node_get_node_from_name_helper (GtkTreeModel *model G_GNUC_UNUSED, GtkTreePath *path G_GNUC_UNUSED,
                                 GtkTreeIter *iter, gpointer data)
 {
   LibraryMenuType *net;
@@ -661,8 +661,8 @@ node_get_node_from_name (gchar * node_name, LibraryMenuType ** node_net)
 /* ---------- Manage the GUI treeview of the data models -----------
  */
 static gint
-netlist_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev,
-				   gpointer data)
+netlist_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev G_GNUC_UNUSED,
+				   gpointer data G_GNUC_UNUSED)
 {
   GtkAllocation allocation;
 
@@ -674,7 +674,7 @@ netlist_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev,
 }
 
 static void
-netlist_close_cb (GtkWidget * widget, gpointer data)
+netlist_close_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   gtk_widget_destroy (netlist_window);
   selected_net = NULL;
@@ -686,7 +686,7 @@ netlist_close_cb (GtkWidget * widget, gpointer data)
 
 
 static void
-netlist_destroy_cb (GtkWidget * widget, GHidPort * out)
+netlist_destroy_cb (GtkWidget * widget G_GNUC_UNUSED, GHidPort * out G_GNUC_UNUSED)
 {
   selected_net = NULL;
   netlist_window = NULL;
@@ -708,7 +708,6 @@ ghid_netlist_window_create (GHidPort * out)
   g_signal_connect (G_OBJECT (netlist_window), "destroy",
 		    G_CALLBACK (netlist_destroy_cb), out);
   gtk_window_set_title (GTK_WINDOW (netlist_window), _("PCB Netlist"));
-  gtk_window_set_wmclass (GTK_WINDOW (netlist_window), "PCB_Netlist", "PCB");
   g_signal_connect (G_OBJECT (netlist_window), "configure_event",
 		    G_CALLBACK (netlist_window_configure_event_cb), NULL);
   gtk_window_resize (GTK_WINDOW (netlist_window),
@@ -731,7 +730,6 @@ ghid_netlist_window_create (GHidPort * out)
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (net_model),
 					NET_NAME_COLUMN, GTK_SORT_ASCENDING);
 
-  gtk_tree_view_set_rules_hint (treeview, FALSE);
   g_object_set (treeview, "enable-tree-lines", TRUE, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -769,7 +767,6 @@ ghid_netlist_window_create (GHidPort * out)
   treeview = GTK_TREE_VIEW (gtk_tree_view_new ());
   node_treeview = treeview;
 
-  gtk_tree_view_set_rules_hint (treeview, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
   gtk_tree_view_insert_column_with_attributes (treeview, -1, _("Nodes"),
@@ -786,7 +783,8 @@ ghid_netlist_window_create (GHidPort * out)
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   label = gtk_label_new (_("Operations on selected 'Net Name':"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 4);
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
@@ -810,7 +808,7 @@ ghid_netlist_window_create (GHidPort * out)
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (netlist_rip_up_cb), GINT_TO_POINTER (0));
-  
+
   ghid_check_button_connected (vbox, &disable_all_button, FALSE, TRUE, FALSE,
 			       FALSE, 0, netlist_disable_all_cb, NULL,
 			       _("Disable all nets for adding rats"));
@@ -818,10 +816,10 @@ ghid_netlist_window_create (GHidPort * out)
   sep = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start (GTK_BOX (vbox), sep, FALSE, FALSE, 3);
 
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 4);
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
+  button = gtk_button_new_with_mnemonic (_("_Close"));
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (netlist_close_cb), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
@@ -851,7 +849,7 @@ struct ggnfnn_task {
 };
 
 static gboolean
-hunt_named_node (GtkTreeModel *model, GtkTreePath *path,
+hunt_named_node (GtkTreeModel *model, GtkTreePath *path G_GNUC_UNUSED,
                  GtkTreeIter *iter, gpointer data)
 {
   struct ggnfnn_task *task = (struct ggnfnn_task *)data;
@@ -1005,7 +1003,7 @@ ghid_netlist_window_update (gboolean init_nodes)
 }
 
 static gint
-GhidNetlistChanged (int argc, char **argv, Coord x, Coord y)
+GhidNetlistChanged (int argc G_GNUC_UNUSED, char **argv G_GNUC_UNUSED, Coord x G_GNUC_UNUSED, Coord y G_GNUC_UNUSED)
 {
   /* XXX: We get called before the GUI is up when
    *         exporting from the command-line. */
@@ -1032,7 +1030,7 @@ static const char netlistshow_help[] =
 show the window if it isn't already shown.";
 
 static gint
-GhidNetlistShow (int argc, char **argv, Coord x, Coord y)
+GhidNetlistShow (int argc, char **argv, Coord x G_GNUC_UNUSED, Coord y G_GNUC_UNUSED)
 {
   ghid_netlist_window_create (gport);
   if (argc > 0)
@@ -1047,19 +1045,19 @@ static const char netlistpresent_help[] =
 "Presents the netlist window.";
 
 static gint
-GhidNetlistPresent (int argc, char **argv, Coord x, Coord y)
+GhidNetlistPresent (int argc G_GNUC_UNUSED, char **argv G_GNUC_UNUSED, Coord x G_GNUC_UNUSED, Coord y G_GNUC_UNUSED)
 {
   ghid_netlist_window_show (gport, TRUE);
   return 0;
 }
 
 HID_Action ghid_netlist_action_list[] = {
-  {"NetlistChanged", 0, GhidNetlistChanged,
-   netlistchanged_help, netlistchanged_syntax},
-  {"NetlistShow", 0, GhidNetlistShow,
-   netlistshow_help, netlistshow_syntax},
-  {"NetlistPresent", 0, GhidNetlistPresent,
-   netlistpresent_help, netlistpresent_syntax}
+  {.name = "NetlistChanged", .need_coord_msg = 0, .trigger_cb = GhidNetlistChanged,
+   .description = netlistchanged_help, .syntax = netlistchanged_syntax},
+  {.name = "NetlistShow", .need_coord_msg = 0, .trigger_cb = GhidNetlistShow,
+   .description = netlistshow_help, .syntax = netlistshow_syntax},
+  {.name = "NetlistPresent", .need_coord_msg = 0, .trigger_cb = GhidNetlistPresent,
+   .description = netlistpresent_help, .syntax = netlistpresent_syntax}
   ,
 };
 

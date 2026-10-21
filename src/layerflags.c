@@ -219,11 +219,11 @@ ActionSetLayertype (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action layerflags_action_list[] = {
-  {"ListLayertypes", 0, ActionListLayertypes,
-   listlayertypes_help, listlayertypes_syntax}
+  {.name = "ListLayertypes", .need_coord_msg = 0, .trigger_cb = ActionListLayertypes,
+   .description = listlayertypes_help, .syntax = listlayertypes_syntax}
   ,
-  {"SetLayertype", 0, ActionSetLayertype,
-   setlayertype_help, setlayertype_syntax}
+  {.name = "SetLayertype", .need_coord_msg = 0, .trigger_cb = ActionSetLayertype,
+   .description = setlayertype_help, .syntax = setlayertype_syntax}
 };
 
 REGISTER_ACTIONS (layerflags_action_list)

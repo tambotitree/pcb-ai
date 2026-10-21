@@ -72,8 +72,8 @@ Parameter @code{<string>} can include a path.
 @end ftable
 %end-doc
 */
-  {"bomfile", "Name of the BOM output file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "bomfile", .help_text = "Name of the BOM output file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_bomfile 0
 
 /* %start-doc options "80 BOM Creation"
@@ -84,8 +84,8 @@ Parameter @code{<string>} can include a path.
 @end ftable
 %end-doc
 */
-  {"xyfile", "Name of the XY output file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "xyfile", .help_text = "Name of the XY output file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_xyfile 1
 
 /* %start-doc options "80 BOM Creation"
@@ -105,8 +105,8 @@ vendor_part_number
 @end ftable
 %end-doc
 */
-  {"attrs", "Name of the attributes input file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "attrs", .help_text = "Name of the attributes input file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_attrs 2
 
 /* %start-doc options "80 BOM Creation"
@@ -119,12 +119,12 @@ Parameter @code{<unit>} can be @samp{km}, @samp{m}, @samp{cm}, @samp{mm},
 @end ftable
 %end-doc
 */
-  {"xy-unit", "XY units",
-   HID_Unit, 0, 0, {-1, 0, 0}, NULL, 0},
+  {.name = "xy-unit", .help_text = "XY units",
+   .type = HID_Unit, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = -1, .str_value = 0, .real_value = 0}, .enumerations = NULL, .value = 0},
 #define HA_unit 3
 
-  {"xy-in-mm", ATTR_UNDOCUMENTED,
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "xy-in-mm", .help_text = ATTR_UNDOCUMENTED,
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_xymm 4
 };
 
@@ -196,7 +196,7 @@ CleanBOMString (char *in)
       exit (1);
     }
 
-  /* 
+  /*
    * copy over in to out with some character conversions.
    * Go all the way to then end to get the terminating \0
    */
@@ -229,7 +229,7 @@ xyToAngle (double x, double y, bool morethan2pins)
        * 80 to 170 degrees.
        * Pin #1 can be at dead top (e.g. certain PLCCs) or anywhere in the top
        * left.
-       */	    
+       */
       if (d < -100)
         return 90; /* -180 to -100 */
       else if (d < -10)
@@ -380,7 +380,7 @@ print_and_free (FILE *fp, BomList *bom)
 	  free (descr);
 	  free (value);
 	}
-      
+
       while (bom->refdes != NULL)
 	{
 	  if (fp)
@@ -490,7 +490,7 @@ PrintBOM (void)
   int i;
   char fmt[256];
 
-  sprintf(fmt, "%%s,\"%%s\",\"%%s\",%%.2`m%c,%%.2`m%c,%%g,%%s\n", 
+  sprintf(fmt, "%%s,\"%%s\",\"%%s\",%%.2`m%c,%%.2`m%c,%%g,%%s\n",
           xy_unit->printf_code, xy_unit->printf_code);
 
   fp = fopen (xy_filename, "wb");
@@ -601,7 +601,7 @@ PrintBOM (void)
       {
 	centroidx = sumx / (double) pin_cnt;
 	centroidy = sumy / (double) pin_cnt;
-	      
+
 	if (NSTRCMP( AttributeGetFromList (&element->Attributes,"xy-centre"), "origin") == 0 )
 	  {
             x = element->MarkX;
@@ -612,15 +612,15 @@ PrintBOM (void)
             x = centroidx;
             y = centroidy;
 	  }
-	
+
 	fixed_rotation = AttributeGetFromList (&element->Attributes, "xy-fixed-rotation");
 	if (fixed_rotation)
-	  {	
+	  {
             /* The user specified a fixed rotation */
             theta = atof (fixed_rotation);
             found_any_not_at_centroid = 1;
             found_any = 1;
-	  } 
+	  }
 	else
 	  {
             /* Find first reference pin not at the  centroid  */
@@ -681,7 +681,7 @@ PrintBOM (void)
 
  	y = PCB->MaxHeight - y;
 	//pcb_fprintf (fp, "%m+%s,\"%s\",\"%s\",%.2`mS,%.2`mS,%g,%s\n",
-	pcb_fprintf (fp, fmt, name, descr, value, x, y, theta, 
+	pcb_fprintf (fp, fmt, name, descr, value, x, y, theta,
                           FRONT (element) == 1 ? "top" : "bottom");
 	free (name);
 	free (descr);
@@ -743,9 +743,9 @@ bom_do_export (HID_Attr_Val * options)
   if (options[HA_xymm].int_value)
     xy_unit = get_unit_struct ("mm");
   else
-    /* options[HA_unit].int_value gets set to the index of the passed unit 
-     * in the Units structure (pcb-printf.c) by hid_parse_command_line 
-     * (hid/common/hidinit.c), so, this command gets a pointer to the desired 
+    /* options[HA_unit].int_value gets set to the index of the passed unit
+     * in the Units structure (pcb-printf.c) by hid_parse_command_line
+     * (hid/common/hidinit.c), so, this command gets a pointer to the desired
      * unit structure from that list.
      * */
     xy_unit = &(get_unit_list ()[options[HA_unit].int_value]);

@@ -33,6 +33,7 @@
 #endif
 
 #include "gui.h"
+#include "pcb-grid.h"
 #include "hid.h"
 #include "../hidint.h"
 #include "gtkhid.h"
@@ -89,7 +90,7 @@ typedef struct
 {
   HID_Attribute *attributes;
   enum ColorTypes type;
-  GdkColor color;
+  GdkRGBA color;
   gboolean color_is_mapped;
 }
 ConfigColor;
@@ -850,7 +851,7 @@ static GtkWidget *config_window;
    */
 
 static void
-config_command_window_toggle_cb (GtkToggleButton * button, gpointer data)
+config_command_window_toggle_cb (GtkToggleButton * button, gpointer data G_GNUC_UNUSED)
 {
   gboolean active = gtk_toggle_button_get_active (button);
   static gboolean holdoff;
@@ -874,7 +875,7 @@ config_command_window_toggle_cb (GtkToggleButton * button, gpointer data)
 
 
 static void
-config_compact_horizontal_toggle_cb (GtkToggleButton * button, gpointer data)
+config_compact_horizontal_toggle_cb (GtkToggleButton * button, gpointer data G_GNUC_UNUSED)
 {
   gboolean active = gtk_toggle_button_get_active (button);
 
@@ -884,7 +885,7 @@ config_compact_horizontal_toggle_cb (GtkToggleButton * button, gpointer data)
 }
 
 static void
-config_compact_vertical_toggle_cb (GtkToggleButton * button, gpointer data)
+config_compact_vertical_toggle_cb (GtkToggleButton * button, gpointer data G_GNUC_UNUSED)
 {
   gboolean active = gtk_toggle_button_get_active (button);
 
@@ -901,7 +902,7 @@ config_general_toggle_cb (GtkToggleButton * button, void * setting)
 }
 
 static void
-config_backup_spin_button_cb (GtkSpinButton * spin_button, gpointer data)
+config_backup_spin_button_cb (GtkSpinButton * spin_button, gpointer data G_GNUC_UNUSED)
 {
   Settings.BackupInterval = gtk_spin_button_get_value_as_int (spin_button);
   EnableAutosave ();
@@ -909,7 +910,7 @@ config_backup_spin_button_cb (GtkSpinButton * spin_button, gpointer data)
 }
 
 static void
-config_history_spin_button_cb (GtkSpinButton * spin_button, gpointer data)
+config_history_spin_button_cb (GtkSpinButton * spin_button, gpointer data G_GNUC_UNUSED)
 {
   ghidgui->history_size = gtk_spin_button_get_value_as_int (spin_button);
   ghidgui->config_modified = TRUE;
@@ -1062,10 +1063,10 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
 			     4, 2, TRUE, TRUE);
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  table = gtk_table_new (2, 2, FALSE);
+  table = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 6);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 3);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 6);
+  gtk_grid_set_row_spacing (GTK_GRID (table), 3);
 
   new_board_width = PCB->MaxWidth;
   new_board_height = PCB->MaxHeight;
@@ -1087,10 +1088,10 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
 			     4, 2, TRUE, TRUE);
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  table = gtk_table_new (4, 2, FALSE);
+  table = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 6);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 3);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 6);
+  gtk_grid_set_row_spacing (GTK_GRID (table), 3);
 
   ghid_table_spin_button (table, 0, 0, &config_text_spin_button,
 			  Settings.TextScale,
@@ -1105,10 +1106,10 @@ config_sizes_tab_create (GtkWidget * tab_vbox)
 			     4, 2, TRUE, TRUE);
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  table = gtk_table_new (4, 2, FALSE);
+  table = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 6);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 3);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 6);
+  gtk_grid_set_row_spacing (GTK_GRID (table), 3);
 
   ghid_table_coord_entry (table, 0, 0, NULL,
 			  PCB->Bloat, MIN_DRC_VALUE, MAX_DRC_VALUE,
@@ -1188,7 +1189,7 @@ config_increments_tab_create (GtkWidget * tab_vbox)
     }
 
 #define INCR_ENTRY(row, name, family, type, msg)	\
-  gtk_table_attach_defaults (GTK_TABLE (table),	\
+  pcb_grid_attach_expanding (GTK_GRID (table),	\
                              gtk_label_new (name),	\
                              0, 1, row, row + 1);	\
   ghid_table_coord_entry (table, row, 1, NULL,	\
@@ -1198,16 +1199,16 @@ config_increments_tab_create (GtkWidget * tab_vbox)
 			  CE_SMALL, 0, increment_spin_button_cb,	\
 			  &incr_##family->type, FALSE,	\
                           msg)
-  
+
   /* ---- Metric Settings ---- */
   vbox = ghid_category_vbox (config_increments_vbox,
 			     _("Metric Increment Settings"), 4, 2, TRUE, TRUE);
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  table = gtk_table_new (4, 3, FALSE);
+  table = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 6);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 18);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 6);
+  gtk_grid_set_row_spacing (GTK_GRID (table), 18);
 
   INCR_ENTRY (0, _("Grid:"), mm, grid,
               _("For 'g' and '<shift>g' grid change actions"));
@@ -1225,10 +1226,10 @@ config_increments_tab_create (GtkWidget * tab_vbox)
 			     _("Imperial Increment Settings"), 4, 2, TRUE, TRUE);
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  table = gtk_table_new (4, 3, FALSE);
+  table = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (hbox), table, FALSE, FALSE, 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 6);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 18);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 6);
+  gtk_grid_set_row_spacing (GTK_GRID (table), 18);
 
   INCR_ENTRY (0, _("Grid:"), mil, grid,
               _("For 'g' and '<shift>g' grid change actions"));
@@ -1386,7 +1387,8 @@ static gchar *
 make_layer_group_string (LayerGroupType * lg)
 {
   GString *string;
-  gint group, entry, layer;
+  gint group, layer;
+  Cardinal entry;
 
   string = g_string_new ("");
 
@@ -1506,7 +1508,8 @@ config_layers_apply (void)
 static void
 config_layer_group_button_state_update (void)
 {
-  gint g, i;
+  gint g;
+  Cardinal i;
 
   /* Set button active corresponding to layer group state.
    */
@@ -1554,7 +1557,7 @@ ghid_config_groups_changed(void)
   if (config_groups_window)
     gtk_widget_destroy(config_groups_window);
 
-  config_groups_window = scrolled_window = 
+  config_groups_window = scrolled_window =
     gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_set_size_request (scrolled_window, 34, 408);
   gtk_container_set_border_width (GTK_CONTAINER (scrolled_window), 3);
@@ -1564,20 +1567,19 @@ ghid_config_groups_changed(void)
   gtk_widget_show (scrolled_window);
 
 
-  table = gtk_table_new (max_copper_layer + SILK_LAYER + 1,
-                         max_group + 1, FALSE);
+  table = gtk_grid_new ();
   config_groups_table = table;
-  gtk_table_set_row_spacings (GTK_TABLE (table), 3);
-  gtk_scrolled_window_add_with_viewport (
-        GTK_SCROLLED_WINDOW (scrolled_window), table);
+  gtk_grid_set_row_spacing (GTK_GRID (table), 3);
+  gtk_container_add (GTK_CONTAINER (scrolled_window), table);
   gtk_widget_show (table);
 
   layer_groups = PCB->LayerGroups;	/* working copy */
   lg_monitor = &PCB->LayerGroups;	/* So can know if PCB changes on us */
 
   label = gtk_label_new (_("Layer group number: "));
-  gtk_table_attach_defaults (GTK_TABLE (table), label, 0, 1, 0, 1);
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  pcb_grid_attach_expanding (GTK_GRID (table), label, 0, 1, 0, 1);
+  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 
   for (i = 1; i < max_group + 1; ++i)
     {
@@ -1586,7 +1588,7 @@ ghid_config_groups_changed(void)
 	else
 		snprintf (buf, sizeof (buf), "%d", i);
       label = gtk_label_new (buf);
-      gtk_table_attach_defaults (GTK_TABLE (table), label, i, i + 1, 0, 1);
+      pcb_grid_attach_expanding (GTK_GRID (table), label, i, i + 1, 0, 1);
     }
 
   /* Create a row of radio toggle buttons for layer.  So each layer
@@ -1596,10 +1598,10 @@ ghid_config_groups_changed(void)
     {
 	  name = (gchar *) UNKNOWN (PCB->Data->Layer[layer].Name);
 	  row = layer + 1;
- 
+
 	  layer_entry[layer] = gtk_entry_new ();
 	  gtk_entry_set_text (GTK_ENTRY (layer_entry[layer]), name);
-	  gtk_table_attach_defaults (GTK_TABLE (table), layer_entry[layer],
+	  pcb_grid_attach_expanding (GTK_GRID (table), layer_entry[layer],
 				     0, 1, row, row + 1);
 	  g_signal_connect(G_OBJECT(layer_entry[layer]), "activate",
 				G_CALLBACK(layer_name_entry_cb), GINT_TO_POINTER(layer));
@@ -1610,7 +1612,7 @@ ghid_config_groups_changed(void)
 	  button = gtk_radio_button_new (group);
 	  gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (button), TRUE);
 	  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-	  gtk_table_attach_defaults (GTK_TABLE (table), button,
+	  pcb_grid_attach_expanding (GTK_GRID (table), button,
 				     i + 1, i + 2, row, row +1);
 	  g_signal_connect (G_OBJECT (button), "toggled",
 			    G_CALLBACK (config_layer_groups_radio_button_cb),
@@ -1619,7 +1621,7 @@ ghid_config_groups_changed(void)
 	}
     }
 
-  /* silk layers double as special layer groups 'top side' and 'bottom side'. 
+  /* silk layers double as special layer groups 'top side' and 'bottom side'.
     So some special treatment is needed:
     1) top and bottom silk cannot be renamed by the user
     2) The dialog shows the top side buttons above bottom side button row
@@ -1628,35 +1630,37 @@ ghid_config_groups_changed(void)
   layer = top_silk_layer;
   label = gtk_label_new ("Top side: ");
   row = max_copper_layer + 1;
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach_defaults (GTK_TABLE (table), label,
+  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+  pcb_grid_attach_expanding (GTK_GRID (table), label,
 				     0, 1, row, row + 1);
   for (i = 0; i < max_group; ++i)
 	{
 	  button = gtk_radio_button_new (group);
 	  gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (button), TRUE);
 	  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-	  gtk_table_attach_defaults (GTK_TABLE (table), button,
+	  pcb_grid_attach_expanding (GTK_GRID (table), button,
 				     i + 1, i + 2, row, row + 1);
 	  g_signal_connect (G_OBJECT (button), "toggled",
 			    G_CALLBACK (config_layer_groups_radio_button_cb),
 			    GINT_TO_POINTER ((layer << 8) | (i + 1)));
 	  group_button[layer][i] = button;
 	}
-  
+
   group = NULL;
   layer = bottom_silk_layer;
   label = gtk_label_new ("Bottom side: ");
   row = max_copper_layer + 2;
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach_defaults (GTK_TABLE (table), label,
+  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+  pcb_grid_attach_expanding (GTK_GRID (table), label,
 				     0, 1, row, row + 1);
   for (i = 0; i < max_group; ++i)
 	{
 	  button = gtk_radio_button_new (group);
 	  gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (button), TRUE);
 	  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-	  gtk_table_attach_defaults (GTK_TABLE (table), button,
+	  pcb_grid_attach_expanding (GTK_GRID (table), button,
 				     i + 1, i + 2, row, row + 1);
 	  g_signal_connect (G_OBJECT (button), "toggled",
 			    G_CALLBACK (config_layer_groups_radio_button_cb),
@@ -1670,7 +1674,7 @@ ghid_config_groups_changed(void)
 
 
 static void
-edit_layer_button_cb(GtkWidget *widget, gchar *data)
+edit_layer_button_cb(GtkWidget *widget G_GNUC_UNUSED, gchar *data)
 {
 	gchar	**argv;
 
@@ -1686,8 +1690,8 @@ static void
 config_layers_tab_create (GtkWidget * tab_vbox)
 {
   GtkWidget *tabs, *vbox, *vbox1, *button, *text, *sep;
-  GtkWidget *hbox, *arrow;
-  gint i;
+  GtkWidget *hbox;
+  gsize i;
 
   tabs = gtk_notebook_new ();
   gtk_box_pack_start (GTK_BOX (tab_vbox), tabs, TRUE, TRUE, 0);
@@ -1698,25 +1702,21 @@ config_layers_tab_create (GtkWidget * tab_vbox)
 			_("Operations on currently selected layer:"),
 			4, 2, TRUE, TRUE);
 
-  button = gtk_button_new();
-  arrow = gtk_arrow_new(GTK_ARROW_UP, GTK_SHADOW_ETCHED_IN);
-  gtk_container_add(GTK_CONTAINER(button), arrow);
+  button = gtk_button_new_with_mnemonic (_("_Up"));
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"c,up");
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), hbox, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
-  button = gtk_button_new();
-  arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_ETCHED_IN);
-  gtk_container_add(GTK_CONTAINER(button), arrow);
+  button = gtk_button_new_with_mnemonic (_("_Down"));
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"c,down");
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox1), hbox, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
-  button = gtk_button_new_from_stock(GTK_STOCK_DELETE);
+  button = gtk_button_new_with_mnemonic (_("_Delete"));
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"c,-1");
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -1726,7 +1726,7 @@ config_layers_tab_create (GtkWidget * tab_vbox)
   vbox1 = ghid_category_vbox(vbox,
 			_("Add new layer above currently selected layer:"),
 			4, 2, TRUE, TRUE);
-  button = gtk_button_new_from_stock(GTK_STOCK_ADD);
+  button = gtk_button_new_with_mnemonic (_("_Add"));
   g_signal_connect(G_OBJECT(button), (gchar *)"clicked",
 		   G_CALLBACK(edit_layer_button_cb), (gchar *)"-1,c");
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -1738,7 +1738,7 @@ config_layers_tab_create (GtkWidget * tab_vbox)
   config_groups_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_box_pack_start(GTK_BOX(vbox), config_groups_vbox, FALSE, FALSE, 0);
   ghid_config_groups_changed();
-  
+
   sep = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_box_pack_start (GTK_BOX (vbox), sep, FALSE, FALSE, 4);
 
@@ -1754,7 +1754,7 @@ config_layers_tab_create (GtkWidget * tab_vbox)
 
   text = ghid_scrolled_text_view (vbox, NULL,
 				  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  for (i = 0; i < sizeof (layer_info_text) / sizeof (gchar *); ++i)
+  for (i = 0; i < G_N_ELEMENTS (layer_info_text); ++i)
     ghid_text_view_append (text, _(layer_info_text[i]));
 }
 
@@ -1806,7 +1806,7 @@ config_color_file_set_label (void)
 }
 
 static void
-config_color_defaults_cb (gpointer data)
+config_color_defaults_cb (gpointer data G_GNUC_UNUSED)
 {
   GList *list;
   ConfigColor *cc;
@@ -1840,7 +1840,7 @@ config_color_defaults_cb (gpointer data)
 }
 
 static void
-config_color_load_cb (gpointer data)
+config_color_load_cb (gpointer data G_GNUC_UNUSED)
 {
   gchar *path, *dir = g_strdup (color_dir);
 
@@ -1869,7 +1869,7 @@ config_color_load_cb (gpointer data)
 }
 
 static void
-config_color_save_cb (gpointer data)
+config_color_save_cb (gpointer data G_GNUC_UNUSED)
 {
   gchar *name, *path, *dir = g_strdup (color_dir);
 
@@ -1901,11 +1901,11 @@ config_color_save_cb (gpointer data)
 static void
 config_color_set_cb (GtkWidget * button, ConfigColor * cc)
 {
-  GdkColor new_color;
+  GdkRGBA new_color;
   HID_Attribute *ha = cc->attributes;
   gchar *str;
 
-  gtk_color_button_get_color (GTK_COLOR_BUTTON (button), &new_color);
+  gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (button), &new_color);
   str = ghid_get_color_name (&new_color);
   ghid_map_color_string (str, &cc->color);
   *(char **) ha->value = str;
@@ -1935,7 +1935,7 @@ config_color_button_create (GtkWidget * box, ConfigColor * cc)
   cc->color_is_mapped = TRUE;
 
   title = g_strdup_printf (_("PCB %s Color"), ha->name);
-  button = gtk_color_button_new_with_color (&cc->color);
+  button = gtk_color_button_new_with_rgba (&cc->color);
   gtk_color_button_set_title (GTK_COLOR_BUTTON (button), title);
   g_free (title);
 
@@ -2107,7 +2107,7 @@ ghid_config_text_scale_update (void)
 }
 
 static void
-config_close_cb (gpointer data)
+config_close_cb (gpointer data G_GNUC_UNUSED)
 {
   /* Config pages may need to check for modified entries, use as default
      |  options, etc when the config window is closed.
@@ -2128,7 +2128,7 @@ config_close_cb (gpointer data)
 }
 
 static void
-config_destroy_cb (gpointer data)
+config_destroy_cb (gpointer data G_GNUC_UNUSED)
 {
   config_sizes_vbox = NULL;
   config_increments_vbox = NULL;
@@ -2139,7 +2139,7 @@ config_destroy_cb (gpointer data)
 }
 
 static void
-config_selection_changed_cb (GtkTreeSelection * selection, gpointer data)
+config_selection_changed_cb (GtkTreeSelection * selection, gpointer data G_GNUC_UNUSED)
 {
   GtkTreeIter iter;
   GtkTreeModel *model;
@@ -2175,7 +2175,6 @@ ghid_config_window_show (void)
 		    G_CALLBACK (config_destroy_cb), NULL);
 
   gtk_window_set_title (GTK_WINDOW (config_window), _("PCB Preferences"));
-  gtk_window_set_wmclass (GTK_WINDOW (config_window), "Pcb_Conf", "PCB");
   gtk_container_set_border_width (GTK_CONTAINER (config_window), 2);
 
   config_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
@@ -2257,12 +2256,12 @@ ghid_config_window_show (void)
 		    G_CALLBACK (config_selection_changed_cb), NULL);
 
 
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_set_spacing (GTK_BOX (hbox), 5);
   gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
 
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
+  button = gtk_button_new_with_mnemonic (_("_OK"));
   gtk_widget_set_can_default (button, TRUE);
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (config_close_cb), NULL);

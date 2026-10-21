@@ -254,6 +254,7 @@ ghid_trackball_constructor (GType type,
   ball = GHID_TRACKBALL (G_OBJECT_CLASS (ghid_trackball_parent_class)->
     constructor (type, n_construct_properties, construct_properties));
 
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (ball), GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_size_request (GTK_WIDGET (ball), 140, 140);
 
   ball->view_2d = gtk_toggle_button_new_with_label (_("2D View"));
@@ -413,6 +414,14 @@ ghid_trackball_class_init (GhidTrackballClass * klass)
  *
  *  \return the GType identifier associated with GhidTrackball.
  */
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+ghid_trackball_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  ghid_trackball_class_init ((GhidTrackballClass *) klass);
+}
+
 GType
 ghid_trackball_get_type ()
 {
@@ -424,16 +433,17 @@ ghid_trackball_get_type ()
 	sizeof (GhidTrackballClass),
 	NULL,			/* base_init */
 	NULL,			/* base_finalize */
-	(GClassInitFunc) ghid_trackball_class_init,
+	ghid_trackball_class_init_adapter,
 	NULL,			/* class_finalize */
 	NULL,			/* class_data */
 	sizeof (GhidTrackball),
 	0,			/* n_preallocs */
 	NULL,			/* instance_init */
+        NULL /* value_table */
       };
 
       ghid_trackball_type =
-	g_type_register_static (GTK_TYPE_VBOX, "GhidTrackball",
+	g_type_register_static (GTK_TYPE_BOX, "GhidTrackball",
 				&ghid_trackball_info, 0);
     }
 

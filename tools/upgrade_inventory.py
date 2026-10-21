@@ -128,7 +128,14 @@ def main():
   paths = sorted(set(paths) | {'tools/upgrade_inventory.py', 'tools/conversion.py',
     'tools/python_conversion.py', 'tools/autoconf_conversion.py', 'bootstrap.sh',
     'tools/c_conversion.py', 'tools/scheme_conversion.py',
-    'tools/c_signature_conversion.py', 'm4/pcb-macos.m4'})
+    'tools/c_signature_conversion.py', 'm4/pcb-macos.m4',
+    'tools/gtk3_build_conversion.py', 'tools/struct_macro_conversion.py', 'tools/gtk_api_conversion.py',
+    'tools/test_gtk_api_conversion.py', 'tools/timestamp_conversion.py', 'tools/visibility_renderer_conversion.py', 'tools/test_visibility_renderer.py',
+    'tools/test_visibility_renderer.c', 'tools/drawing_conversion.py',
+    'tools/drawing_backend_rules.py', 'tools/drawing_ui_rules.py', 'tools/menu_conversion.py', 'tools/gtype_conversion.py', 'tools/menu_actions_conversion.py', 'tools/selector_actions_conversion.py', 'tools/dialog_layout_conversion.py', 'src/hid/gtk/pcb-grid.h', 'tools/callback_conversion.py', 'tools/pointer_conversion.py', 'src/hid/gtk/pcb-pointer.h', 'tools/hid_initializer_conversion.py', 'tools/hid_bounds_conversion.py', 'tools/hid_flags_conversion.py', 'tools/benchmark_conversion.py', 'tools/combo_conversion.py', 'tools/desktop_hints_conversion.py', 'tools/array_loop_conversion.py', 'tools/dialog_stock_conversion.py', 'tools/reverse_loop_conversion.py', 'tools/layer_loop_conversion.py',
+    'tools/render_cache_conversion.py', 'tools/sentinel_audit.py',
+    'tools/topbar_appearance_conversion.py', 'tools/xpm_stream_conversion.py',
+    'src/hid/gtk/pcb-cairo.h', 'src/hid/gtk/pcb-cairo.c'})
   project_version = read_version((root / 'configure.ac').read_text())
   entries = []
   for path in paths:

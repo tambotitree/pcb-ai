@@ -31,6 +31,7 @@
 #endif
 
 #include "gui.h"
+#include "pcb-pointer.h"
 #include "gtkhid.h"
 #include "hid/common/hid_resource.h"
 
@@ -103,7 +104,7 @@ ghid_port_ranges_scale (void)
 }
 
 
-/* ---------------------------------------------------------------------- 
+/* ----------------------------------------------------------------------
  * handles all events from PCB drawing area
  */
 
@@ -127,8 +128,7 @@ ghid_note_event_location (GdkEventButton * ev)
 
   if (!ev)
     {
-      gdk_window_get_pointer (gtk_widget_get_window (ghid_port.drawing_area),
-                              &event_x, &event_y, NULL);
+      pcb_pointer_query_window (gtk_widget_get_window (ghid_port.drawing_area), &event_x, &event_y, NULL);
     }
   else
     {
@@ -149,7 +149,7 @@ ghid_note_event_location (GdkEventButton * ev)
 }
 
 static gboolean
-ghid_idle_cb (gpointer data)
+ghid_idle_cb (gpointer data G_GNUC_UNUSED)
 {
   if (Settings.Mode == NO_MODE)
     SetMode (ARROW_MODE);
@@ -165,8 +165,8 @@ ghid_idle_cb (gpointer data)
 }
 
 gboolean
-ghid_port_key_release_cb (GtkWidget * drawing_area, GdkEventKey * kev,
-			  gpointer data)
+ghid_port_key_release_cb (GtkWidget * drawing_area G_GNUC_UNUSED, GdkEventKey * kev,
+			  gpointer data G_GNUC_UNUSED)
 {
   gint ksym = kev->keyval;
 
@@ -191,8 +191,8 @@ ghid_port_key_release_cb (GtkWidget * drawing_area, GdkEventKey * kev,
  */
 
 gboolean
-ghid_port_key_press_cb (GtkWidget * drawing_area,
-			GdkEventKey * kev, gpointer data)
+ghid_port_key_press_cb (GtkWidget * drawing_area G_GNUC_UNUSED,
+			GdkEventKey * kev, gpointer data G_GNUC_UNUSED)
 {
   ModifierKeysState mk;
   gint  ksym = kev->keyval;
@@ -209,33 +209,33 @@ ghid_port_key_press_cb (GtkWidget * drawing_area,
   handled = TRUE;		/* Start off assuming we handle it */
   switch (ksym)
     {
-    case GDK_Alt_L:
-    case GDK_Alt_R:
-    case GDK_Control_L:
-    case GDK_Control_R:
-    case GDK_Shift_L:
-    case GDK_Shift_R:
-    case GDK_Shift_Lock:
-    case GDK_ISO_Level3_Shift:
+    case GDK_KEY_Alt_L:
+    case GDK_KEY_Alt_R:
+    case GDK_KEY_Control_L:
+    case GDK_KEY_Control_R:
+    case GDK_KEY_Shift_L:
+    case GDK_KEY_Shift_R:
+    case GDK_KEY_Shift_Lock:
+    case GDK_KEY_ISO_Level3_Shift:
       break;
 
-    case GDK_Up:
+    case GDK_KEY_Up:
       ghid_hotkey_cb (GHID_KEY_UP);
       break;
-      
-    case GDK_Down:
+
+    case GDK_KEY_Down:
       ghid_hotkey_cb (GHID_KEY_DOWN);
       break;
-    case GDK_Left:
+    case GDK_KEY_Left:
       ghid_hotkey_cb (GHID_KEY_LEFT);
       break;
-    case GDK_Right:
+    case GDK_KEY_Right:
       ghid_hotkey_cb (GHID_KEY_RIGHT);
       break;
 
-    case GDK_ISO_Left_Tab: 
-    case GDK_3270_BackTab: 
-      switch (mk) 
+    case GDK_KEY_ISO_Left_Tab:
+    case GDK_KEY_3270_BackTab:
+      switch (mk)
 	{
 	case NONE_PRESSED:
 	  ghid_hotkey_cb (GHID_KEY_SHIFT | GHID_KEY_TAB);
@@ -255,15 +255,15 @@ ghid_port_key_press_cb (GtkWidget * drawing_area,
 	case SHIFT_MOD1_PRESSED:
 	  ghid_hotkey_cb (GHID_KEY_ALT | GHID_KEY_SHIFT | GHID_KEY_TAB);
 	  break;
-	  
+
 	default:
 	  handled = FALSE;
 	  break;
 	}
       break;
 
-    case GDK_Tab: 
-      switch (mk) 
+    case GDK_KEY_Tab:
+      switch (mk)
 	{
 	case NONE_PRESSED:
 	  ghid_hotkey_cb (GHID_KEY_TAB);
@@ -283,7 +283,7 @@ ghid_port_key_press_cb (GtkWidget * drawing_area,
 	case SHIFT_MOD1_PRESSED:
 	  ghid_hotkey_cb (GHID_KEY_ALT | GHID_KEY_SHIFT | GHID_KEY_TAB);
 	  break;
-	  
+
 	default:
 	  handled = FALSE;
 	  break;
@@ -298,8 +298,8 @@ ghid_port_key_press_cb (GtkWidget * drawing_area,
 }
 
 gboolean
-ghid_port_button_press_cb (GtkWidget * drawing_area,
-			   GdkEventButton * ev, gpointer data)
+ghid_port_button_press_cb (GtkWidget * drawing_area G_GNUC_UNUSED,
+			   GdkEventButton * ev, gpointer data G_GNUC_UNUSED)
 {
   ModifierKeysState mk;
   GdkModifierType state;
@@ -323,8 +323,8 @@ ghid_port_button_press_cb (GtkWidget * drawing_area,
 
 
 gboolean
-ghid_port_button_release_cb (GtkWidget * drawing_area,
-			     GdkEventButton * ev, gpointer data)
+ghid_port_button_release_cb (GtkWidget * drawing_area G_GNUC_UNUSED,
+			     GdkEventButton * ev, gpointer data G_GNUC_UNUSED)
 {
   ModifierKeysState mk;
   GdkModifierType state;
@@ -346,46 +346,22 @@ ghid_port_button_release_cb (GtkWidget * drawing_area,
 
 
 gboolean
-ghid_port_drawing_area_configure_event_cb (GtkWidget * widget,
-					   GdkEventConfigure * ev,
-					   GHidPort * out)
+ghid_port_drawing_area_configure_event_cb (GtkWidget *widget,
+                                         GdkEventConfigure *event, GHidPort *port)
 {
-  static gboolean first_time_done;
-
-  gport->width = ev->width;
-  gport->height = ev->height;
-
-  if (gport->pixmap)
-    g_object_unref (gport->pixmap);
-
-  gport->pixmap = gdk_pixmap_new (gtk_widget_get_window (widget),
-				  gport->width, gport->height, -1);
-  gport->drawable = gport->pixmap;
-
-  if (!first_time_done)
-    {
-      gport->colormap = gtk_widget_get_colormap (gport->top_window);
-      if (gdk_color_parse (Settings.BackgroundColor, &gport->bg_color))
-	gdk_color_alloc (gport->colormap, &gport->bg_color);
-      else
-	gdk_color_white (gport->colormap, &gport->bg_color);
-
-      if (gdk_color_parse (Settings.OffLimitColor, &gport->offlimits_color))
-	gdk_color_alloc (gport->colormap, &gport->offlimits_color);
-      else
-	gdk_color_white (gport->colormap, &gport->offlimits_color);
-      first_time_done = TRUE;
-      ghid_drawing_area_configure_hook (out);
-      PCBChanged (0, NULL, 0, 0);
-    }
-  else
-    {
-      ghid_drawing_area_configure_hook (out);
-    }
-
-  ghid_port_ranges_scale ();
-  ghid_invalidate_all ();
-  return 0;
+  static gboolean first;
+  (void) widget;
+  if (event->width <= 0 || event->height <= 0) return FALSE;
+  port->width = event->width; port->height = event->height;
+  if (port->pixmap) cairo_surface_destroy (port->pixmap);
+  port->pixmap = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, port->width, port->height);
+  port->drawable = port->pixmap;
+  ghid_map_color_string (Settings.BackgroundColor, &port->bg_color);
+  ghid_map_color_string (Settings.OffLimitColor, &port->offlimits_color);
+  ghid_drawing_area_configure_hook (port);
+  if (!first) { first = TRUE; PCBChanged (0, NULL, 0, 0); }
+  ghid_port_ranges_scale (); ghid_invalidate_all ();
+  return FALSE;
 }
 
 
@@ -507,7 +483,7 @@ queue_tooltip_update (GHidPort *out)
 }
 
 gint
-ghid_port_window_motion_cb (GtkWidget * widget,
+ghid_port_window_motion_cb (GtkWidget * widget G_GNUC_UNUSED,
 			    GdkEventMotion * ev, GHidPort * out)
 {
   gdouble dx, dy;
@@ -534,14 +510,14 @@ ghid_port_window_motion_cb (GtkWidget * widget,
 }
 
 gint
-ghid_port_window_enter_cb (GtkWidget * widget,
+ghid_port_window_enter_cb (GtkWidget * widget G_GNUC_UNUSED,
 			   GdkEventCrossing * ev, GHidPort * out)
 {
   /* printf("enter: mode: %d detail: %d\n", ev->mode, ev->detail); */
 
   /* See comment in ghid_port_window_leave_cb() */
 
-  if(ev->mode != GDK_CROSSING_NORMAL && ev->detail != GDK_NOTIFY_NONLINEAR) 
+  if(ev->mode != GDK_CROSSING_NORMAL && ev->detail != GDK_NOTIFY_NONLINEAR)
     {
       return FALSE;
     }
@@ -555,9 +531,9 @@ ghid_port_window_enter_cb (GtkWidget * widget,
     }
   ghidgui->in_popup = FALSE;
 
-  /* Following expression is true if a you open a menu from the menu bar, 
-   * move the mouse to the viewport and click on it. This closes the menu 
-   * and moves the pointer to the viewport without the pointer going over 
+  /* Following expression is true if a you open a menu from the menu bar,
+   * move the mouse to the viewport and click on it. This closes the menu
+   * and moves the pointer to the viewport without the pointer going over
    * the edge of the viewport */
   if(ev->mode == GDK_CROSSING_UNGRAB && ev->detail == GDK_NOTIFY_NONLINEAR)
     {
@@ -567,7 +543,7 @@ ghid_port_window_enter_cb (GtkWidget * widget,
 }
 
 gint
-ghid_port_window_leave_cb (GtkWidget * widget, 
+ghid_port_window_leave_cb (GtkWidget * widget G_GNUC_UNUSED,
                            GdkEventCrossing * ev, GHidPort * out)
 {
   /* printf("leave mode: %d detail: %d\n", ev->mode, ev->detail); */
@@ -576,7 +552,7 @@ ghid_port_window_leave_cb (GtkWidget * widget,
    * X applications occasionally grab the focus and so trigger this function.
    * At least GNOME's window manager is known to do this on every mouse click.
    *
-   * See http://bugzilla.gnome.org/show_bug.cgi?id=102209 
+   * See http://bugzilla.gnome.org/show_bug.cgi?id=102209
    */
 
   if(ev->mode != GDK_CROSSING_NORMAL)
@@ -595,8 +571,8 @@ ghid_port_window_leave_cb (GtkWidget * widget,
   /* Mouse scroll wheel events
    */
 gint
-ghid_port_window_mouse_scroll_cb (GtkWidget * widget,
-				  GdkEventScroll * ev, GHidPort * out)
+ghid_port_window_mouse_scroll_cb (GtkWidget * widget G_GNUC_UNUSED,
+				  GdkEventScroll * ev, GHidPort * out G_GNUC_UNUSED)
 {
   ModifierKeysState mk;
   GdkModifierType state;

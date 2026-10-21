@@ -40,7 +40,7 @@ typedef struct _GhidTrackball GhidTrackball;
 
 struct _GhidTrackballClass
 {
-  GtkVBoxClass parent_class;
+  GtkBoxClass parent_class;
 
   void (*rotation_changed) (GhidTrackball *ball, gpointer rotation, gpointer user_data);
   void (*view_2d_changed) (GhidTrackball *ball, gboolean view_2d, gpointer user_data);
@@ -48,7 +48,7 @@ struct _GhidTrackballClass
 
 struct _GhidTrackball
 {
-  GtkVBox parent_instance;
+  GtkBox parent_instance;
 
   GtkWidget *drawing_area;
   GtkWidget *view_2d;

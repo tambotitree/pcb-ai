@@ -55,14 +55,14 @@ struct _GhidDrcViolation
 {
   GObject parent_instance;
   DrcViolationType * v;
-  GdkDrawable *pixmap;
+  cairo_surface_t *pixmap;
 };
 
 
 GType ghid_drc_violation_get_type (void);
 
 GhidDrcViolation *ghid_drc_violation_new (DrcViolationType *violation,
-					  GdkDrawable *pixmap);
+					  cairo_surface_t *pixmap);
 
 
 /*

@@ -593,7 +593,7 @@ make_footprint_hash ()
   for (i=0; i<Library.MenuN; i++)
     {
 #ifdef DEBUG
-  printf("In make_footprint_hash, looking for footprints in %s\n", 
+  printf("In make_footprint_hash, looking for footprints in %s\n",
 	 Library.Menu[i].directory);
 #endif
 
@@ -601,7 +601,7 @@ make_footprint_hash ()
 	{
 	  footprint_hash[num_entries].menu_idx = i;
 	  footprint_hash[num_entries].entry_idx = j;
-	  if (Library.Menu[i].Entry[j].Template == (char *) -1) 
+	  if (Library.Menu[i].Entry[j].Template == (char *) -1)
           /* file */
 	    {
 #ifdef DEBUG
@@ -614,17 +614,17 @@ make_footprint_hash ()
 
 	      if (fp)
 		fp ++;
-	      else 
+	      else
 		fp = Library.Menu[i].Entry[j].AllocatedMemory;
 
 #ifdef DEBUG
 /* 	      printf(" ... found file footprint %s\n",  fp); */
 #endif
-	        
+
 	      footprint_hash[num_entries].footprint = fp;
 	      footprint_hash[num_entries].footprint_allocated = 0;
 	    }
-	  else 
+	  else
           /* m4 */
 	    {
 	      fp = strrchr (Library.Menu[i].Entry[j].Description, '[');
@@ -1370,7 +1370,7 @@ static const char freerotatebuffer_help[] =
   "for one.\n");
 
 /* %start-doc actions FreeRotateBuffer
-   
+
 Rotates the contents of the pastebuffer by an arbitrary angle.  If no
 angle is given, the user is prompted for one.
 
@@ -1647,10 +1647,10 @@ CopyObjectToBuffer (DataType *Destination, DataType *Src,
 /* ---------------------------------------------------------------------- */
 
 HID_Action rotate_action_list[] = {
-  {"FreeRotateBuffer", 0, ActionFreeRotateBuffer,
-   freerotatebuffer_syntax, freerotatebuffer_help},
-  {"LoadFootprint", 0, LoadFootprint,
-   loadfootprint_syntax, loadfootprint_help}
+  {.name = "FreeRotateBuffer", .need_coord_msg = 0, .trigger_cb = ActionFreeRotateBuffer,
+   .description = freerotatebuffer_syntax, .syntax = freerotatebuffer_help},
+  {.name = "LoadFootprint", .need_coord_msg = 0, .trigger_cb = LoadFootprint,
+   .description = loadfootprint_syntax, .syntax = loadfootprint_help}
 };
 
 REGISTER_ACTIONS (rotate_action_list)

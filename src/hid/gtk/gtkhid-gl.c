@@ -594,7 +594,7 @@ ghid_fill_pcb_polygon (hidGC gc, PolygonType *poly, const BoxType *clip_box)
   ghid_set_alpha_mult (gc, 1.0);
 }
 
-/* 
+/*
  * TODO: remove at next major revision
  * This funciton was initially used to override the common function so that the
  * hidgl HID would fill the thin-drawn polygons using transparency. Due to the
@@ -602,7 +602,7 @@ ghid_fill_pcb_polygon (hidGC gc, PolygonType *poly, const BoxType *clip_box)
  * ones. As a result, in order to correctly draw objects in thin-draw mode, the
  * drawing of objects and polygon outlines must be done first, prior to drawing
  * the fill.
- * 
+ *
  * The call to the common thindraw_pcb_polygon has been restored, and a second
  * polygon draw phase has been added. The first phase only draws the outlines of
  * the polygons and the second phase now draws the fill.
@@ -640,7 +640,7 @@ ghid_invalidate_all ()
   ghid_draw_area_update (gport, NULL);
 
   if (elapsed > MAX_ELAPSED)
-    gdk_window_process_all_updates ();
+    gtk_widget_queue_draw (gport->drawing_area);
 }
 
 void

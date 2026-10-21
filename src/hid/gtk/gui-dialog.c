@@ -53,8 +53,8 @@ ghid_dialog_input (const char * prompt, const char * initial)
   dialog = gtk_dialog_new_with_buttons (_("PCB User Input"),
 					GTK_WINDOW (out->top_window),
 					GTK_DIALOG_MODAL,
-					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
+					_("_Cancel"), GTK_RESPONSE_CANCEL,
+					_("_OK"), GTK_RESPONSE_OK, NULL);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
@@ -118,8 +118,8 @@ ghid_dialog_confirm_all (gchar * all_message)
 					GTK_WINDOW (out->top_window),
 					(GtkDialogFlags)(GTK_DIALOG_MODAL |
 							 GTK_DIALOG_DESTROY_WITH_PARENT),
-					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK, GTK_RESPONSE_OK,
+					_("_Cancel"), GTK_RESPONSE_CANCEL,
+					_("_OK"), GTK_RESPONSE_OK,
 					_("Sequence OK"),
 					GUI_DIALOG_RESPONSE_ALL, NULL);
 
@@ -177,7 +177,7 @@ ghid_dialog_confirm (gchar * message, gchar * cancelmsg, gchar * okmsg)
 				   GTK_MESSAGE_QUESTION,
 				   GTK_BUTTONS_NONE,
 				   "%s", message);
-  gtk_dialog_add_buttons (GTK_DIALOG (dialog), 
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
 			  cancelmsg, GTK_RESPONSE_CANCEL,
 			  okmsg, GTK_RESPONSE_OK,
 			  NULL);
@@ -227,17 +227,12 @@ ghid_dialog_close_confirm ()
   gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (dialog), str);
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
                           _("Close _without saving"), GTK_RESPONSE_NO,
-                          GTK_STOCK_CANCEL,          GTK_RESPONSE_CANCEL,
-                          GTK_STOCK_SAVE,            GTK_RESPONSE_YES,
+                          _("_Cancel"),          GTK_RESPONSE_CANCEL,
+                          _("_Save"),            GTK_RESPONSE_YES,
                           NULL);
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_YES);
 
-  /* Set the alternative button order (ok, cancel, help) for other systems */
-  gtk_dialog_set_alternative_button_order(GTK_DIALOG(dialog),
-                                          GTK_RESPONSE_YES,
-                                          GTK_RESPONSE_NO,
-                                          GTK_RESPONSE_CANCEL,
-                                          -1);
+
 
   switch (gtk_dialog_run (GTK_DIALOG (dialog)))
     {
@@ -275,8 +270,8 @@ ghid_dialog_file_select_open (gchar * title, gchar ** path, gchar * shortcuts)
   dialog = gtk_file_chooser_dialog_new (title,
 					GTK_WINDOW (out->top_window),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
-					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK, GTK_RESPONSE_OK,
+					_("_Cancel"), GTK_RESPONSE_CANCEL,
+					_("_OK"), GTK_RESPONSE_OK,
 					NULL);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
@@ -383,8 +378,8 @@ ghid_dialog_file_select_multiple(gchar * title, gchar ** path, gchar * shortcuts
   dialog = gtk_file_chooser_dialog_new (title,
 					GTK_WINDOW (out->top_window),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
-					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK, GTK_RESPONSE_OK,
+					_("_Cancel"), GTK_RESPONSE_CANCEL,
+					_("_OK"), GTK_RESPONSE_OK,
 					NULL);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
@@ -465,8 +460,8 @@ ghid_dialog_file_select_save (gchar * title, gchar ** path, gchar * file,
   dialog = gtk_file_chooser_dialog_new (title,
 					GTK_WINDOW (out->top_window),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
-					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK, GTK_RESPONSE_OK,
+					_("_Cancel"), GTK_RESPONSE_CANCEL,
+					_("_OK"), GTK_RESPONSE_OK,
 					NULL);
 
   gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog),
@@ -526,13 +521,13 @@ ghid_dialog_file_select_save (gchar * title, gchar ** path, gchar * file,
 #define NHIST 8
 typedef struct ghid_file_history_struct
 {
-  /* 
+  /*
    * an identifier as to which recent files pool this is.  For example
    * "boards", "eco", "netlists", etc.
    */
   char * id;
 
-  /* 
+  /*
    * the array of files or directories
    */
   char * history[NHIST];
@@ -544,8 +539,8 @@ static ghid_file_history * recent_dirs = NULL;
 /* ---------------------------------------------- */
 /* Caller must g_free() the returned filename. */
 gchar *
-ghid_fileselect (const char *title, const char *descr,
-                 char *default_file, char *default_ext,
+ghid_fileselect (const char *title, const char *descr G_GNUC_UNUSED,
+                 char *default_file, char *default_ext G_GNUC_UNUSED,
 		 const char *history_tag, int flags)
 {
   GtkWidget *dialog;
@@ -557,7 +552,7 @@ ghid_fileselect (const char *title, const char *descr,
 
   if (history_tag && *history_tag)
     {
-      /* 
+      /*
        * I used a simple linear search here because the number of
        * entries in the array is likely to be quite small (5, maybe 10 at
        * the absolute most) and this function is used when pulling up
@@ -571,7 +566,7 @@ ghid_fileselect (const char *title, const char *descr,
 	{
 	  history_pool++;
 	}
-      
+
       /*
        * If we counted all the way to n_recent_dirs, that means we
        * didn't find our entry
@@ -580,7 +575,7 @@ ghid_fileselect (const char *title, const char *descr,
 	{
 	  n_recent_dirs++;
 
-	  recent_dirs = (ghid_file_history *)realloc (recent_dirs, 
+	  recent_dirs = (ghid_file_history *)realloc (recent_dirs,
 				  n_recent_dirs * sizeof (ghid_file_history));
 
 	  if (recent_dirs == NULL)
@@ -588,7 +583,7 @@ ghid_fileselect (const char *title, const char *descr,
 	      fprintf (stderr, "%s():  realloc failed\n", __FUNCTION__);
 	      exit (1);
 	    }
-	  
+
 	  recent_dirs[history_pool].id = strdup (history_tag);
 
 	  /* Initialize the entries in our history list to all be NULL */
@@ -607,11 +602,11 @@ ghid_fileselect (const char *title, const char *descr,
 
   dialog = gtk_file_chooser_dialog_new (title,
 					GTK_WINDOW (out->top_window),
-					(flags & HID_FILESELECT_READ) ? 
-					GTK_FILE_CHOOSER_ACTION_OPEN : 
+					(flags & HID_FILESELECT_READ) ?
+					GTK_FILE_CHOOSER_ACTION_OPEN :
 					GTK_FILE_CHOOSER_ACTION_SAVE,
-					GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OK, GTK_RESPONSE_OK,
+					_("_Cancel"), GTK_RESPONSE_CANCEL,
+					_("_OK"), GTK_RESPONSE_OK,
 					NULL);
 
   gtk_dialog_set_default_response (GTK_DIALOG (dialog), GTK_RESPONSE_OK);
@@ -642,7 +637,7 @@ ghid_fileselect (const char *title, const char *descr,
   for (i = 0; i < NHIST && recent_dirs[history_pool].history[i] != NULL ; i++)
     {
       gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (dialog),
-					    recent_dirs[history_pool].history[i], 
+					    recent_dirs[history_pool].history[i],
 					    NULL);
     }
 
@@ -660,7 +655,7 @@ ghid_fileselect (const char *title, const char *descr,
 	  char *tmps, *tmps2;
 	  int k = 0;
 
-	  /* 
+	  /*
 	   * Put this at the top of the list and bump everything else
 	   * down but skip any old entry of this directory
 	   *
@@ -682,7 +677,7 @@ ghid_fileselect (const char *title, const char *descr,
 		{
 		  k++;
 		}
-		     
+
 	      if (i + k < NHIST)
 		tmps2 = recent_dirs[history_pool].history[i + k];
 	      else
@@ -695,7 +690,7 @@ ghid_fileselect (const char *title, const char *descr,
 	      tmps = tmps2;
 	    }
 
-	  /* 
+	  /*
 	   * the last one has fallen off the end of the history list
 	   * so we need to free() it.
 	   */
@@ -704,7 +699,7 @@ ghid_fileselect (const char *title, const char *descr,
 	      free (tmps);
 	    }
 	}
-      
+
 #ifdef DEBUG
       printf ("\n\n-----\n\n");
       for (i = 0 ; i < NHIST ; i++)
@@ -721,4 +716,3 @@ ghid_fileselect (const char *title, const char *descr,
 
   return result;
 }
-

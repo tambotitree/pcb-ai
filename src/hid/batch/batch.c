@@ -125,7 +125,7 @@ info (int argc, char **argv, Coord x, Coord y)
   bottom_group = GetLayerGroupNumberBySide (BOTTOM_SIDE);
   for (i=0; i<MAX_LAYER; i++)
     {
-      
+
       int lg = GetLayerGroupNumberByNumber (i);
       for (j = 0; j < MAX_GROUP; j++)
 	putchar(j==lg ? '#' : '-');
@@ -137,14 +137,14 @@ info (int argc, char **argv, Coord x, Coord y)
 
 
 HID_Action batch_action_list[] = {
-  {"PCBChanged", 0, PCBChanged },
-  {"RouteStylesChanged", 0, nop },
-  {"NetlistChanged", 0, nop },
-  {"LayersChanged", 0, nop },
-  {"LibraryChanged", 0, nop },
-  {"Busy", 0, nop },
-  {"Help", 0, help },
-  {"Info", 0, info }
+  {.name = "PCBChanged", .need_coord_msg = 0, .trigger_cb = PCBChanged },
+  {.name = "RouteStylesChanged", .need_coord_msg = 0, .trigger_cb = nop },
+  {.name = "NetlistChanged", .need_coord_msg = 0, .trigger_cb = nop },
+  {.name = "LayersChanged", .need_coord_msg = 0, .trigger_cb = nop },
+  {.name = "LibraryChanged", .need_coord_msg = 0, .trigger_cb = nop },
+  {.name = "Busy", .need_coord_msg = 0, .trigger_cb = nop },
+  {.name = "Help", .need_coord_msg = 0, .trigger_cb = help },
+  {.name = "Info", .need_coord_msg = 0, .trigger_cb = info }
 };
 
 REGISTER_ACTIONS (batch_action_list)

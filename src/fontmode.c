@@ -256,15 +256,15 @@ FontSave (int argc, char **argv, Coord Ux, Coord Uy)
     }
 
   SetFontInfo (font);
-  
+
   return 0;
 }
 
 HID_Action fontmode_action_list[] = {
-  {"FontEdit", 0, FontEdit,
-   fontedit_help, fontedit_syntax},
-  {"FontSave", 0, FontSave,
-   fontsave_help, fontsave_syntax}
+  {.name = "FontEdit", .need_coord_msg = 0, .trigger_cb = FontEdit,
+   .description = fontedit_help, .syntax = fontedit_syntax},
+  {.name = "FontSave", .need_coord_msg = 0, .trigger_cb = FontSave,
+   .description = fontsave_help, .syntax = fontsave_syntax}
 };
 
 REGISTER_ACTIONS (fontmode_action_list)

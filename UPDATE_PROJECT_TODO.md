@@ -24,6 +24,42 @@ The adapted `bootstrap.sh` has not been added.
 
 ## Working discipline
 
+- Current priority: obtain a compiled GTK executable, however rough. Defer broad
+  cleanup that does not block that build. When touching a directory or function,
+  consult `upgrade_data/sentinel_candidates.json` and
+  `upgrade_data/signedness_candidates.json`, review relevant entries and update
+  their status/notes. These audit lists are follow-up queues, not release gates.
+
+- Counts and indices use appropriate numeric types; named states use enums and
+  two-valued conditions use bool. A cache value retains its domain type and uses
+  explicit validity instead of an out-of-domain numeric sentinel. Audit -1 uses
+  systematically, preserving documented error contracts and real arithmetic.
+
+- Optional desktop integration is outside the application scope. Remove legacy
+  window-manager class, pager and taskbar policy hints; retain application-owned
+  titles, dialog parents, modality and input/rendering behavior. Use bundled
+  assets rather than desktop theme dependencies as icon consumers are migrated.
+
+### Build-stop conversion cycle (agreed 2026-10-20)
+
+The next coordinated work set is documented in
+[`upgrade_data/menu_migration_scope.md`](upgrade_data/menu_migration_scope.md),
+including C sources, headers, callers and menu resource definitions.
+
+1. Capture the compiler failure and identify the underlying migration pattern.
+2. Search the entire PCB-ai source tree with `rg`, listing all matching cases.
+3. Add a reviewed rule to an existing Python converter, or create a dedicated
+   converter when the pattern needs coordinated declarations and bodies.
+4. Preview the complete diff, then apply the conversion to every confirmed
+   instance across the project. Flag ambiguous cases instead of guessing;
+   callback parameters and return types must match the actual signal contract.
+5. Rebuild, record the compiled artifacts and next blocker, and repeat.
+
+Compilation is the immediate acceptance target. Avoid unrelated UI redesigns
+or rendering experiments during these cycles. Converters remain one-time
+migration tools, never bootstrap or normal build dependencies. A temporary
+warning exemption is recorded debt, not a completed API conversion.
+
 - Initial verified platform: Apple Silicon macOS.
 - Preserve upstream history, licenses and author credits.
 - Target GTK3 and modern installed tools. Use Python 3 or Guile 3 only where
@@ -317,3 +353,55 @@ repeatable conversion tools/inventory, typed GTS signatures, initial GTK
 constructor conversion, and successful batch/connectivity/PostScript/PDF smoke
 checks. GUI migration, physical footprints, toner-transfer mirroring and printer
 scale remain unverified. No conventional release tarball has been tested.
+
+### 2026-10-20 — GUI refactor list
+
+Added `GUI_REFACTOR_TODO.md`, based on the actual gschem action, icon,
+appearance and rendering repairs. It preserves PCB's existing C action/HID
+interfaces and resource menus. Next proposed work is a separate GTK3 build
+boundary; the initial rendering-backend choice needs discussion before porting.
+
+Maintainer direction: automate repeated GUI migrations with separate Python
+conversion scripts driven by the inventory. Add and validate a rule first;
+preview/apply/compile and record hashes/results rather than hand-editing each
+occurrence. GUI_REFACTOR_TODO.md now includes the automation passes and gates.
+
+### 2026-10-20 — GUI cycle 1
+
+Experimental GTK3 build configuration established with a dedicated Python
+converter; preview, apply, idempotence, bootstrap and configure checks passed.
+Compiler now reaches GTK GUI sources and stops at removed GTK2 types in gui.h.
+See GUI_REFACTOR_TODO.md for the bounded next pass. No GUI executable yet.
+
+### 2026-10-20 — GTK cycle 2: strict warnings
+
+Scoped -Wall/-Wextra/-Werror/-Wpedantic to libgtk.a. The first automated cleanup
+normalized a shared object-field macro terminator; layout-preservation and
+idempotence checks passed. Build diagnostics now point at GTK/GLib deprecations,
+removed types and unused callback parameters. Details in GUI_REFACTOR_TODO.md.
+
+### 2026-10-20 — GTK cycle 3: rule table
+
+Table-driven GTK API converter added and applied for adjustment fields, dialog
+object casts and scrollbar constructors. Four tests pass; GtkObject field error
+cleared. Lifetime-sensitive API changes are reported for new coordinated rules.
+
+### 2026-10-20 — GTK cycle 4: timestamps cleared
+
+Followed gschem's timespec/stat approach with a coordinated one-time Python
+conversion. Strict build clears GTimeVal; actual converted-function behavior
+checks passed. Current platform selects st_mtimespec. Windows debt is deferred.
+Maintainer policy: conversions are one-time migrations, not recurring build or
+regeneration steps; converted production code becomes the source of truth.
+
+GTK conversion evidence now lives in upgrade_data/gtk_api_migrations.json: both
+compiler suggestions and concrete gschem implementations are recorded. Next
+coordinated rule can port the visibility cell renderer using GTK-provided Cairo.
+
+### 2026-10-20 — GTK cycle 5: visibility renderer passed
+
+Applied the coordinated one-time renderer conversion. Its production object
+builds with strict flags. Standalone GTK checks pass for rendering variants,
+clipping/Cairo preservation, color fallback, toggle signal and finalization.
+The shared drawing-header blockers remain in the next object. See the GUI list
+and API table for the rule, precedent and validation details.

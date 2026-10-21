@@ -63,10 +63,10 @@ FillDrill (DrillType *Drill, ElementType *Element, PinType *Pin)
   if (Element)
     {
       Drill->PinCount++;
-      for (n = Drill->ElementN - 1; n != -1; n--)
+      for (n = Drill->ElementN; n-- > 0;)
 	if (Drill->Element[n] == Element)
 	  break;
-      if (n == -1)
+      if (n >= Drill->ElementN)
 	{
 	  ptr = GetDrillElementMemory (Drill);
 	  *ptr = Element;

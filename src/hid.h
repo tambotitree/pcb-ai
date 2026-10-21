@@ -238,6 +238,14 @@ extern "C"
       HID_Unit, HID_Coord
     };
 
+  /* Bounds use the same numeric category as the attribute's default value. */
+  typedef union
+  {
+    int int_value;
+    double real_value;
+    Coord coord_value;
+  } HID_Attr_Bound;
+
   typedef struct
   {
     char *name;
@@ -245,8 +253,8 @@ extern "C"
     char *help_text;
       /*!< If the help_text is this, usage() won't show this option */
     enum hids type;
-    int min_val; /*!< For integer and real */
-    int max_val; /*!< For integer and real */
+    HID_Attr_Bound min_val; /*!< Member selected by attribute type. */
+    HID_Attr_Bound max_val; /*!< Member selected by attribute type. */
     HID_Attr_Val default_val; /*!< Also actual value for global attributes. */
     const char **enumerations;
     void *value;
@@ -331,7 +339,7 @@ typedef enum
 {
   PCB_WATCH_READABLE = 1 << 0, /*!< As in POLLIN */
   PCB_WATCH_WRITABLE = 1 << 1, /*!< As in POLLOUT */
-  PCB_WATCH_ERROR    = 1 << 2, /*!< As in POLLERR */ 
+  PCB_WATCH_ERROR    = 1 << 2, /*!< As in POLLERR */
   PCB_WATCH_HANGUP   = 1 << 3  /*!< As in POLLHUP */
 } PCBWatchFlags;
 
@@ -373,14 +381,14 @@ typedef enum
     const char *description;
       /*!< Likewise, but allowed to be longer and more descriptive. */
 
-    char gui:1;
+    unsigned char gui:1;
       /*!< If set, this is the GUI HID.
        *
        * Exactly one of these three flags must be set; setting "gui"
        * lets the expose callback optimize and coordinate itself.
        */
 
-    char printer:1;
+    unsigned char printer:1;
       /*!< If set, this is the printer-class HID.
        *
        * The common part of PCB may use this to do command-line printing,
@@ -388,19 +396,19 @@ typedef enum
        * Only one printer HID is normally defined at a time.
        */
 
-    char exporter:1;
+    unsigned char exporter:1;
       /*!< If set, this HID provides an export option, and should be
        * used as part of the File->Export menu option.
        *
        * Examples are PNG, Gerber, and EPS exporters.
        */
 
-    char poly_before:1;
+    unsigned char poly_before:1;
       /*!< If set, the redraw code will draw polygons before erasing the
        * clearances.
        */
 
-    char poly_after:1;
+    unsigned char poly_after:1;
       /*!< If set, the redraw code will draw polygons after erasing the
        * clearances.
        *

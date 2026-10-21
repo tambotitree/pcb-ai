@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Icons compiled directly into the gschem binary.
+
+  The files are laid out exactly as the hicolor icon theme expects
+  (<size>x<size>/<category>/<name>.png), so that the single runtime call
+  gtk_icon_theme_add_resource_path("/org/geda/pcb/icons") makes them
+  visible to ordinary gtk_image_new_from_icon_name() lookups.
+
+  The names deliberately keep the historical "gtk-*" stock IDs used by
+  gschem/src/actions.c, so the action table needs no renaming.
+
+  To add an icon: drop the PNG in the matching directory and add a <file>
+  line below.  There is no separate install step and no theme cache.
+
+  The list below is generated from the contents of 16x16/actions/; keep
+  it sorted so that it stays diffable.  Both families of names live
+  here:
+
+    gEDA action icons   insert-net, select, clone, ...  where gEDA has
+                        its own artwork (most actions) that artwork wins
+    gtk-* stock IDs     icons for actions gEDA never drew; those come
+                        from Google Material Symbols (Apache-2.0), see
+                        fetch-material-icons.sh and the README.
+-->
+<gresources>
+  <gresource prefix="/org/geda/pcb/icons">
+    <file>16x16/actions/attribute-attach.png</file>
+    <file>16x16/actions/attribute-detach.png</file>
+    <file>16x16/actions/attribute-show-both.png</file>
+    <file>16x16/actions/attribute-show-name.png</file>
+    <file>16x16/actions/attribute-show-value.png</file>
+    <file>16x16/actions/clone.png</file>
+    <file>16x16/actions/deselect.png</file>
+    <file>16x16/actions/gtk-about.png</file>
+    <file>16x16/actions/gtk-cancel.png</file>
+    <file>16x16/actions/gtk-close.png</file>
+    <file>16x16/actions/gtk-copy.png</file>
+    <file>16x16/actions/gtk-cut.png</file>
+    <file>16x16/actions/gtk-delete.png</file>
+    <file>16x16/actions/gtk-edit.png</file>
+    <file>16x16/actions/gtk-enable-accels.png</file>
+    <file>16x16/actions/gtk-execute.png</file>
+    <file>16x16/actions/gtk-find.png</file>
+    <file>16x16/actions/gtk-go-back.png</file>
+    <file>16x16/actions/gtk-go-down.png</file>
+    <file>16x16/actions/gtk-go-forward.png</file>
+    <file>16x16/actions/gtk-go-up.png</file>
+    <file>16x16/actions/gtk-goto-bottom.png</file>
+    <file>16x16/actions/gtk-new.png</file>
+    <file>16x16/actions/gtk-ok.png</file>
+    <file>16x16/actions/gtk-open.png</file>
+    <file>16x16/actions/gtk-paste.png</file>
+    <file>16x16/actions/gtk-preferences.png</file>
+    <file>16x16/actions/gtk-print.png</file>
+    <file>16x16/actions/gtk-properties.png</file>
+    <file>16x16/actions/gtk-quit.png</file>
+    <file>16x16/actions/gtk-redo.png</file>
+    <file>16x16/actions/gtk-refresh.png</file>
+    <file>16x16/actions/gtk-revert-to-saved.png</file>
+    <file>16x16/actions/gtk-save-as.png</file>
+    <file>16x16/actions/gtk-save.png</file>
+    <file>16x16/actions/gtk-select-all.png</file>
+    <file>16x16/actions/gtk-undo.png</file>
+    <file>16x16/actions/gtk-zoom-fit.png</file>
+    <file>16x16/actions/gtk-zoom-in.png</file>
+    <file>16x16/actions/gtk-zoom-out.png</file>
+    <file>16x16/actions/insert-arc.png</file>
+    <file>16x16/actions/insert-attribute.png</file>
+    <file>16x16/actions/insert-box.png</file>
+    <file>16x16/actions/insert-bus.png</file>
+    <file>16x16/actions/insert-circle.png</file>
+    <file>16x16/actions/insert-line.png</file>
+    <file>16x16/actions/insert-net.png</file>
+    <file>16x16/actions/insert-path.png</file>
+    <file>16x16/actions/insert-pin.png</file>
+    <file>16x16/actions/insert-symbol.png</file>
+    <file>16x16/actions/insert-text.png</file>
+    <file>16x16/actions/multi-clone.png</file>
+    <file>16x16/actions/select.png</file>
+    <file>16x16/actions/symbol-datasheet.png</file>
+    <!-- GTK 3 names used by the current dialog and dockable callbacks. -->
+    <file alias="16x16/actions/document-new.png">16x16/actions/gtk-new.png</file>
+    <file alias="16x16/actions/document-open.png">16x16/actions/gtk-open.png</file>
+    <file alias="16x16/actions/document-revert.png">16x16/actions/gtk-revert-to-saved.png</file>
+    <file alias="16x16/actions/document-save.png">16x16/actions/gtk-save.png</file>
+    <file alias="16x16/actions/document-save-as.png">16x16/actions/gtk-save-as.png</file>
+    <file alias="16x16/actions/edit-clear.png">16x16/actions/gtk-delete.png</file>
+    <file alias="16x16/actions/preferences-desktop-keyboard-shortcuts.png">16x16/actions/gtk-enable-accels.png</file>
+    <file alias="16x16/actions/view-refresh.png">16x16/actions/gtk-refresh.png</file>
+    <!-- Original gEDA mirror/rotation artwork, retained at native size. -->
+    <file>24x24/actions/object-flip-horizontal.xpm</file>
+    <file>24x24/actions/object-rotate-left.xpm</file>
+    <!-- Project SVG artwork for the remaining action names. -->
+    <file alias="24x24/actions/insert-image.svg">scalable/actions/insert-image.svg</file>
+    <file alias="24x24/actions/window-new.svg">scalable/actions/window-new.svg</file>
+    <file alias="applications-science.png">48x48/apps/geda-gschem.png</file>
+    <file alias="applications-science-ltr.png">48x48/apps/geda-gschem.png</file>
+    <file alias="applications-science-rtl.png">48x48/apps/geda-gschem.png</file>
+    <file alias="geda-gschem.png">48x48/apps/geda-gschem.png</file>
+    <!-- Scheme-defined documentation actions and GTK directional lookups. -->
+    <file alias="24x24/actions/help-browser.svg">scalable/actions/help-browser.svg</file>
+    <file alias="24x24/actions/help-browser-ltr.svg">scalable/actions/help-browser.svg</file>
+    <file alias="24x24/actions/help-browser-rtl.svg">scalable/actions/help-browser.svg</file>
+    <file alias="24x24/actions/gtk-help.svg">scalable/actions/help-browser.svg</file>
+    <file alias="24x24/actions/help-faq.svg">scalable/actions/help-browser.svg</file>
+    <file alias="24x24/actions/web-browser.svg">scalable/actions/web-browser.svg</file>
+    <file alias="16x16/actions/accessories-text-editor.png">16x16/actions/gtk-edit.png</file>
+  </gresource>
+</gresources>

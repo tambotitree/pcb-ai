@@ -104,7 +104,7 @@ relocate (int argc, char **argv, Coord x, Coord y)
 
 static HID_Action relocate_action_list[] =
 {
-  { "Relocate", NULL, relocate, NULL, NULL}
+  { .name = "Relocate", .need_coord_msg = NULL, .trigger_cb = relocate, .description = NULL, .syntax = NULL}
 };
 
 REGISTER_ACTIONS(relocate_action_list)

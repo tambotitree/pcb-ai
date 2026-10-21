@@ -231,8 +231,8 @@ static char *background_image_file = 0;
 char *lesstif_pcbmenu_path = "pcb-menu.res";
 
 HID_Attribute lesstif_attribute_list[] = {
-  {"install", "Install private colormap",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, &use_private_colormap},
+  {.name = "install", .help_text = "Install private colormap",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = &use_private_colormap},
 #define HA_colormap 0
 
 /* %start-doc options "22 lesstif GUI Options"
@@ -242,8 +242,8 @@ Listen for actions on stdin.
 @end ftable
 %end-doc
 */
-  {"listen", "Listen on standard input for actions",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, &stdin_listen},
+  {.name = "listen", .help_text = "Listen on standard input for actions",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = &stdin_listen},
 #define HA_listen 1
 
 /* %start-doc options "22 lesstif GUI Options"
@@ -255,8 +255,8 @@ automatically scaled to fit the canvas.
 @end ftable
 %end-doc
 */
-  {"bg-image", "Background Image",
-   HID_String, 0, 0, {0, 0, 0}, 0, &background_image_file},
+  {.name = "bg-image", .help_text = "Background Image",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = &background_image_file},
 #define HA_bg_image 2
 
 /* %start-doc options "22 lesstif GUI Options"
@@ -266,8 +266,8 @@ Location of the @file{pcb-menu.res} file which defines the menu for the lesstif 
 @end ftable
 %end-doc
 */
-  {"pcb-menu", "Location of pcb-menu.res file",
-   HID_String, 0, 0, {0, PCBLIBDIR "/pcb-menu.res", 0}, 0, &lesstif_pcbmenu_path}
+  {.name = "pcb-menu", .help_text = "Location of pcb-menu.res file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = PCBLIBDIR "/pcb-menu.res", .real_value = 0}, .enumerations = 0, .value = &lesstif_pcbmenu_path}
 #define HA_pcbmenu 3
 };
 
@@ -989,31 +989,31 @@ CursorAction(int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action lesstif_main_action_list[] = {
-  {"PCBChanged", 0, PCBChanged,
-   pcbchanged_help, pcbchanged_syntax},
-  {"SetUnits", 0, SetUnits,
-   setunits_help, setunits_syntax},
-  {"Zoom", "Click on a place to zoom in", ZoomAction,
-   zoom_help, zoom_syntax},
-  {"Pan", "Click on a place to pan", PanAction,
-   zoom_help, zoom_syntax},
-  {"SwapSides", 0, SwapSides,
-   swapsides_help, swapsides_syntax},
-  {"Command", 0, Command,
-   command_help, command_syntax},
-  {"Benchmark", 0, Benchmark,
-   benchmark_help, benchmark_syntax},
-  {"PointCursor", 0, PointCursor},
-  {"Center", "Click on a location to center", Center},
-  {"Busy", 0, Busy},
-  {"Cursor", 0, CursorAction,
-   cursor_help, cursor_syntax},
+  {.name = "PCBChanged", .need_coord_msg = 0, .trigger_cb = PCBChanged,
+   .description = pcbchanged_help, .syntax = pcbchanged_syntax},
+  {.name = "SetUnits", .need_coord_msg = 0, .trigger_cb = SetUnits,
+   .description = setunits_help, .syntax = setunits_syntax},
+  {.name = "Zoom", .need_coord_msg = "Click on a place to zoom in", .trigger_cb = ZoomAction,
+   .description = zoom_help, .syntax = zoom_syntax},
+  {.name = "Pan", .need_coord_msg = "Click on a place to pan", .trigger_cb = PanAction,
+   .description = zoom_help, .syntax = zoom_syntax},
+  {.name = "SwapSides", .need_coord_msg = 0, .trigger_cb = SwapSides,
+   .description = swapsides_help, .syntax = swapsides_syntax},
+  {.name = "Command", .need_coord_msg = 0, .trigger_cb = Command,
+   .description = command_help, .syntax = command_syntax},
+  {.name = "Benchmark", .need_coord_msg = 0, .trigger_cb = Benchmark,
+   .description = benchmark_help, .syntax = benchmark_syntax},
+  {.name = "PointCursor", .need_coord_msg = 0, .trigger_cb = PointCursor},
+  {.name = "Center", .need_coord_msg = "Click on a location to center", .trigger_cb = Center},
+  {.name = "Busy", .need_coord_msg = 0, .trigger_cb = Busy},
+  {.name = "Cursor", .need_coord_msg = 0, .trigger_cb = CursorAction,
+   .description = cursor_help, .syntax = cursor_syntax},
 };
 
 REGISTER_ACTIONS (lesstif_main_action_list)
 
 
-/* ---------------------------------------------------------------------- 
+/* ----------------------------------------------------------------------
  * redraws the background image
  */
 
@@ -3403,7 +3403,7 @@ lesstif_draw_arc (hidGC gc, Coord cx, Coord cy, Coord width, Coord height,
   if (flip_y)
     {
       start_angle = - start_angle;
-      delta_angle = - delta_angle;					
+      delta_angle = - delta_angle;
     }
   start_angle = NormalizeAngle (start_angle);
   if (start_angle >= 180)
@@ -3755,7 +3755,7 @@ typedef struct
 {
   XtBlockHookId id;
   void (*func) (hidval user_data);
-  hidval user_data; 
+  hidval user_data;
 } BlockHookStruct;
 
 static void lesstif_block_hook_cb(XtPointer user_data);
@@ -4194,7 +4194,7 @@ hid_lesstif_init ()
   lesstif_graphics.fill_rect           = lesstif_fill_rect;
 
   lesstif_graphics.draw_grid           = lesstif_draw_grid;
-  
+
   lesstif_graphics.draw_pcb_polygon    = common_gui_draw_pcb_polygon;
 
   hid_register_hid (&lesstif_hid);

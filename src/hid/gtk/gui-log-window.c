@@ -44,7 +44,7 @@ static gboolean log_show_on_append = FALSE;
 /* Remember user window resizes. */
 static gint
 log_window_configure_event_cb (GtkWidget * widget,
-			       GdkEventConfigure * ev, gpointer data)
+			       GdkEventConfigure * ev G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   GtkAllocation allocation;
 
@@ -57,14 +57,14 @@ log_window_configure_event_cb (GtkWidget * widget,
 }
 
 static void
-log_close_cb (gpointer data)
+log_close_cb (gpointer data G_GNUC_UNUSED)
 {
   gtk_widget_destroy (log_window);
   log_window = NULL;
 }
 
 static void
-log_destroy_cb (GtkWidget * widget, gpointer data)
+log_destroy_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   log_window = NULL;
 }
@@ -83,7 +83,6 @@ ghid_log_window_create ()
   g_signal_connect (G_OBJECT (log_window), "configure_event",
 		    G_CALLBACK (log_window_configure_event_cb), NULL);
   gtk_window_set_title (GTK_WINDOW (log_window), _("PCB Log"));
-  gtk_window_set_wmclass (GTK_WINDOW (log_window), "PCB_Log", "PCB");
   gtk_window_resize (GTK_WINDOW (log_window),
                      ghidgui->log_window_width,
                      ghidgui->log_window_height);
@@ -96,10 +95,10 @@ ghid_log_window_create ()
 				      GTK_POLICY_AUTOMATIC,
 				      GTK_POLICY_AUTOMATIC);
 
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
+  button = gtk_button_new_with_mnemonic (_("_Close"));
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (log_close_cb), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
@@ -154,7 +153,7 @@ to it.  If false, the log will still be updated, but the window won't \
 be shown.";
 
 static gint
-GhidLogShowOnAppend (int argc, char **argv, Coord x, Coord y)
+GhidLogShowOnAppend (int argc, char **argv, Coord x G_GNUC_UNUSED, Coord y G_GNUC_UNUSED)
 {
   char *a = argc == 1 ? argv[0] : (char *)"";
 
@@ -170,8 +169,8 @@ GhidLogShowOnAppend (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action ghid_log_action_list[] = {
-  {"LogShowOnAppend", 0, GhidLogShowOnAppend,
-   logshowonappend_help, logshowonappend_syntax}
+  {.name = "LogShowOnAppend", .need_coord_msg = 0, .trigger_cb = GhidLogShowOnAppend,
+   .description = logshowonappend_help, .syntax = logshowonappend_syntax}
   ,
 };
 

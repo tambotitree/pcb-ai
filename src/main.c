@@ -254,7 +254,7 @@ usage_hid (HID * h)
   note->next = usage_notes;
   note->seen = attributes;
   usage_notes = note;
-  
+
   for (i = 0; i < n_attributes; i++)
     usage_attr (attributes + i);
 }
@@ -317,7 +317,7 @@ usage (void)
 	{
 	  usage_attr (ha->attributes + i);
 	}
-    }  
+    }
 
   exit (1);
 }
@@ -451,8 +451,8 @@ Show help on command line options.
 @end ftable
 %end-doc
 */
-  {"help", "Show help on command line options", HID_Boolean, 0, 0, {0, 0, 0}, 0,
-  &show_help},
+  {.name = "help", .help_text = "Show help on command line options", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0,
+  .value = &show_help},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -461,7 +461,7 @@ Show version.
 @end ftable
 %end-doc
 */
-  {"version", "Show version", HID_Boolean, 0, 0, {0, 0, 0}, 0, &show_version},
+  {.name = "version", .help_text = "Show version", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = &show_version},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -470,8 +470,8 @@ Be verbose on stdout.
 @end ftable
 %end-doc
 */
-  {"verbose", "Be verbose on stdout", HID_Boolean, 0, 0, {0, 0, 0}, 0,
-   &Settings.verbose},
+  {.name = "verbose", .help_text = "Be verbose on stdout", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0,
+   .value = &Settings.verbose},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -480,8 +480,8 @@ Show copyright.
 @end ftable
 %end-doc
 */
-  {"copyright", "Show Copyright", HID_Boolean, 0, 0, {0, 0, 0}, 0,
-   &show_copyright},
+  {.name = "copyright", .help_text = "Show Copyright", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0,
+   .value = &show_copyright},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -490,8 +490,8 @@ Show option defaults.
 @end ftable
 %end-doc
 */
-  {"show-defaults", "Show option defaults", HID_Boolean, 0, 0, {0, 0, 0}, 0,
-   &show_defaults},
+  {.name = "show-defaults", .help_text = "Show option defaults", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0,
+   .value = &show_defaults},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -500,8 +500,8 @@ Show available actions and exit.
 @end ftable
 %end-doc
 */
-  {"show-actions", "Show available actions", HID_Boolean, 0, 0, {0, 0, 0}, 0,
-   &show_actions},
+  {.name = "show-actions", .help_text = "Show available actions", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0,
+   .value = &show_actions},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -510,8 +510,8 @@ Dump actions (for documentation).
 @end ftable
 %end-doc
 */
-  {"dump-actions", "Dump actions (for documentation)", HID_Boolean, 0, 0,
-   {0, 0, 0}, 0, &do_dump_actions},
+  {.name = "dump-actions", .help_text = "Dump actions (for documentation)", .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 },
+   .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = &do_dump_actions},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -520,8 +520,8 @@ Set default grid units. Can be mm or mil. Defaults to mil.
 @end ftable
 %end-doc
 */
-  {"grid-units", "Default grid units (mm|mil)", HID_String, 0, 0, {0, "mil", 0},
-  0, &grid_units},
+  {.name = "grid-units", .help_text = "Default grid units (mm|mil)", .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = "mil", .real_value = 0},
+  .enumerations = 0, .value = &grid_units},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -531,8 +531,8 @@ when user is using a metric grid unit.
 @end ftable
 %end-doc
 */
-  {"clear-increment-mm", "Default clear increment amount (metric)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mm.clear},
+  {.name = "clear-increment-mm", .help_text = "Default clear increment amount (metric)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mm.clear},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -542,8 +542,8 @@ when user is using a metric grid unit.
 @end ftable
 %end-doc
 */
-  {"grid-increment-mm", "Default grid increment amount (metric)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mm.grid},
+  {.name = "grid-increment-mm", .help_text = "Default grid increment amount (metric)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mm.grid},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -553,8 +553,8 @@ when user is using a metric grid unit.
 @end ftable
 %end-doc
 */
-  {"line-increment-mm", "Default line increment amount (metric)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mm.line},
+  {.name = "line-increment-mm", .help_text = "Default line increment amount (metric)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mm.line},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -564,8 +564,8 @@ when user is using a metric grid unit.
 @end ftable
 %end-doc
 */
-  {"size-increment-mm", "Default size increment amount (metric)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mm.size},
+  {.name = "size-increment-mm", .help_text = "Default size increment amount (metric)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mm.size},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -575,8 +575,8 @@ when user is using an imperial grid unit.
 @end ftable
 %end-doc
 */
-  {"clear-increment-mil", "Default clear increment amount (imperial)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mil.clear},
+  {.name = "clear-increment-mil", .help_text = "Default clear increment amount (imperial)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mil.clear},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -586,8 +586,8 @@ when user is using a imperial grid unit.
 @end ftable
 %end-doc
 */
-  {"grid-increment-mil", "Default grid increment amount (imperial)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mil.grid},
+  {.name = "grid-increment-mil", .help_text = "Default grid increment amount (imperial)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mil.grid},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -597,8 +597,8 @@ when user is using a imperial grid unit.
 @end ftable
 %end-doc
 */
-  {"line-increment-mil", "Default line increment amount (imperial)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mil.line},
+  {.name = "line-increment-mil", .help_text = "Default line increment amount (imperial)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mil.line},
 
 /* %start-doc options "1 General Options"
 @ftable @code
@@ -608,8 +608,8 @@ when user is using a imperial grid unit.
 @end ftable
 %end-doc
 */
-  {"size-increment-mil", "Default size increment amount (imperial)", HID_Coord, 0, 0, {0, 0, 0},
-  0, &increment_mil.size},
+  {.name = "size-increment-mil", .help_text = "Default size increment amount (imperial)", .type = HID_Coord, .min_val = { .coord_value = 0 }, .max_val = { .coord_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0},
+  .enumerations = 0, .value = &increment_mil.size},
 
 /* %start-doc options "3 Colors"
 @ftable @code
@@ -913,7 +913,7 @@ Default diameter of holes. Default value is @code{28mil}.
 */
   CSET (ViaDrillingHole, MIL_TO_COORD(28), "via-drilling-hole",
   "default diameter of holes"),
-  
+
 /* %start-doc options "5 Sizes"
 @ftable @code
 @item --via-solder-mask-clerance <num>
@@ -937,10 +937,10 @@ Default thickness of new lines. Default value is @code{10mil}.
 /* %start-doc options "5 Sizes"
 @ftable @code
 @item --rat-thickness <num><unit>
-Thickness of rats. If no unit is given, PCB units are assumed (i.e. 100 
-means "1 nm"). This option allows for a special unit @code{px} which 
+Thickness of rats. If no unit is given, PCB units are assumed (i.e. 100
+means "1 nm"). This option allows for a special unit @code{px} which
 sets the rat thickness to a fixed value in terms of screen pixels.
-Maximum fixed thickness is 100px. Minimum saling rat thickness is 101nm.  
+Maximum fixed thickness is 100px. Minimum saling rat thickness is 101nm.
 Default value is @code{10mil}.
 @end ftable
 %end-doc
@@ -1596,7 +1596,7 @@ Execute the bell command when all rats are routed.
 };
 
 REGISTER_ATTRIBUTES (main_attribute_list)
-/* ---------------------------------------------------------------------- 
+/* ----------------------------------------------------------------------
  * post-process settings.
  */
      static void settings_post_process ()
@@ -1610,7 +1610,7 @@ REGISTER_ATTRIBUTES (main_attribute_list)
     {
       Settings.LibraryCommand
 	=
-	Concat (Settings.LibraryCommandDir, PCB_DIR_SEPARATOR_S, 
+	Concat (Settings.LibraryCommandDir, PCB_DIR_SEPARATOR_S,
 		Settings.LibraryCommand,
 		NULL);
     }
@@ -1717,7 +1717,7 @@ InitPaths (char *argv0)
   haspath = 0;
   for (i = 0; i < strlen (argv0) ; i++)
     {
-      if (argv0[i] == PCB_DIR_SEPARATOR_C) 
+      if (argv0[i] == PCB_DIR_SEPARATOR_C)
 	haspath = 1;
     }
 
@@ -1738,7 +1738,7 @@ InitPaths (char *argv0)
 
       tmps = getenv ("PATH");
 
-      if (tmps != NULL) 
+      if (tmps != NULL)
 	{
 	  path = strdup (tmps);
 
@@ -1765,7 +1765,7 @@ InitPaths (char *argv0)
 		  found_bindir = 1;
 		  free (tmps);
 		  break;
-		}  
+		}
 	      free (tmps);
 	    }
 	  free (path);
@@ -1809,7 +1809,7 @@ InitPaths (char *argv0)
       fprintf (stderr, "InitPaths():  malloc failed\n");
       exit (1);
     }
-  sprintf (exec_prefix, "%s%s%s", bindir, PCB_DIR_SEPARATOR_S, 
+  sprintf (exec_prefix, "%s%s%s", bindir, PCB_DIR_SEPARATOR_S,
 	   BINDIR_TO_EXECPREFIX);
 
   /* now find the path to PCBLIBDIR */
@@ -1819,7 +1819,7 @@ InitPaths (char *argv0)
       fprintf (stderr, "InitPaths():  malloc failed\n");
       exit (1);
     }
-  sprintf (pcblibdir, "%s%s%s", bindir, PCB_DIR_SEPARATOR_S, 
+  sprintf (pcblibdir, "%s%s%s", bindir, PCB_DIR_SEPARATOR_S,
 	   BINDIR_TO_PCBLIBDIR);
 
   /* and the path to PCBTREEDIR */
@@ -1829,7 +1829,7 @@ InitPaths (char *argv0)
       fprintf (stderr, "InitPaths():  malloc failed\n");
       exit (1);
     }
-  sprintf (pcbtreedir, "%s%s%s", bindir, PCB_DIR_SEPARATOR_S, 
+  sprintf (pcbtreedir, "%s%s%s", bindir, PCB_DIR_SEPARATOR_S,
 	   BINDIR_TO_PCBTREEDIR);
 
   /* and the search path including PCBLIBDIR */
@@ -1842,17 +1842,17 @@ InitPaths (char *argv0)
   sprintf (pcblibpath, ".%s%s", PCB_PATH_DELIMETER, pcblibdir);
 
   /* and the newlib search path */
-  l = strlen (pcblibdir) + 1 + strlen (pcbtreedir) 
+  l = strlen (pcblibdir) + 1 + strlen (pcbtreedir)
     + strlen ("pcblib-newlib") + 2;
   if ( (pcbtreepath = (char *) malloc (l * sizeof (char) )) == NULL )
     {
       fprintf (stderr, "InitPaths():  malloc failed\n");
       exit (1);
     }
-  sprintf (pcbtreepath, "%s%s%s%spcblib-newlib", pcbtreedir, 
+  sprintf (pcbtreepath, "%s%s%s%spcblib-newlib", pcbtreedir,
 	PCB_PATH_DELIMETER, pcblibdir,
 	PCB_DIR_SEPARATOR_S);
-  
+
 #ifdef DEBUG
   printf ("bindir      = %s\n", bindir);
   printf ("pcblibdir   = %s\n", pcblibdir);
@@ -1862,14 +1862,14 @@ InitPaths (char *argv0)
 #endif
 
   l = sizeof (main_attribute_list) / sizeof (main_attribute_list[0]);
-  for (i = 0; i < l ; i++) 
+  for (i = 0; i < l ; i++)
     {
       if (NSTRCMP (main_attribute_list[i].name, "lib-command-dir") == 0)
 	{
 	  main_attribute_list[i].default_val.str_value = pcblibdir;
 	}
 
-      if ( (NSTRCMP (main_attribute_list[i].name, "font-path") == 0) 
+      if ( (NSTRCMP (main_attribute_list[i].name, "font-path") == 0)
 	   || (NSTRCMP (main_attribute_list[i].name, "element-path") == 0)
 	   || (NSTRCMP (main_attribute_list[i].name, "lib-path") == 0) )
 	{
@@ -1901,7 +1901,7 @@ InitPaths (char *argv0)
     }
 }
 
-/* ---------------------------------------------------------------------- 
+/* ----------------------------------------------------------------------
  * main program
  */
 
@@ -1932,7 +1932,7 @@ pcb_main_uninit (void)
   free (PCB);
   PCB = NULL;
 
-  /*! 
+  /*!
    * \warning Please do not free the below variables like:
    * \code
   for (i = 0; i < MAX_LAYER; i++)
@@ -2027,7 +2027,7 @@ main (int argc, char *argv[])
     }
   Progname = program_basename;
 
-  /* Print usage or version if requested.  Then exit.  */  
+  /* Print usage or version if requested.  Then exit.  */
   if (argc > 1 &&
       (strcmp (argv[1], "-h") == 0 ||
        strcmp (argv[1], "-?") == 0 ||
@@ -2181,13 +2181,13 @@ main (int argc, char *argv[])
 #ifdef DEBUG
   printf ("Settings.LibraryCommandDir = \"%s\"\n",
           Settings.LibraryCommandDir);
-  printf ("Settings.FontPath          = \"%s\"\n", 
+  printf ("Settings.FontPath          = \"%s\"\n",
           Settings.FontPath);
-  printf ("Settings.ElementPath       = \"%s\"\n", 
+  printf ("Settings.ElementPath       = \"%s\"\n",
           Settings.ElementPath);
-  printf ("Settings.LibraryPath       = \"%s\"\n", 
+  printf ("Settings.LibraryPath       = \"%s\"\n",
           Settings.LibraryPath);
-  printf ("Settings.LibraryTree       = \"%s\"\n", 
+  printf ("Settings.LibraryTree       = \"%s\"\n",
           Settings.LibraryTree);
   printf ("Settings.MakeProgram = \"%s\"\n",
           UNKNOWN (Settings.MakeProgram));
@@ -2204,4 +2204,3 @@ main (int argc, char *argv[])
 
   return (0);
 }
-

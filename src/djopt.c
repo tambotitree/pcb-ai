@@ -3126,11 +3126,11 @@ ActionDJopt (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action djopt_action_list[] = {
-  {"djopt", 0, ActionDJopt,
-   djopt_help, djopt_syntax}
+  {.name = "djopt", .need_coord_msg = 0, .trigger_cb = ActionDJopt,
+   .description = djopt_help, .syntax = djopt_syntax}
   ,
-  {"OptAutoOnly", 0, djopt_set_auto_only,
-   djopt_sao_help, djopt_sao_syntax}
+  {.name = "OptAutoOnly", .need_coord_msg = 0, .trigger_cb = djopt_set_auto_only,
+   .description = djopt_sao_help, .syntax = djopt_sao_syntax}
 };
 
 REGISTER_ACTIONS (djopt_action_list)

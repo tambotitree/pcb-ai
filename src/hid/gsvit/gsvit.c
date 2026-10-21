@@ -109,7 +109,7 @@ struct hid_gc_struct {
 
 struct gsvit_net_layer {
   GList *Line;
-  GList *Arc; 
+  GList *Arc;
   GList *Polygon;
 };
 
@@ -132,7 +132,7 @@ struct drill_hole
   int cx;
   int cy;
   int is_plated;
-}; 
+};
 
 /*!
 * \brief Structure to represent all holes of a given size.
@@ -142,7 +142,7 @@ struct single_size_drills
   double diameter_inches;
   Coord radius;
   int n_holes;
-  int n_holes_allocated;   
+  int n_holes_allocated;
   struct drill_hole* holes;
 };
 static struct single_size_drills* drills = NULL;
@@ -168,7 +168,7 @@ static int n_drills_allocated = 0;
 
 static int save_drill = 0;
 
-static int is_plated = 0;        
+static int is_plated = 0;
 
 struct gsvit_netlist* gsvit_netlist = NULL;
 
@@ -202,7 +202,7 @@ static int is_drill;
 
 /*!
  * \brief Which groups of layers to export into PNG layer masks.
- * 
+ *
  * 1 means export; 0 means do not export.
  */
 static int gsvit_export_group[MAX_GROUP];
@@ -232,8 +232,8 @@ File name prefix.
 @end ftable
 %end-doc
 */
-  {"basename", "File name prefix",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "basename", .help_text = "File name prefix",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_basename 0
 
 /* %start-doc options "96 gsvit Options"
@@ -243,8 +243,8 @@ Horizontal scale factor (grid points/inch).
 @end ftable
 %end-doc
 */
-  {"dpi", "Horizontal scale factor (grid points/inch)",
-   HID_Integer, 0, 1000, {1000, 0, 0}, 0, 0}, /* 1000 --> 1 mil (25.4 um) resolution */
+  {.name = "dpi", .help_text = "Horizontal scale factor (grid points/inch)",
+   .type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 1000 }, .default_val = {.int_value = 1000, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0}, /* 1000 --> 1 mil (25.4 um) resolution */
 #define HA_dpi 1
 
 };
@@ -772,7 +772,7 @@ xyToAngle (double x, double y, bool morethan2pins)
 /*!
  * \brief Main export callback.
  */
-static void 
+static void
 gsvit_parse_arguments (int *argc, char ***argv)
 {
   hid_register_attributes (gsvit_attribute_list, sizeof (gsvit_attribute_list) /
@@ -1100,7 +1100,7 @@ static void gsvit_write_xcentroids (void)
 /*!
  * \brief Populates gsvit_export_group array.
  */
-void 
+void
 gsvit_choose_groups ()
 {
   int n, m;
@@ -1136,7 +1136,7 @@ gsvit_choose_groups ()
  * White and black, the first color allocated becomes the background
  * color.
  */
-static void 
+static void
 gsvit_alloc_colors ()
 {
   int i;
@@ -1173,7 +1173,7 @@ gsvit_alloc_colors ()
 }
 
 
-static void 
+static void
 gsvit_start_png (const char *basename, const char *suffix)
 {
   int h, w;
@@ -1194,7 +1194,7 @@ gsvit_start_png (const char *basename, const char *suffix)
 }
 
 
-static void 
+static void
 gsvit_finish_png ()
 {
   int i;
@@ -1215,7 +1215,7 @@ gsvit_finish_png ()
 }
 
 
-void 
+void
 gsvit_start_png_export ()
 {
   BoxType region;
@@ -1232,7 +1232,7 @@ gsvit_start_png_export ()
 }
 
 
-static void 
+static void
 gsvit_do_export (HID_Attr_Val *options)
 {
   int save_ons[MAX_ALL_LAYER];
@@ -1339,7 +1339,7 @@ gsvit_xml_out (char *gsvit_basename)
 
 /* *** PNG export (slightly modified code from PNG export HID) ************* */
 
-static int 
+static int
 gsvit_set_layer (const char *name, int group, int empty)
 {
   int idx = (group >= 0 && group < max_group) ? PCB->LayerGroups.Entries[group][0] : group;
@@ -1378,7 +1378,7 @@ gsvit_set_layer (const char *name, int group, int empty)
 }
 
 
-static hidGC 
+static hidGC
 gsvit_make_gc (void)
 {
   hidGC rv = (hidGC) malloc (sizeof (struct hid_gc_struct));
@@ -1392,21 +1392,21 @@ gsvit_make_gc (void)
 }
 
 
-static void 
+static void
 gsvit_destroy_gc (hidGC gc)
 {
   free (gc);
 }
 
 
-static void 
+static void
 gsvit_use_mask (enum mask_mode mode)
 {
   /* Do nothing. */
 }
 
 
-static void 
+static void
 gsvit_set_color (hidGC gc, const char *name)
 {
   if (gsvit_im == NULL) {
@@ -1541,7 +1541,7 @@ use_gc (hidGC gc)
        */
       if (r == 0) {
         gdImageFilledRectangle (gc->brush, 0, 0, 0, 0, fg);
-      }  
+      }
       else {
         if (type == 'C')
           gdImageFilledEllipse (gc->brush, r, r, 2 * r, 2 * r, fg);

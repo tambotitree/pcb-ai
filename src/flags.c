@@ -278,7 +278,7 @@ bool
 ClearFlagOnPinsViasAndPads (int flag, bool undoable)
 {
   bool change = false;
-  
+
   VIA_LOOP (PCB->Data);
   {
     if (TEST_FLAG (flag, via))
@@ -328,7 +328,7 @@ bool
 ClearFlagOnLinesAndPolygons (int flag, bool undoable)
 {
   bool change = false;
-  
+
   RAT_LOOP (PCB->Data);
   {
     if (TEST_FLAG (flag, line))
@@ -385,10 +385,10 @@ bool
 ClearFlagOnAllObjects (int flag, bool undoable)
 {
   bool change = false;
-  
+
   change = ClearFlagOnPinsViasAndPads  (flag, undoable) || change;
   change = ClearFlagOnLinesAndPolygons (flag, undoable) || change;
-  
+
   return change;
 }
 
@@ -420,17 +420,17 @@ ActionDumpFlags(int argc, char **argv, Coord x, Coord y)
     if (type & (LINEPOINT_TYPE | POLYGONPOINT_TYPE)) continue; /*p = p3;*/
     else if (type && (LINE_TYPE | ARC_TYPE | TEXT_TYPE | POLYGON_TYPE | ELEMENTLINE_TYPE | ELEMENTARC_TYPE | ELEMENTNAME_TYPE | PIN_TYPE | PAD_TYPE)) p = p2;
     else p = p1;
-    
+
     fprintf(fp, "%4d %3d %s\n", i, type,
             flags_to_string(((AnyObjectType*)p)->Flags, type));
   }
-  
+
   fclose(fp);
   return 0;
 }
 
 HID_Action flag_action_list[] = {
-  {"DumpFlags", 0, ActionDumpFlags, dump_flags_help, dump_flags_syntax}
+  {.name = "DumpFlags", .need_coord_msg = 0, .trigger_cb = ActionDumpFlags, .description = dump_flags_help, .syntax = dump_flags_syntax}
 };
 
 REGISTER_ACTIONS (flag_action_list)
@@ -523,4 +523,3 @@ HID_Flag flags_flag_list[] = {
 };
 
 REGISTER_FLAGS (flags_flag_list)
-

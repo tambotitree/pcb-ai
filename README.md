@@ -27,8 +27,9 @@ Gerber/drill and milling workflows can follow once this path is verified.
 
 ## Current status
 
-**The batch/PostScript build succeeds; the GTK3 editor and a working release
-remain unverified.**
+**The GTK3 editor now compiles, links, and displays our two-resistor test board
+on Apple Silicon macOS.** This is an early development checkpoint, not a
+manufacturing-qualified release.
 Apple Silicon macOS is the initial target. Other platforms are not verified.
 
 - The upstream Git history is preserved, starting from revision
@@ -41,8 +42,11 @@ Apple Silicon macOS is the initial target. Other platforms are not verified.
 - A two-resistor smoke test passes batch load/save/reopen, connection checking
   (including a disconnected negative control), and PostScript/PDF export.
   It uses test footprints; physical manufacture and printer scale are unverified.
-- Upstream GUI configuration still requests GTK2 and gtkglext. The GTK3 port
-  has not yet been performed.
+- The GTK3/Cairo GUI builds with debugging symbols (`-g3 -O0`); its GTK archive
+  passes `-Wall -Wextra -Werror -Wpedantic`. Menus, layer controls, embedded XPM
+  tool icons and the test board are visible. OpenGL is disabled.
+- Startup sizing, interaction, save/reopen and rendering behavior still need
+  further testing. No supported binary installer is provided yet.
 - Upstream already contains PostScript/EPS, Gerber, and experimental G-code
   export backends. Those facilities will be verified rather than assumed to
   produce correct manufacturing output on the target platform.
@@ -50,6 +54,15 @@ Apple Silicon macOS is the initial target. Other platforms are not verified.
 The existing [README](README), [README.git](README.git) and [INSTALL](INSTALL)
 describe upstream PCB; their dependency and installation instructions are
 historical and do not establish a working pcb-ai installation.
+
+## GTK3 editor in action
+
+![PCB-ai GTK3 editor showing two resistors joined by a copper trace](screenshots/two_resistors.jpg)
+
+The first GUI milestone on Apple Silicon: layer controls, embedded tool icons,
+and a two-resistor board with a routed copper connection. The fixture is
+**not for manufacturing**; this screenshot demonstrates the editor rendering,
+not a verified production board.
 
 ## Modernization approach
 
@@ -66,7 +79,8 @@ Work proceeds in consultation with the maintainer, one reviewable step at a time
 - Keep debugging symbols and test open/edit/save/reopen and physical export scale.
 
 Track stage completion, decisions and test notes in the
-[upgrade tracker](UPDATE_PROJECT_TODO.md). See [the project plan](PCB_AI_PLAN.md)
+[upgrade tracker](UPDATE_PROJECT_TODO.md). The
+[GUI refactor list](GUI_REFACTOR_TODO.md) applies lessons from gschem. See [the project plan](PCB_AI_PLAN.md)
 for the original scope and acceptance criteria.
 A successful compiler run alone will not count as a working board-production tool.
 
@@ -87,14 +101,29 @@ On macOS, `m4/pcb-macos.m4` prefers Homebrew's keg-only Bison, obtained with
 override is honored but must pass the version check. Native-language support is deferred; `--enable-nls`
 is rejected and `--disable-nls` is accepted.
 
-Reproducible Apple Silicon build commands will be documented when verified.
-There is no supported binary package from this project yet.
+The GTK3 configuration used for this checkpoint is:
+
+```sh
+./bootstrap.sh
+mkdir -p upgrade_data/scratch/build-gtk3
+cd upgrade_data/scratch/build-gtk3
+../../../configure --with-gui=gtk --with-exporters=ps \
+  --disable-doc --disable-nls --disable-gl --disable-dbus \
+  --disable-update-mime-database --disable-update-desktop-database \
+  --enable-debug --prefix=/tmp/pcb-ai-gtk3-test \
+  CFLAGS='-g3 -O0' CXXFLAGS='-g3 -O0'
+make -j1
+```
+
+This requires the modern Homebrew GTK3/Cairo development dependencies. It is a
+source-build checkpoint; no supported binary package is provided yet.
 
 ## Release identity
 
 The authoritative version is the literal `AC_INIT` version in `configure.ac`.
-The current development checkpoint is `0.1.1-20261020`. The batch/PostScript
-smoke test passes; the GUI and manufacturing workflow remain unverified.
+The current development checkpoint is `0.1.2-20261021`. The GTK3 executable
+builds and displays the two-resistor board. Batch/PostScript smoke tests pass;
+physical manufacturing and full GUI operation remain unverified.
 Versions follow `MAJOR.MINOR.PATCH-YYYYMMDD`, matching gEDA-ai's release format.
 
 ```sh
@@ -117,7 +146,7 @@ and create an annotated tag with the exact version printed by the helper
 (no `v` prefix). After `make dist`, validate both identities before publishing:
 
 ```sh
-python3 tools/version.py check --tag --archive pcb-ai-0.1.1-20261020.tar.gz
+python3 tools/version.py check --tag --archive pcb-ai-0.1.2-20261021.tar.gz
 ```
 
 `--tag` requires a clean checkout and the matching annotated tag at HEAD.

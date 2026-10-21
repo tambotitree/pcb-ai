@@ -35,6 +35,7 @@
 #include "pcb-printf.h"
 
 #include "gui.h"
+#include "pcb-pointer.h"
 #include <gdk/gdkkeysyms.h>
 
 #ifdef HAVE_LIBDMALLOC
@@ -49,8 +50,7 @@
 #define ICON_Y_HOT 8
 
 
-GdkPixmap *XC_clock_source, *XC_clock_mask,
-  *XC_hand_source, *XC_hand_mask, *XC_lock_source, *XC_lock_mask;
+GdkCursor *XC_clock_cursor, *XC_hand_cursor, *XC_lock_cursor;
 
 
 static GdkCursorType oldCursor;
@@ -67,7 +67,7 @@ ghid_status_line_set_text (const gchar * text)
 void
 ghid_cursor_position_label_set_text (gchar * text)
 {
-  ghid_label_set_markup (ghidgui->cursor_position_absolute_label, text);  
+  ghid_label_set_markup (ghidgui->cursor_position_absolute_label, text);
 }
 
 void
@@ -79,46 +79,23 @@ ghid_cursor_position_relative_label_set_text (gchar * text)
 static GdkCursorType
 gport_set_cursor (GdkCursorType shape)
 {
+  GdkCursorType previous = gport->X_cursor_shape;
+  GdkCursor *custom = NULL;
   GdkWindow *window;
-  GdkCursorType old_shape = gport->X_cursor_shape;
-  GdkColor fg = { 0, 65535, 65535, 65535 };	/* white */
-  GdkColor bg = { 0, 0, 0, 0 };	/* black */
-
-  if (gport->drawing_area == NULL)
-    return GDK_X_CURSOR;
-
+  if (!gport->drawing_area) return GDK_X_CURSOR;
   window = gtk_widget_get_window (gport->drawing_area);
-
-  if (gport->X_cursor_shape == shape)
-    return shape;
-
-  /* check if window exists to prevent from fatal errors */
-  if (window == NULL)
-    return GDK_X_CURSOR;
-
-  gport->X_cursor_shape = shape;
-  if (shape > GDK_LAST_CURSOR)
-    {
-      if (shape == CUSTOM_CURSOR_CLOCKWISE)
-        gport->X_cursor =
-          gdk_cursor_new_from_pixmap (XC_clock_source, XC_clock_mask, &fg,
-                                      &bg, ICON_X_HOT, ICON_Y_HOT);
-      else if (shape == CUSTOM_CURSOR_DRAG)
-        gport->X_cursor =
-          gdk_cursor_new_from_pixmap (XC_hand_source, XC_hand_mask, &fg,
-                                      &bg, ICON_X_HOT, ICON_Y_HOT);
-      else if (shape == CUSTOM_CURSOR_LOCK)
-        gport->X_cursor =
-          gdk_cursor_new_from_pixmap (XC_lock_source, XC_lock_mask, &fg,
-                                      &bg, ICON_X_HOT, ICON_Y_HOT);
-    }
-  else
-    gport->X_cursor = gdk_cursor_new (shape);
-
+  if (!window) return GDK_X_CURSOR;
+  if (shape == previous) return shape;
+  if (shape == CUSTOM_CURSOR_CLOCKWISE) custom = XC_clock_cursor;
+  else if (shape == CUSTOM_CURSOR_DRAG) custom = XC_hand_cursor;
+  else if (shape == CUSTOM_CURSOR_LOCK) custom = XC_lock_cursor;
+  g_clear_object (&gport->X_cursor);
+  if (custom) gport->X_cursor = g_object_ref (custom);
+  else gport->X_cursor = gdk_cursor_new_for_display (gtk_widget_get_display (gport->drawing_area),
+                                                   shape > GDK_LAST_CURSOR ? GDK_LEFT_PTR : shape);
   gdk_window_set_cursor (window, gport->X_cursor);
-  gdk_cursor_unref (gport->X_cursor);
-
-  return old_shape;
+  gport->X_cursor_shape = shape;
+  return previous;
 }
 
 void
@@ -244,7 +221,7 @@ static gboolean got_location;
      |  it's the enter key (which accepts the current crosshair location).
    */
 static gboolean
-loop_key_press_cb (GtkWidget * drawing_area, GdkEventKey * kev,
+loop_key_press_cb (GtkWidget * drawing_area G_GNUC_UNUSED, GdkEventKey * kev,
 		   GMainLoop ** loop)
 {
   gint ksym = kev->keyval;
@@ -254,7 +231,7 @@ loop_key_press_cb (GtkWidget * drawing_area, GdkEventKey * kev,
 
   switch (ksym)
     {
-    case GDK_Return:		/* Accept cursor location */
+    case GDK_KEY_Return:		/* Accept cursor location */
       if (g_main_loop_is_running (*loop))
 	g_main_loop_quit (*loop);
       break;
@@ -272,7 +249,7 @@ loop_key_press_cb (GtkWidget * drawing_area, GdkEventKey * kev,
      |  and the cursor values when the button was pressed will be used.
    */
 static gboolean
-loop_button_press_cb (GtkWidget * drawing_area, GdkEventButton * ev,
+loop_button_press_cb (GtkWidget * drawing_area G_GNUC_UNUSED, GdkEventButton * ev,
 		      GMainLoop ** loop)
 {
   if (g_main_loop_is_running (*loop))
@@ -332,9 +309,9 @@ run_get_location_loop (const gchar * message)
 
   loop = g_main_loop_new (NULL, FALSE);
 
-  GDK_THREADS_LEAVE ();
+  /* Run the nested input loop on the UI thread without the obsolete GDK lock. */
   g_main_loop_run (loop);
-  GDK_THREADS_ENTER ();
+
 
   g_main_loop_unref (loop);
 
@@ -368,7 +345,7 @@ ghid_get_user_xy (const char *msg)
   /* XXX The abort dialog isn't implemented yet in the Gtk port
    */
 void
-ghid_create_abort_dialog (char *msg)
+ghid_create_abort_dialog (char *msg G_GNUC_UNUSED)
 {
 }
 
@@ -388,8 +365,7 @@ ghid_get_pointer (int *x, int *y)
 {
   gint xp, yp;
 
-  gdk_window_get_pointer (gtk_widget_get_window (gport->drawing_area),
-                          &xp, &yp, NULL);
+  pcb_pointer_query_window (gtk_widget_get_window (gport->drawing_area), &xp, &yp, NULL);
   if (x)
     *x = xp;
   if (y)

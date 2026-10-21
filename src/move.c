@@ -1212,8 +1212,8 @@ MoveLayerAction (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action move_action_list[] = {
-  {"MoveLayer", 0, MoveLayerAction,
-   movelayer_help, movelayer_syntax}
+  {.name = "MoveLayer", .need_coord_msg = 0, .trigger_cb = MoveLayerAction,
+   .description = movelayer_help, .syntax = movelayer_syntax}
 };
 
 REGISTER_ACTIONS (move_action_list)

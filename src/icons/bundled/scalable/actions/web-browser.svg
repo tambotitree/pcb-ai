@@ -1,0 +1,7 @@
+<!-- gEDA-AI artwork, GPL-2.0-or-later. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <title>Web documentation</title>
+  <circle cx="12" cy="12" r="10" fill="#fff" stroke="#3465a4" stroke-width="2"/>
+  <ellipse cx="12" cy="12" rx="4" ry="10" fill="none" stroke="#3465a4"/>
+  <path d="M2 12H22M4 6H20M4 18H20" fill="none" stroke="#3465a4"/>
+</svg>

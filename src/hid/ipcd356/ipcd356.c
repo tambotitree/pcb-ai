@@ -71,10 +71,10 @@ Parameter @code{<string>} can include a path.
 %end-doc
 */
   {
-    "netlistfile",
-    "Name of the IPC-D-356 Netlist output file",
-    HID_String,
-    0, 0, {0, 0, 0}, 0, 0
+    .name = "netlistfile",
+    .help_text = "Name of the IPC-D-356 Netlist output file",
+    .type = HID_String,
+    .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0
   },
 #define HA_IPCD356_filename 0
 };
@@ -242,7 +242,7 @@ IPCD356_WriteNet (FILE * fd, char *net)
       fprintf (fd, "Y%4.4d", pady);
       fprintf (fd, "R000"); /* Rotation (0 degrees). */
       fprintf (fd, " "); /* Column 72 should be left blank. */
-      if (pad->Mask > 0)    
+      if (pad->Mask > 0)
         {
           if (TEST_FLAG (ONSOLDERFLAG, pad) == true)
             {
@@ -335,7 +335,7 @@ IPCD356_WriteNet (FILE * fd, char *net)
         }
       fprintf (fd, "R000"); /* Rotation (0 degrees). */
       fprintf (fd, " "); /* Column 72 should be left blank.*/
-      if (pin->Mask > 0)    
+      if (pin->Mask > 0)
         {
           fprintf(fd, "S0"); /* No Soldermask. */
         }
@@ -368,7 +368,7 @@ IPCD356_WriteNet (FILE * fd, char *net)
       fprintf (fd, "VIA   "); /* Refdes. */
       fprintf (fd, "-    "); /* Pin number. */
       fprintf (fd, " "); /*! \todo Midpoint indicator (M). */
-      tmp = via->DrillingHole;	
+      tmp = via->DrillingHole;
       if (strcmp (Settings.grid_unit->suffix, "mil") == 0)
         {
           tmp = tmp / 2540; /* 0.0001". */
@@ -405,7 +405,7 @@ IPCD356_WriteNet (FILE * fd, char *net)
       fprintf (fd, "Y%+6.6d", pady); /* Y pad center. */
 
       padx = via->Thickness;
-      
+
       if (strcmp (Settings.grid_unit->suffix, "mil") == 0)
         {
           padx = padx / 2540; /* X location in 0.0001". */
@@ -419,7 +419,7 @@ IPCD356_WriteNet (FILE * fd, char *net)
       fprintf (fd, "Y0000"); /* Y is 0 for round pins (vias always round?). */
       fprintf (fd, "R000"); /* Rotation (0 degrees). */
       fprintf (fd, " "); /* Column 72 should be left blank. */
-      if (via->Mask > 0)    
+      if (via->Mask > 0)
         {
           fprintf(fd, "S0"); /* No Soldermask. */
         }

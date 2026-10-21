@@ -38,6 +38,7 @@
 #include "global.h"
 #include "gtkhid.h"
 #include "gui.h"
+#include "pcb-grid.h"
 #include "pcb-printf.h"
 
 #include "ghid-route-style-selector.h"
@@ -49,7 +50,7 @@ struct _route_style *ghid_route_style_selector_real_add_route_style
 static void ghid_route_style_selector_finalize (GObject *object);
 
 /*! \brief Global action creation counter */
-static gint action_count;
+
 
 /*! \brief Signals exposed by the widget */
 enum {
@@ -65,21 +66,19 @@ enum {
   N_COLS
 };
 
-static GtkVBox *ghid_route_style_selector_parent_class;
+static GtkBoxClass *ghid_route_style_selector_parent_class;
 static guint ghid_route_style_selector_signals[LAST_SIGNAL] = { 0 };
 
 struct _GHidRouteStyleSelector
 {
-  GtkVBox parent;
+  GtkBox parent;
 
   GSList *button_radio_group;
-  GSList *action_radio_group;
   GtkWidget *edit_button;
 
-  GtkActionGroup *action_group;
   GtkAccelGroup *accel_group;
-  GtkRadioAction *null_action;
   GtkWidget *null_button;
+  gboolean syncing;
   gint shortcut_key_idx;
 
   GtkListStore *model;
@@ -88,7 +87,7 @@ struct _GHidRouteStyleSelector
 
 struct _GHidRouteStyleSelectorClass
 {
-  GtkVBoxClass parent_class;
+  GtkBoxClass parent_class;
 
   void (* select_style) (GHidRouteStyleSelector *, RouteStyleType *);
   void (* style_edited) (GHidRouteStyleSelector *, gboolean);
@@ -97,34 +96,73 @@ struct _GHidRouteStyleSelectorClass
 struct _route_style
 {
   gboolean temporary;
-  GtkRadioAction *action;
   GtkWidget *button;
   GtkWidget *menu_item;
   GtkTreeRowReference *rref;
   RouteStyleType *rst;
-  gulong sig_id;
 };
 
 static void
 init_radio_groups (GHidRouteStyleSelector *rss)
 {
-  gtk_radio_action_set_group (rss->null_action, rss->action_radio_group);
-  rss->action_radio_group = gtk_radio_action_get_group (rss->null_action);
   gtk_radio_button_set_group (GTK_RADIO_BUTTON (rss->null_button),
                               rss->button_radio_group);
   rss->button_radio_group = gtk_radio_button_get_group
                               (GTK_RADIO_BUTTON (rss->null_button));
 }
 
+/*! \brief Bind a shortcut directly to a selector menu item. */
+static void
+selector_add_accel (GtkWidget *item, GtkAccelGroup *group, const char *text)
+{
+  guint key;
+  GdkModifierType modifiers;
+  gtk_accelerator_parse (text, &key, &modifiers);
+  if (key)
+    gtk_widget_add_accelerator (item, "activate", group, key, modifiers,
+                                GTK_ACCEL_VISIBLE);
+}
+
+/*! \brief Synchronize menu checks and radio buttons without dispatching. */
+static void
+route_set_active (GHidRouteStyleSelector *rss, struct _route_style *selected)
+{
+  GtkTreeIter iter;
+  gboolean valid;
+  rss->syncing = TRUE;
+  valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (rss->model), &iter);
+  while (valid)
+    {
+      struct _route_style *style;
+      gtk_tree_model_get (GTK_TREE_MODEL (rss->model), &iter, DATA_COL, &style, -1);
+      if (style)
+        {
+          gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (style->menu_item), style == selected);
+          if (style == selected) gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (style->button), TRUE);
+        }
+      valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (rss->model), &iter);
+    }
+  if (!selected) gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rss->null_button), TRUE);
+  rss->active_style = selected;
+  rss->syncing = FALSE;
+}
+
+/*! \brief Dispatch a routing menu item through the typed style selector. */
+static void
+route_menu_cb (GtkCheckMenuItem *item, GHidRouteStyleSelector *rss)
+{
+  struct _route_style *style = g_object_get_data (G_OBJECT (item), "route-style");
+  if (!rss->syncing) ghid_route_style_selector_select_style (rss, style->rst);
+}
+
 /* SIGNAL HANDLERS */
 /*! \brief Callback for user selection of a route style */
 static void
-radio_select_cb (GtkToggleAction *action, GHidRouteStyleSelector *rss)
+radio_select_cb (GtkToggleButton *button, GHidRouteStyleSelector *rss)
 {
-  rss->active_style = g_object_get_data (G_OBJECT (action), "route-style");
-  if (gtk_toggle_action_get_active (action))
-    g_signal_emit (rss, ghid_route_style_selector_signals[SELECT_STYLE_SIGNAL],
-                   0, rss->active_style->rst);
+  struct _route_style *style = g_object_get_data (G_OBJECT (button), "route-style");
+  if (!rss->syncing && gtk_toggle_button_get_active (button))
+    ghid_route_style_selector_select_style (rss, style->rst);
 }
 
 /* EDIT DIALOG */
@@ -185,12 +223,13 @@ _table_attach (GtkWidget *table, gint row, const gchar *label,
                GtkWidget **entry, Coord min, Coord max)
 {
   GtkWidget *label_w = gtk_label_new (label);
-  gtk_misc_set_alignment (GTK_MISC (label_w), 1.0, 0.5);
+  gtk_label_set_xalign (GTK_LABEL (label_w), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label_w), 0.5);
 
   *entry = ghid_coord_entry_new (min, max, 0, Settings.grid_unit, CE_SMALL);
-  gtk_table_attach (GTK_TABLE (table), label_w, 0, 1, row, row + 1,
+  pcb_grid_attach_bounds (GTK_GRID (table), label_w, 0, 1, row, row + 1,
                     GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 2);
-  gtk_table_attach (GTK_TABLE (table), *entry, 1, 2, row, row + 1,
+  pcb_grid_attach_bounds (GTK_GRID (table), *entry, 1, 2, row, row + 1,
                     GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 2);
 }
 
@@ -212,11 +251,12 @@ ghid_route_style_selector_edit_dialog (GHidRouteStyleSelector *rss)
   dialog = gtk_dialog_new_with_buttons (_("Edit Route Styles"),
                                         GTK_WINDOW (window),
                                         GTK_DIALOG_DESTROY_WITH_PARENT,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_NONE,
-                                        GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
+                                        _("_Cancel"), GTK_RESPONSE_NONE,
+                                        _("_OK"), GTK_RESPONSE_OK, NULL);
 
   label = gtk_label_new (_("Edit Style:"));
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 
   select_box = gtk_combo_box_new_with_model (GTK_TREE_MODEL (rss->model));
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (select_box), renderer, TRUE);
@@ -237,14 +277,15 @@ ghid_route_style_selector_edit_dialog (GHidRouteStyleSelector *rss)
 
   sub_vbox = ghid_category_vbox (vbox, _("Route Style Data"),
                                  4, 2, TRUE, TRUE);
-  table = gtk_table_new (6, 2, FALSE);
+  table = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (sub_vbox), table, TRUE, TRUE, 4);
   label = gtk_label_new (_("Name:"));
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
   dialog_data.name_entry = gtk_entry_new ();
-  gtk_table_attach (GTK_TABLE (table), label, 0, 1, 0, 1,
+  pcb_grid_attach_bounds (GTK_GRID (table), label, 0, 1, 0, 1,
                     GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 2);
-  gtk_table_attach (GTK_TABLE (table), dialog_data.name_entry, 1, 2, 0, 1,
+  pcb_grid_attach_bounds (GTK_GRID (table), dialog_data.name_entry, 1, 2, 0, 1,
                     GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 2);
 
   _table_attach (table, 1, _("Line width:"),
@@ -317,7 +358,8 @@ ghid_route_style_selector_edit_dialog (GHidRouteStyleSelector *rss)
                   (rss, rst, TRUE);
       else
         {
-          gtk_action_set_label (GTK_ACTION (style->action), rst->Name); 
+          gtk_menu_item_set_label (GTK_MENU_ITEM (style->menu_item), rst->Name);
+          gtk_button_set_label (GTK_BUTTON (style->button), rst->Name);
           gtk_list_store_set (rss->model, &iter, TEXT_COL, rst->Name, -1);
         }
 
@@ -341,6 +383,7 @@ ghid_route_style_selector_edit_dialog (GHidRouteStyleSelector *rss)
 static void
 edit_button_cb (GtkButton *btn, GHidRouteStyleSelector *rss)
 {
+  (void) btn;
   ghid_route_style_selector_edit_dialog (rss);
 }
 
@@ -348,6 +391,7 @@ edit_button_cb (GtkButton *btn, GHidRouteStyleSelector *rss)
 static void
 ghid_route_style_selector_init (GHidRouteStyleSelector *rss)
 {
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (rss), GTK_ORIENTATION_VERTICAL);
 }
 
 static void
@@ -387,12 +431,29 @@ ghid_route_style_selector_finalize (GObject *object)
   ghid_route_style_selector_empty (rss);
 
   g_object_unref (rss->accel_group);
-  g_object_unref (rss->action_group);
+  gtk_widget_destroy (rss->null_button);
+  g_object_unref (rss->null_button);
 
   G_OBJECT_CLASS (ghid_route_style_selector_parent_class)->finalize (object);
 }
 
 /* PUBLIC FUNCTIONS */
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+ghid_route_style_selector_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  ghid_route_style_selector_class_init ((GHidRouteStyleSelectorClass *) klass);
+}
+
+/*! \brief Adapt GLib instance initialization to the typed widget. */
+static void
+ghid_route_style_selector_init_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  ghid_route_style_selector_init ((GHidRouteStyleSelector *) instance);
+}
+
 GType
 ghid_route_style_selector_get_type (void)
 {
@@ -405,15 +466,16 @@ ghid_route_style_selector_get_type (void)
 	sizeof (GHidRouteStyleSelectorClass),
 	NULL, /* base_init */
 	NULL, /* base_finalize */
-	(GClassInitFunc) ghid_route_style_selector_class_init,
+	ghid_route_style_selector_class_init_adapter,
 	NULL, /* class_finalize */
 	NULL, /* class_data */
 	sizeof (GHidRouteStyleSelector),
 	0,    /* n_preallocs */
-	(GInstanceInitFunc) ghid_route_style_selector_init,
+	ghid_route_style_selector_init_adapter,
+        NULL /* value_table */
       };
 
-      rss_type = g_type_register_static (GTK_TYPE_VBOX,
+      rss_type = g_type_register_static (GTK_TYPE_BOX,
                                          "GHidRouteStyleSelector",
                                          &rss_info,
                                          0);
@@ -433,18 +495,13 @@ ghid_route_style_selector_new ()
     g_object_new (GHID_ROUTE_STYLE_SELECTOR_TYPE, NULL);
 
   rss->active_style = NULL;
-  rss->action_radio_group = NULL;
   rss->button_radio_group = NULL;
   rss->model = gtk_list_store_new (N_COLS, G_TYPE_STRING, G_TYPE_POINTER);
 
   rss->accel_group = gtk_accel_group_new ();
-  rss->action_group = gtk_action_group_new ("RouteStyleSelector");
-  rss->null_action = gtk_radio_action_new ("RouteStyleXX", "",
-                                           NULL, NULL, -1);
   rss->null_button = gtk_radio_button_new (rss->button_radio_group);
+  g_object_ref_sink (rss->null_button);
   init_radio_groups (rss);
-  gtk_activatable_set_related_action (GTK_ACTIVATABLE (rss->null_button),
-                                      GTK_ACTION (rss->null_action));
   rss->shortcut_key_idx = 1;
 
   /* Create edit button */
@@ -456,7 +513,7 @@ ghid_route_style_selector_new ()
   return GTK_WIDGET (rss);
 }
 
-/*! \brief Create a new GHidRouteStyleSelector 
+/*! \brief Create a new GHidRouteStyleSelector
  *
  *  \param [in] rss     The selector to be acted on
  *  \param [in] data    PCB's route style object that will be edited
@@ -469,21 +526,16 @@ ghid_route_style_selector_real_add_route_style (GHidRouteStyleSelector *rss,
 {
   GtkTreeIter iter;
   GtkTreePath *path;
-  gchar *action_name = g_strdup_printf ("RouteStyle%d", action_count);
   struct _route_style *new_style = g_malloc (sizeof (*new_style));
 
   /* Key the route style data with the RouteStyleType it controls */
   new_style->rst = data;
   new_style->temporary = temp;
-  new_style->action = gtk_radio_action_new (action_name, data->Name,
-                                            NULL, NULL, action_count);
-  gtk_radio_action_set_group (new_style->action, rss->action_radio_group);
-  rss->action_radio_group = gtk_radio_action_get_group (new_style->action);
-  new_style->button = gtk_radio_button_new (rss->button_radio_group);
-  rss->button_radio_group = gtk_radio_button_get_group
-                              (GTK_RADIO_BUTTON (new_style->button));
-  gtk_activatable_set_related_action (GTK_ACTIVATABLE (new_style->button),
-                                      GTK_ACTION (new_style->action));
+  new_style->menu_item = gtk_check_menu_item_new_with_label (data->Name);
+  g_object_ref_sink (new_style->menu_item);
+  gtk_check_menu_item_set_draw_as_radio (GTK_CHECK_MENU_ITEM (new_style->menu_item), TRUE);
+  new_style->button = gtk_radio_button_new_with_label (rss->button_radio_group, data->Name);
+  rss->button_radio_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (new_style->button));
 
   gtk_list_store_append (rss->model, &iter);
   gtk_list_store_set (rss->model, &iter, TEXT_COL, data->Name,
@@ -497,24 +549,18 @@ ghid_route_style_selector_real_add_route_style (GHidRouteStyleSelector *rss,
   if (rss->shortcut_key_idx < 12)
     {
       gchar *accel = g_strdup_printf ("<Ctrl>F%d", rss->shortcut_key_idx);
-      gtk_action_set_accel_group (GTK_ACTION (new_style->action),
-                                  rss->accel_group);
-      gtk_action_group_add_action_with_accel (rss->action_group,
-                                              GTK_ACTION (new_style->action),
-                                              accel);
+      selector_add_accel (new_style->menu_item, rss->accel_group, accel);
       g_free (accel);
       ++rss->shortcut_key_idx;
     }
 
   /* Hookup and install radio button */
-  g_object_set_data (G_OBJECT (new_style->action), "route-style", new_style);
-  new_style->sig_id = g_signal_connect (G_OBJECT (new_style->action),
-                                        "activate",
-                                        G_CALLBACK (radio_select_cb), rss);
+  g_object_set_data (G_OBJECT (new_style->menu_item), "route-style", new_style);
+  g_object_set_data (G_OBJECT (new_style->button), "route-style", new_style);
+  g_signal_connect (new_style->menu_item, "activate", G_CALLBACK (route_menu_cb), rss);
+  g_signal_connect (new_style->button, "toggled", G_CALLBACK (radio_select_cb), rss);
   gtk_box_pack_start (GTK_BOX (rss), new_style->button, FALSE, FALSE, 0);
 
-  g_free (action_name);
-  ++action_count;
   return new_style;
 }
 
@@ -558,13 +604,10 @@ ghid_route_style_selector_install_items (GHidRouteStyleSelector *rss,
   gtk_tree_model_get_iter_first (GTK_TREE_MODEL (rss->model), &iter);
   do
     {
-      GtkAction *action;
       struct _route_style *style;
 
       gtk_tree_model_get (GTK_TREE_MODEL (rss->model),
                           &iter, DATA_COL, &style, -1);
-      action = GTK_ACTION (style->action);
-      style->menu_item = gtk_action_create_menu_item (action);
       gtk_menu_shell_insert (shell, style->menu_item, pos + n);
       ++n;
     }
@@ -593,11 +636,7 @@ ghid_route_style_selector_select_style (GHidRouteStyleSelector *rss,
                           &iter, DATA_COL, &style, -1);
       if (style->rst == rst)
         {
-          g_signal_handler_block (G_OBJECT (style->action), style->sig_id);
-          gtk_toggle_action_set_active
-            (GTK_TOGGLE_ACTION (style->action), TRUE);
-          g_signal_handler_unblock (G_OBJECT (style->action), style->sig_id);
-          rss->active_style = style;
+          route_set_active (rss, style);
           g_signal_emit
             (rss, ghid_route_style_selector_signals[SELECT_STYLE_SIGNAL],
              0, rss->active_style->rst);
@@ -655,18 +694,14 @@ ghid_route_style_selector_sync (GHidRouteStyleSelector *rss,
           style->rst->Keepaway == Keepaway &&
           style->rst->ViaMask == ViaMask)
         {
-          g_signal_handler_block (G_OBJECT (style->action), style->sig_id);
-          gtk_toggle_action_set_active
-            (GTK_TOGGLE_ACTION (style->action), TRUE);
-          g_signal_handler_unblock (G_OBJECT (style->action), style->sig_id);
-          rss->active_style = style;
+          route_set_active (rss, style);
           found_match = TRUE;
         }
     }
   while (gtk_tree_model_iter_next (GTK_TREE_MODEL (rss->model), &iter));
 
   if (!found_match)
-    gtk_radio_action_set_current_value (rss->null_action, -1);
+    route_set_active (rss, NULL);
 }
 
 /*! \brief Removes all styles from a route style selector */
@@ -680,16 +715,11 @@ ghid_route_style_selector_empty (GHidRouteStyleSelector *rss)
       struct _route_style *rsdata;
       gtk_tree_model_get (GTK_TREE_MODEL (rss->model),
                           &iter, DATA_COL, &rsdata, -1);
-      if (rsdata->action)
-        {
-          gtk_action_group_remove_action (rss->action_group,
-                                GTK_ACTION (rsdata->action));
-          g_object_unref (G_OBJECT (rsdata->action));
-        }
-      if (rsdata->button)
-        gtk_widget_destroy (GTK_WIDGET (rsdata->button));
-      if (rsdata->menu_item)
-        gtk_widget_destroy (GTK_WIDGET (rsdata->menu_item));
+      rss->syncing = TRUE;
+      gtk_widget_destroy (rsdata->button);
+      gtk_widget_destroy (rsdata->menu_item);
+      g_object_unref (rsdata->menu_item);
+      rss->syncing = FALSE;
       if (rsdata->temporary)
         {
           free (rsdata->rst->Name);
@@ -699,9 +729,8 @@ ghid_route_style_selector_empty (GHidRouteStyleSelector *rss)
       free (rsdata);
     }
   while (gtk_list_store_remove (rss->model, &iter));
-  rss->action_radio_group = NULL;
   rss->button_radio_group = NULL;
   rss->shortcut_key_idx = 1;
   init_radio_groups (rss);
+  rss->active_style = NULL;
 }
-

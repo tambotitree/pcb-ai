@@ -64,7 +64,8 @@ static HID_DRAW eps_graphics;
 
 static FILE *f = 0;
 static Coord linewidth = -1;
-static int lastcap = -1;
+static EndCapStyle lastcap = Trace_Cap;
+static bool lastcap_valid = false;
 static int lastcolor = -1;
 static int print_group[MAX_GROUP];
 static int print_layer[MAX_ALL_LAYER];
@@ -80,8 +81,8 @@ Name of the encapsulated postscript output file. Can contain a path.
 @end ftable
 %end-doc
 */
-  {"eps-file", "Encapsulated Postscript output file",
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "eps-file", .help_text = "Encapsulated Postscript output file",
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_psfile 0
 
 /* %start-doc options "92 Encapsulated Postscript Export"
@@ -91,8 +92,8 @@ Scale EPS output by the parameter @samp{num}.
 @end ftable
 %end-doc
 */
-  {"eps-scale", "EPS scale",
-   HID_Real, 0, 100, {0, 0, 1.0}, 0, 0},
+  {.name = "eps-scale", .help_text = "EPS scale",
+   .type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 100 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 1.0}, .enumerations = 0, .value = 0},
 #define HA_scale 1
 
 /* %start-doc options "92 Encapsulated Postscript Export"
@@ -103,8 +104,8 @@ Export layers as shown on screen.
 @end ftable
 %end-doc
 */
-  {"screen-layer-order", "Export layers in the order shown on screen",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "screen-layer-order", .help_text = "Export layers in the order shown on screen",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_as_shown 2
 
 /* %start-doc options "92 Encapsulated Postscript Export"
@@ -114,8 +115,8 @@ Convert output to monochrome.
 @end ftable
 %end-doc
 */
-  {"monochrome", "Convert to monochrome",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "monochrome", .help_text = "Convert to monochrome",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_mono 3
 
 /* %start-doc options "92 Encapsulated Postscript Export"
@@ -126,8 +127,8 @@ Limit the bounds of the EPS file to the visible items.
 @end ftable
 %end-doc
 */
-  {"only-visible", "Limit the bounds of the EPS file to the visible items",
-   HID_Boolean, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = "only-visible", .help_text = "Limit the bounds of the EPS file to the visible items",
+   .type = HID_Boolean, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_only_visible 4
 };
 
@@ -254,7 +255,7 @@ eps_hid_export_to_file (FILE * the_file, HID_Attr_Val * options)
     }
   fprintf (f, "%%!PS-Adobe-3.0 EPSF-3.0\n");
   linewidth = -1;
-  lastcap = -1;
+  lastcap_valid = false;
   lastcolor = -1;
 
   in_mono = options[HA_mono].int_value;
@@ -281,7 +282,7 @@ eps_hid_export_to_file (FILE * the_file, HID_Attr_Val * options)
   if (options[HA_as_shown].int_value && Settings.ShowBottomSide)
     pcb_fprintf (f, "-1 1 scale %mi 0 translate\n", bounds->X1 - bounds->X2);
   linewidth = -1;
-  lastcap = -1;
+  lastcap_valid = false;
   lastcolor = -1;
 #define Q (Coord) MIL_TO_COORD(10)
   pcb_fprintf (f,
@@ -522,7 +523,7 @@ use_gc (hidGC gc)
       pcb_fprintf (f, "%mi setlinewidth\n", gc->width);
       linewidth = gc->width;
     }
-  if (lastcap != gc->cap)
+  if (!lastcap_valid || lastcap != gc->cap)
     {
       int c;
       switch (gc->cap)
@@ -538,6 +539,7 @@ use_gc (hidGC gc)
 	}
       fprintf (f, "%d setlinecap\n", c);
       lastcap = gc->cap;
+      lastcap_valid = true;
     }
   if (lastcolor != gc->color)
     {

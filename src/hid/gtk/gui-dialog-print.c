@@ -87,11 +87,11 @@ entry_changed_cb (GtkEntry * entry, char **str)
 }
 
 static void
-enum_changed_cb (GtkWidget * combo_box, int *val)
+enum_changed_cb (GtkComboBox *combo_box, int *val)
 {
   gint active;
 
-  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_box));
+  active = gtk_combo_box_get_active (combo_box);
   *val = active;
 }
 
@@ -115,9 +115,8 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 					GTK_WINDOW (out->top_window),
 					(GtkDialogFlags)(GTK_DIALOG_MODAL
 							 | GTK_DIALOG_DESTROY_WITH_PARENT),
-					GTK_STOCK_CANCEL, GTK_RESPONSE_NONE,
-					GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
-  gtk_window_set_wmclass (GTK_WINDOW (dialog), "PCB_attribute_editor", "PCB");
+					_("_Cancel"), GTK_RESPONSE_NONE,
+					_("_OK"), GTK_RESPONSE_OK, NULL);
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
@@ -128,7 +127,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
   vbox = ghid_category_vbox (main_vbox, descr != NULL ? descr : "",
 			     4, 2, TRUE, TRUE);
 
-  /* 
+  /*
    * Iterate over all the export options and build up a dialog box
    * that lets us control all of the options.  By doing things this
    * way, any changes to the exporter HID's automatically are
@@ -151,13 +150,13 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-	  /* 
-	   * FIXME 
+	  /*
+	   * FIXME
 	   * need to pick the "digits" argument based on min/max
 	   * values
 	   */
 	  ghid_spin_button (hbox, &widget, attrs[j].default_val.int_value,
-			    attrs[j].min_val, attrs[j].max_val, 1.0, 1.0, 0, 0,
+			    attrs[j].min_val.int_value, attrs[j].max_val.int_value, 1.0, 1.0, 0, 0,
 			    intspinner_changed_cb,
 			    &(attrs[j].default_val.int_value), FALSE, NULL);
 	  gtk_widget_set_tooltip_text (widget, _(attrs[j].help_text));
@@ -170,7 +169,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-	  entry = ghid_coord_entry_new (attrs[j].min_val, attrs[j].max_val,
+	  entry = ghid_coord_entry_new (attrs[j].min_val.coord_value, attrs[j].max_val.coord_value,
 	                                attrs[j].default_val.coord_value,
 	                                Settings.grid_unit, CE_SMALL);
 	  gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, FALSE, 0);
@@ -190,14 +189,14 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-	  /* 
-	   * FIXME 
+	  /*
+	   * FIXME
 	   * need to pick the "digits" and step size argument more
 	   * intelligently
 	   */
 	  ghid_spin_button (hbox, &widget, attrs[j].default_val.real_value,
-			    attrs[j].min_val, attrs[j].max_val, 0.01, 0.01, 3,
-			    0, 
+			    attrs[j].min_val.real_value, attrs[j].max_val.real_value, 0.01, 0.01, 3,
+			    0,
 			    dblspinner_changed_cb,
 			    &(attrs[j].default_val.real_value), FALSE, NULL);
 
@@ -240,7 +239,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
         do_enum:
-	  combo = gtk_combo_box_new_text ();
+	  combo = gtk_combo_box_text_new ();
 	  gtk_widget_set_tooltip_text (combo, _(attrs[j].help_text));
 	  gtk_box_pack_start (GTK_BOX (hbox), combo, FALSE, FALSE, 0);
 	  g_signal_connect (G_OBJECT (combo), "changed",
@@ -248,15 +247,14 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 			    &(attrs[j].default_val.int_value));
 
 
-	  /* 
+	  /*
 	   * Iterate through each value and add them to the
 	   * combo box
 	   */
 	  i = 0;
 	  while (attrs[j].enumerations[i])
 	    {
-	      gtk_combo_box_append_text (GTK_COMBO_BOX (combo),
-					 attrs[j].enumerations[i]);
+	      gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), attrs[j].enumerations[i]);
 	      i++;
 	    }
 	  gtk_combo_box_set_active (GTK_COMBO_BOX (combo),
@@ -268,14 +266,14 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	case HID_Mixed:
 	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-          
+
 	  /*
 	   * FIXME
 	   * need to pick the "digits" and step size argument more
 	   * intelligently
 	   */
 	  ghid_spin_button (hbox, &widget, attrs[j].default_val.real_value,
-			    attrs[j].min_val, attrs[j].max_val, 0.01, 0.01, 3,
+			    attrs[j].min_val.real_value, attrs[j].max_val.real_value, 0.01, 0.01, 3,
 			    0,
 			    dblspinner_changed_cb,
 			    &(attrs[j].default_val.real_value), FALSE, NULL);
@@ -304,20 +302,19 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 	  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-	  combo = gtk_combo_box_new_text ();
+	  combo = gtk_combo_box_text_new ();
 	  gtk_widget_set_tooltip_text (combo, _(attrs[j].help_text));
 	  gtk_box_pack_start (GTK_BOX (hbox), combo, FALSE, FALSE, 0);
 	  g_signal_connect (G_OBJECT (combo), "changed",
 			    G_CALLBACK (enum_changed_cb),
 			    &(attrs[j].default_val.int_value));
 
-	  /* 
+	  /*
 	   * Iterate through each value and add them to the
 	   * combo box
 	   */
 	  for (i = 0; i < n; ++i)
-	    gtk_combo_box_append_text (GTK_COMBO_BOX (combo),
-					unit_list[i].in_suffix);
+	    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), unit_list[i].in_suffix);
 	  gtk_combo_box_set_active (GTK_COMBO_BOX (combo),
 				    attrs[j].default_val.int_value);
 	  widget = gtk_label_new (_(attrs[j].name));
@@ -354,7 +351,7 @@ ghid_attribute_dialog (HID_Attribute * attrs,
 
 
 static void
-exporter_clicked_cb (GtkButton * button, HID * exporter)
+exporter_clicked_cb (GtkButton * button G_GNUC_UNUSED, HID * exporter)
 {
   ghid_dialog_print (exporter);
 }
@@ -382,16 +379,16 @@ ghid_dialog_print (HID *hid)
 	  fprintf (stderr, _("%s() -- malloc failed\n"), __FUNCTION__);
 	  exit (1);
 	}
-      
+
       /* non-zero means cancel was picked */
-      if (ghid_attribute_dialog (attr, n, results,  _("PCB Print Layout"), 
+      if (ghid_attribute_dialog (attr, n, results,  _("PCB Print Layout"),
 				 exporter->description))
 	return;
-	  
+
     }
 
   exporter->do_export (results);
-  
+
   for (i = 0; i < n; i++)
     {
       if (results[i].str_value)
@@ -419,9 +416,8 @@ ghid_dialog_export (void)
 					       (GtkDialogFlags)(GTK_DIALOG_MODAL
 					       |
 								GTK_DIALOG_DESTROY_WITH_PARENT),
-					       GTK_STOCK_CANCEL,
+					       _("_Cancel"),
 					       GTK_RESPONSE_CANCEL, NULL);
-  gtk_window_set_wmclass (GTK_WINDOW (export_dialog), "PCB_Export", "PCB");
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (export_dialog));
 
@@ -429,7 +425,7 @@ ghid_dialog_export (void)
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
   gtk_container_add (GTK_CONTAINER (content_area), vbox);
 
-  /* 
+  /*
    * Iterate over all the export HID's and build up a dialog box that
    * lets us choose which one we want to use.
    * This way, any additions to the exporter HID's automatically are

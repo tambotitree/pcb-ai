@@ -38,8 +38,8 @@ PDF output with a virtual PDF printer. Example: @*
 @noindent In addition, all @ref{Postscript Export} options are valid.
 %end-doc
 */
-  {N_("lprcommand"), N_("Command to use for printing"),
-   HID_String, 0, 0, {0, 0, 0}, 0, 0},
+  {.name = N_("lprcommand"), .help_text = N_("Command to use for printing"),
+   .type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_lprcommand 0
 };
 

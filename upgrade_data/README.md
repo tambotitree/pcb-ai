@@ -1,5 +1,11 @@
 # Upgrade inventory and working data
 
+For each build stop, search the whole PCB-ai source tree for the same migration
+pattern and capture the matches. Extend a Python converter (or add a dedicated
+one), preview its diff, apply it to all confirmed instances, and rebuild. Record
+ambiguous matches for review; similar names alone do not establish compatible
+callback signatures. See `../UPDATE_PROJECT_TODO.md` for the agreed cycle.
+
 `source_inventory.json` is the versioned inventory and per-file review record.
 Regenerate it from the repository root with:
 
@@ -96,3 +102,40 @@ Add `--apply` to write reviewed changes and record conversion history. Existing
 headers are not rewritten: compare them first, then compile the candidate source
 against its included header. Scalar promotion rules, complex declarators and
 missing types are outside this converter's rules. Function bodies are untouched.
+
+`gtk3_build_conversion.py` selects the experimental GTK3 configure dependency
+and rejects the legacy gtkglext path. It does not convert renderer types or
+claim a working GUI. It uses the same preview/apply and history workflow.
+
+`struct_macro_conversion.py --path src/global.h` normalizes the redundant
+ANYOBJECTFIELDS macro terminator. It leaves callers and field layout intact;
+the first application was checked with compiled size/offset comparisons.
+
+`gtk_api_conversion.py` holds a RULES table of file scopes, patterns, replacements
+and rationales. A `None` replacement reports `needs_rule` without rewriting.
+Preview selected files with repeatable `--path` arguments; add `--apply` after
+review. Run `python3 tools/test_gtk_api_conversion.py` for the rule tests.
+
+## One-time migration policy
+
+Conversion scripts record historical migration steps. Apply a reviewed rule once,
+then maintain the converted production source directly. They are not run by
+bootstrap, configure or make and must not regenerate code after manual changes.
+Idempotence checks validate a rule before use, not a recurring build process.
+Windows-specific portability changes are deferred until the Windows port.
+
+`timestamp_conversion.py` records the completed migration from GTimeVal to
+struct timespec, stat member detection and coordinated timestamp comparisons,
+following gschem. The converted source is now authoritative.
+
+`gtk_api_migrations.json` is the human-reviewed rule table read by the GTK API
+script. It stores compiler hints separately from selected replacements and links
+to actual companion gschem implementations. Report-only rows retain unresolved
+ownership/type changes until a coordinated conversion rule is ready. These
+references are evidence, not a dependency on gschem at normal build/runtime.
+
+`visibility_renderer_conversion.py` records the completed coordinated visibility
+cell-renderer migration (guarded against an unexpected original hash). Maintain
+the production source directly. `test_visibility_renderer.py` compiles and tests
+that actual source against GTK3 independently of the full PCB window. It requires
+a configured experimental GTK3 build and returns skip status 77 without a display.

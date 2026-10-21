@@ -33,22 +33,22 @@
 
 /*
  * FIXME:
- * 
+ *
  * If you have a section of a net that does not contain any pins then that
  * section will be missing from the Nelma's copper geometry.
- * 
+ *
  * For example:
- * 
+ *
  * this section will be ignored by Nelma |       |
- * 
+ *
  * ||             ||=======||            ||     component layer ||
  * ||       ||            || ||=============||       ||============||
  * solder layer
- * 
+ *
  * pin1           via      via           pin2
- * 
+ *
  * Single layer layouts are always exported correctly.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -159,8 +159,8 @@ File name prefix.
 @end ftable
 %end-doc
 */
-	{"basename", "File name prefix",
-	HID_String, 0, 0, {0, 0, 0}, 0, 0},
+	{.name = "basename", .help_text = "File name prefix",
+	.type = HID_String, .min_val = { .int_value = 0 }, .max_val = { .int_value = 0 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_basename 0
 
 /* %start-doc options "94 Nelma Options"
@@ -170,8 +170,8 @@ Horizontal scale factor (grid points/inch).
 @end ftable
 %end-doc
 */
-	{"dpi", "Horizontal scale factor (grid points/inch)",
-	HID_Integer, 0, 1000, {100, 0, 0}, 0, 0},
+	{.name = "dpi", .help_text = "Horizontal scale factor (grid points/inch)",
+	.type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 1000 }, .default_val = {.int_value = 100, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_dpi 1
 
 /* %start-doc options "94 Nelma Options"
@@ -181,8 +181,8 @@ Copper layer height (um).
 @end ftable
 %end-doc
 */
-	{"copper-height", "Copper layer height (um)",
-	HID_Integer, 0, 200, {100, 0, 0}, 0, 0},
+	{.name = "copper-height", .help_text = "Copper layer height (um)",
+	.type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 200 }, .default_val = {.int_value = 100, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_copperh 2
 
 /* %start-doc options "94 Nelma Options"
@@ -192,8 +192,8 @@ Substrate layer height (um).
 @end ftable
 %end-doc
 */
-	{"substrate-height", "Substrate layer height (um)",
-	HID_Integer, 0, 10000, {2000, 0, 0}, 0, 0},
+	{.name = "substrate-height", .help_text = "Substrate layer height (um)",
+	.type = HID_Integer, .min_val = { .int_value = 0 }, .max_val = { .int_value = 10000 }, .default_val = {.int_value = 2000, .str_value = 0, .real_value = 0}, .enumerations = 0, .value = 0},
 #define HA_substrateh 3
 
 /* %start-doc options "94 Nelma Options"
@@ -203,8 +203,8 @@ Substrate relative epsilon.
 @end ftable
 %end-doc
 */
-	{"substrate-epsilon", "Substrate relative epsilon",
-	HID_Real, 0, 100, {0, 0, 4.0}, 0, 0},
+	{.name = "substrate-epsilon", .help_text = "Substrate relative epsilon",
+	.type = HID_Real, .min_val = { .real_value = 0 }, .max_val = { .real_value = 100 }, .default_val = {.int_value = 0, .str_value = 0, .real_value = 4.0}, .enumerations = 0, .value = 0},
 #define HA_substratee 4
 };
 
@@ -237,7 +237,7 @@ nelma_get_png_name(const char *basename, const char *suffix)
 
 /* Retrieves coordinates (in default PCB units) of a pin or pad. */
 /* Copied from netlist.c */
-static int 
+static int
 pin_name_to_xy (LibraryEntryType * pin, Coord *x, Coord *y)
 {
 	ConnectionType  conn;
@@ -258,7 +258,7 @@ pin_name_to_xy (LibraryEntryType * pin, Coord *x, Coord *y)
 
 /* *** Exporting netlist data and geometry to the nelma config file ******** */
 
-static void 
+static void
 nelma_write_space(FILE * out)
 {
 	double          xh, zh;
@@ -300,7 +300,7 @@ nelma_write_space(FILE * out)
 }
 
 
-static void 
+static void
 nelma_write_material(FILE * out, char *name, char *type, double e)
 {
 	fprintf(out, "material %s {\n", name);
@@ -311,7 +311,7 @@ nelma_write_material(FILE * out, char *name, char *type, double e)
 	fprintf(out, "}\n");
 }
 
-static void 
+static void
 nelma_write_materials(FILE * out)
 {
 	fprintf(out, "\n/* **** Materials **** */\n\n");
@@ -322,7 +322,7 @@ nelma_write_materials(FILE * out)
 			     nelma_air_epsilon * nelma_substratee);
 }
 
-static void 
+static void
 nelma_write_nets(FILE * out)
 {
 	LibraryType     netlist;
@@ -369,7 +369,7 @@ nelma_write_nets(FILE * out)
 	}
 }
 
-static void 
+static void
 nelma_write_layer(FILE * out, int z, int h,
 		  const char *name, int full,
 		  char *mat)
@@ -407,7 +407,7 @@ nelma_write_layer(FILE * out, int z, int h,
 	fprintf(out, "}\n");
 }
 
-static void 
+static void
 nelma_write_layers(FILE * out)
 {
 	int             i, idx;
@@ -454,7 +454,7 @@ nelma_write_layers(FILE * out)
 		}
 }
 
-static void 
+static void
 nelma_write_object(FILE * out, LibraryEntryType *pin)
 {
 	int             i, idx;
@@ -492,7 +492,7 @@ nelma_write_object(FILE * out, LibraryEntryType *pin)
 		}
 }
 
-static void 
+static void
 nelma_write_objects(FILE * out)
 {
 	LibraryType     netlist;
@@ -518,7 +518,7 @@ nelma_write_objects(FILE * out)
 
 /* *** Main export callback ************************************************ */
 
-static void 
+static void
 nelma_parse_arguments(int *argc, char ***argv)
 {
 	hid_register_attributes(nelma_attribute_list,
@@ -545,7 +545,7 @@ nelma_get_export_options(int *n)
 }
 
 /* Populates nelma_export_group array */
-void 
+void
 nelma_choose_groups()
 {
 	int             n, m;
@@ -577,7 +577,7 @@ nelma_choose_groups()
 	}
 }
 
-static void 
+static void
 nelma_alloc_colors()
 {
 	/*
@@ -594,7 +594,7 @@ nelma_alloc_colors()
 	black->c = gdImageColorAllocate(nelma_im, black->r, black->g, black->b);
 }
 
-static void 
+static void
 nelma_start_png(const char *basename, const char *suffix)
 {
 	int             h, w;
@@ -616,7 +616,7 @@ nelma_start_png(const char *basename, const char *suffix)
 	free(buf);
 }
 
-static void 
+static void
 nelma_finish_png()
 {
 #ifdef HAVE_GDIMAGEPNG
@@ -634,7 +634,7 @@ nelma_finish_png()
 	nelma_f = NULL;
 }
 
-void 
+void
 nelma_start_png_export()
 {
 	BoxType         region;
@@ -650,7 +650,7 @@ nelma_start_png_export()
 	hid_expose_callback(&nelma_hid, &region, 0);
 }
 
-static void 
+static void
 nelma_do_export(HID_Attr_Val * options)
 {
 	int             save_ons[MAX_ALL_LAYER];
@@ -726,7 +726,7 @@ nelma_do_export(HID_Attr_Val * options)
 
 /* *** PNG export (slightly modified code from PNG export HID) ************* */
 
-static int 
+static int
 nelma_set_layer(const char *name, int group, int empty)
 {
 	int             idx = (group >= 0 && group < max_group) ?
@@ -758,7 +758,7 @@ nelma_set_layer(const char *name, int group, int empty)
 	return 0;
 }
 
-static hidGC 
+static hidGC
 nelma_make_gc(void)
 {
 	hidGC           rv = (hidGC) malloc(sizeof(struct hid_gc_struct));
@@ -771,19 +771,19 @@ nelma_make_gc(void)
 	return rv;
 }
 
-static void 
+static void
 nelma_destroy_gc(hidGC gc)
 {
 	free(gc);
 }
 
-static void 
+static void
 nelma_use_mask(enum mask_mode mode)
 {
 	/* does nothing */
 }
 
-static void 
+static void
 nelma_set_color(hidGC gc, const char *name)
 {
 	if (nelma_im == NULL) {

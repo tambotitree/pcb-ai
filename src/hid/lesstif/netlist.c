@@ -325,12 +325,12 @@ build_netlist_dialog ()
 
   n = 0;
   b_sel = netlist_button (netlist_dialog, "select", "Select",
-			  0, b_rat_on, NLB_FORM, 0, 
+			  0, b_rat_on, NLB_FORM, 0,
 			      (XtCallbackProc)nbcb_std_callback, (void *)nbcb_select);
 
   n = 0;
   b_unsel = netlist_button (netlist_dialog, "deselect", "Deselect",
-			    0, b_rat_on, b_sel, 0, 
+			    0, b_rat_on, b_sel, 0,
 			      (XtCallbackProc)nbcb_std_callback, (void *)nbcb_deselect);
 
   n = 0;
@@ -482,10 +482,10 @@ lesstif_show_netlist ()
 }
 
 HID_Action lesstif_netlist_action_list[] = {
-  {"NetlistChanged", 0, LesstifNetlistChanged,
-   netlistchanged_help, netlistchanged_syntax},
-  {"NetlistShow", 0, LesstifNetlistShow,
-   netlistshow_help, netlistshow_syntax}
+  {.name = "NetlistChanged", .need_coord_msg = 0, .trigger_cb = LesstifNetlistChanged,
+   .description = netlistchanged_help, .syntax = netlistchanged_syntax},
+  {.name = "NetlistShow", .need_coord_msg = 0, .trigger_cb = LesstifNetlistShow,
+   .description = netlistshow_help, .syntax = netlistshow_syntax}
 };
 
 REGISTER_ACTIONS (lesstif_netlist_action_list)

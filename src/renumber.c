@@ -178,8 +178,8 @@ renumber_buffer (int argc, char **argv, Coord x, Coord y)
 
 static HID_Action renumber_block_action_list[] =
 {
-  {"RenumberBlock", NULL, renumber_block, NULL, NULL},
-  {"RenumberBuffer", NULL, renumber_buffer, NULL, NULL}
+  {.name = "RenumberBlock", .need_coord_msg = NULL, .trigger_cb = renumber_block, .description = NULL, .syntax = NULL},
+  {.name = "RenumberBuffer", .need_coord_msg = NULL, .trigger_cb = renumber_buffer, .description = NULL, .syntax = NULL}
 };
 
 REGISTER_ACTIONS (renumber_block_action_list)

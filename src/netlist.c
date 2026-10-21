@@ -532,11 +532,11 @@ Netlist (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action netlist_action_list[] = {
-  {"net", 0, Netlist,
-   netlist_help, netlist_syntax}
+  {.name = "net", .need_coord_msg = 0, .trigger_cb = Netlist,
+   .description = netlist_help, .syntax = netlist_syntax}
   ,
-  {"netlist", 0, Netlist,
-   netlist_help, netlist_syntax}
+  {.name = "netlist", .need_coord_msg = 0, .trigger_cb = Netlist,
+   .description = netlist_help, .syntax = netlist_syntax}
 };
 
 REGISTER_ACTIONS (netlist_action_list)

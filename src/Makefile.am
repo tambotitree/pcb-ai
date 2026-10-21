@@ -178,7 +178,9 @@ DBUS_SRCS= \
 	dbus.c
 
 LIBGTK_GDK_SRCS= \
-	hid/gtk/gtkhid-gdk.c
+	hid/gtk/gtkhid-gdk.c \
+	hid/gtk/pcb-cairo.c \
+	hid/gtk/pcb-cairo.h
 
 LIBGTK_GL_SRCS= \
 	hid/gtk/gtkhid-gl.c \
@@ -322,7 +324,12 @@ hid/common/hidlist.h : Makefile
 	done
 
 libgtk_a_CPPFLAGS = -I$(top_srcdir) -I./hid/gtk
+# Keep migration diagnostics local to GTK; configure probes and core are separate.
+libgtk_a_CFLAGS = $(AM_CFLAGS) -Wall -Wextra -Werror -Wpedantic
 LIBGTK_SRCS = \
+	hid/gtk/pcb-pointer.h \
+	hid/gtk/pcb-grid.h \
+	hid/gtk/pcb-xpm.h \
 	dolists.h \
 	hid/hidint.h \
 	hid/gtk/ghid-cell-renderer-visibility.c \

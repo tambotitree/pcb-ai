@@ -119,7 +119,7 @@ static const char apply_vendor_help[] =
   N_("Applies the currently loaded vendor drill table to the current design.");
 
 /* %start-doc actions ApplyVendor
-@cindex vendor map 
+@cindex vendor map
 @cindex vendor drill table
 @findex ApplyVendor()
 
@@ -144,7 +144,7 @@ static const char toggle_vendor_help[] =
 
 /* %start-doc actions ToggleVendor
 
-@cindex vendor map 
+@cindex vendor map
 @cindex vendor drill table
 @findex ToggleVendor()
 
@@ -175,7 +175,7 @@ static const char enable_vendor_help[] =
 
 /* %start-doc actions EnableVendor
 
-@cindex vendor map 
+@cindex vendor map
 @cindex vendor drill table
 @findex EnableVendor()
 
@@ -203,7 +203,7 @@ static const char disable_vendor_help[] =
 
 /* %start-doc actions DisableVendor
 
-@cindex vendor map 
+@cindex vendor map
 @cindex vendor drill table
 @findex DisableVendor()
 
@@ -229,7 +229,7 @@ static const char unload_vendor_help[] =
 
 /* %start-doc actions UnloadVendor
 
-@cindex vendor map 
+@cindex vendor map
 @cindex vendor drill table
 @findex UnloadVendor()
 
@@ -261,7 +261,7 @@ static const char load_vendor_help[] =
 
 /* %start-doc actions LoadVendorFrom
 
-@cindex vendor map 
+@cindex vendor map
 @cindex vendor drill table
 @findex LoadVendorFrom()
 
@@ -604,7 +604,7 @@ apply_vendor_map (void)
 	    }
 	}
 
-      /* 
+      /*
        * if we've changed anything, indicate that we need to save the
        * file, redraw things, and make sure we can undo.
        */
@@ -718,7 +718,7 @@ add_to_drills (char *sval)
   tmpd = atof (sval);
   val = floor (sf * tmpd + 0.5);
 
-  /* 
+  /*
    * We keep the array of vendor drills sorted to make it easier to
    * do the rounding later.  The algorithm used here is not so efficient,
    * but we're not dealing with much in the way of data.
@@ -766,7 +766,7 @@ process_skips (Resource * res)
       switch (type)
 	{
 	case 1:
-	  /* 
+	  /*
 	   * an unnamed sub resource.  This is something like
 	   * {refdes "J3"}
 	   */
@@ -957,23 +957,23 @@ rematch (const char *re, const char *s)
 }
 
 HID_Action vendor_action_list[] = {
-  {"ApplyVendor", 0, ActionApplyVendor,
-   apply_vendor_help, apply_vendor_syntax}
+  {.name = "ApplyVendor", .need_coord_msg = 0, .trigger_cb = ActionApplyVendor,
+   .description = apply_vendor_help, .syntax = apply_vendor_syntax}
   ,
-  {"ToggleVendor", 0, ActionToggleVendor,
-   toggle_vendor_help, toggle_vendor_syntax}
+  {.name = "ToggleVendor", .need_coord_msg = 0, .trigger_cb = ActionToggleVendor,
+   .description = toggle_vendor_help, .syntax = toggle_vendor_syntax}
   ,
-  {"EnableVendor", 0, ActionEnableVendor,
-   enable_vendor_help, enable_vendor_syntax}
+  {.name = "EnableVendor", .need_coord_msg = 0, .trigger_cb = ActionEnableVendor,
+   .description = enable_vendor_help, .syntax = enable_vendor_syntax}
   ,
-  {"DisableVendor", 0, ActionDisableVendor,
-   disable_vendor_help, disable_vendor_syntax}
+  {.name = "DisableVendor", .need_coord_msg = 0, .trigger_cb = ActionDisableVendor,
+   .description = disable_vendor_help, .syntax = disable_vendor_syntax}
   ,
-  {"UnloadVendor", 0, ActionUnloadVendor,
-   unload_vendor_help, unload_vendor_syntax}
+  {.name = "UnloadVendor", .need_coord_msg = 0, .trigger_cb = ActionUnloadVendor,
+   .description = unload_vendor_help, .syntax = unload_vendor_syntax}
   ,
-  {"LoadVendorFrom", 0, ActionLoadVendorFrom,
-   load_vendor_help, load_vendor_syntax}
+  {.name = "LoadVendorFrom", .need_coord_msg = 0, .trigger_cb = ActionLoadVendorFrom,
+   .description = load_vendor_help, .syntax = load_vendor_syntax}
 };
 
 REGISTER_ACTIONS (vendor_action_list)

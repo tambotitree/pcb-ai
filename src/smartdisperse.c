@@ -301,7 +301,7 @@ smartdisperse (int argc, char **argv, Coord x, Coord y)
 static HID_Action
 smartdisperse_action_list[] =
 {
-  {"smartdisperse", NULL, smartdisperse, NULL, NULL}
+  {.name = "smartdisperse", .need_coord_msg = NULL, .trigger_cb = smartdisperse, .description = NULL, .syntax = NULL}
 };
 
 REGISTER_ACTIONS (smartdisperse_action_list)

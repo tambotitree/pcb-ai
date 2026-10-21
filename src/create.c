@@ -856,7 +856,7 @@ CreateNewPin (ElementType *Element,
   pin->ID = ID++;
   pin->Element = Element;
 
-  /* 
+  /*
    * If there is no vendor drill map installed, this will simply
    * return DrillingHole.
    */
@@ -1092,26 +1092,26 @@ create_via_action(int argc, char **argv, Coord x, Coord y)
   Coord nx, ny;
   bool absolute1, absolute2;
   PinType *via;
-  
+
   ny = GetValue (y_str, units, &absolute1);
   nx = GetValue (x_str, units, &absolute2);
-  
+
   if (!absolute1 || !absolute2) {
     Message(
             "CreateVia action does not currently support relative placements.\n");
   }
-  
+
   via = CreateNewVia(PCB->Data, nx, ny, Settings.ViaThickness,
                      2*Settings.Keepaway, Settings.ViaMaskAperture,
                      Settings.ViaDrillingHole, NULL, NoFlags());
-  
+
   return via->ID;
 }
 
 static HID_Action create_action_list[] =
 {
-  {"CreateVia", NULL, create_via_action,
-    create_via_help, create_via_syntax}
+  {.name = "CreateVia", .need_coord_msg = NULL, .trigger_cb = create_via_action,
+    .description = create_via_help, .syntax = create_via_syntax}
 };
 
 REGISTER_ACTIONS (create_action_list)

@@ -90,8 +90,8 @@ static void GetGridLockCoordinates (int, void *, void *, void *,
 
 /* Local variables */
 
-/*! 
- * \brief Used by SaveStackAndVisibility() and 
+/*!
+ * \brief Used by SaveStackAndVisibility() and
  * RestoreStackAndVisibility().
  */
 static struct
@@ -172,7 +172,7 @@ GetValueEx (const char *val, const char *units, bool * absolute, UnitList extra_
 
   while (units && *units == ' ')
     units ++;
-    
+
   if (units && *units)
     {
       int i;
@@ -898,7 +898,7 @@ CenterDisplay (Coord X, Coord Y, bool warp_pointer)
  * symbol is at the zero position.
  *
  * The y coordinates are moved so that min(y) = 0.
- * 
+ *
  */
 void
 SetFontInfo (FontType *Ptr)
@@ -1013,7 +1013,7 @@ make_route_string (RouteStyleType rs[], int n_styles)
 
 /*!
  * \brief Parses the routes definition string
- * 
+ *
  * Which is a colon separated list of comma separated Name, Dimension,
  * Dimension, Dimension[, Dimension, Dimension].
  *
@@ -1025,7 +1025,7 @@ ParseRouteString (char *s, RouteStyleType *routeStyle, const char *default_unit)
   int i, n, style;
   char Name[256];
   char *orig_s = s;
-  
+
   Coord *style_items[5];
 
   style = 0;
@@ -1039,7 +1039,7 @@ ParseRouteString (char *s, RouteStyleType *routeStyle, const char *default_unit)
       for (i = 0; *s && *s != ','; i++)  Name[i] = *s++;
       Name[i] = '\0';
       routeStyle->Name = strdup (Name);
-      
+
       // setup some default values
       routeStyle->Keepaway = MIL_TO_COORD(10);
       routeStyle->ViaMask = 0;
@@ -1070,7 +1070,7 @@ ParseRouteString (char *s, RouteStyleType *routeStyle, const char *default_unit)
         fprintf(stderr, "unexpected character: %c\n", *s);
         goto error;
       }
-      
+
       // otherwise, prepare for the next loop
       style++; routeStyle++;
     }
@@ -2733,7 +2733,7 @@ pcb_mkdir (const char *path, int mode)
  * \return a relative rotation for an element, useful only for comparing
  * two similar footprints.
  */
-int 
+int
 ElementOrientation (ElementType *e)
 {
   Coord pin1x, pin1y, pin2x, pin2y, dx, dy;
@@ -2816,8 +2816,8 @@ ActionListRotations(int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action misc_action_list[] = {
-  {"ListRotations", 0, ActionListRotations,
-   0,0},
+  {.name = "ListRotations", .need_coord_msg = 0, .trigger_cb = ActionListRotations,
+   .description = 0,.syntax = 0},
 };
 
 REGISTER_ACTIONS (misc_action_list)

@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""One-time coordinated GTK3 visibility-renderer migration, based on gschem."""
+
+import hashlib
+
+from conversion import main
+
+# Filled from the reviewed original module, not guessed from an API spelling.
+ORIGINAL_SHA256 = '55a9bafe47d0cd247f0968727282e87233fb142a39bf35a82899694c5ab92aa3'
+
+IMPLEMENTATION = r'''#include <gtk/gtk.h>
+#include "global.h"
+#include "ghid-cell-renderer-visibility.h"
+
+enum { TOGGLED, LAST_SIGNAL };
+static guint toggle_cell_signals[LAST_SIGNAL];
+enum { PROP_ACTIVE = 1, PROP_COLOR };
+
+struct _GHidCellRendererVisibility
+{
+  GtkCellRenderer parent;
+  gboolean active;
+  gchar *color;
+};
+
+struct _GHidCellRendererVisibilityClass
+{
+  GtkCellRendererClass parent_class;
+  void (*toggled) (GHidCellRendererVisibility *cell, const gchar *path);
+};
+
+G_DEFINE_TYPE (GHidCellRendererVisibility, ghid_cell_renderer_visibility,
+               GTK_TYPE_CELL_RENDERER)
+
+/*! \brief Calculate swatch size using GTK3 border metrics and cell padding. */
+static void
+ghid_cell_renderer_visibility_get_size (GtkCellRenderer *cell,
+                                       GtkWidget *widget,
+                                       const GdkRectangle *cell_area,
+                                       gint *x_offset, gint *y_offset,
+                                       gint *width, gint *height)
+{
+  GtkStyleContext *context = gtk_widget_get_style_context (widget);
+  GtkBorder border;
+  gint xpad, ypad, w, h;
+  gfloat xalign, yalign;
+
+  gtk_style_context_get_border (context, gtk_widget_get_state_flags (widget), &border);
+  gtk_cell_renderer_get_padding (cell, &xpad, &ypad);
+  gtk_cell_renderer_get_alignment (cell, &xalign, &yalign);
+  w = VISIBILITY_TOGGLE_SIZE + 2 * xpad + border.left + border.right;
+  h = VISIBILITY_TOGGLE_SIZE + 2 * ypad + border.top + border.bottom;
+  if (width) *width = w;
+  if (height) *height = h;
+  if (x_offset) *x_offset = 0;
+  if (y_offset) *y_offset = 0;
+  if (cell_area)
+    {
+      if (gtk_widget_get_direction (widget) == GTK_TEXT_DIR_RTL)
+        xalign = 1.0f - xalign;
+      if (x_offset) *x_offset = MAX (0, xalign * (cell_area->width - w));
+      if (y_offset) *y_offset = MAX (0, yalign * (cell_area->height - h));
+    }
+}
+
+/*! \brief Draw active/inactive swatches using GTK's borrowed Cairo context.
+ * The caller owns cr. Preserve its graphics state and current path.
+ */
+static void
+ghid_cell_renderer_visibility_render (GtkCellRenderer *cell, cairo_t *cr,
+                                     GtkWidget *widget,
+                                     const GdkRectangle *background_area,
+                                     const GdkRectangle *cell_area,
+                                     GtkCellRendererState flags)
+{
+  GHidCellRendererVisibility *pcb_cell = GHID_CELL_RENDERER_VISIBILITY (cell);
+  GdkRectangle rect;
+  GdkRGBA color = {0.0, 0.0, 0.0, 1.0};
+  cairo_pattern_t *pattern;
+  cairo_path_t *saved_path;
+  gint xpad, ypad;
+
+  /* GTK supplies this required argument; drawing is clipped to cell_area. */
+  (void) background_area;
+  ghid_cell_renderer_visibility_get_size (cell, widget, cell_area,
+                                         &rect.x, &rect.y, &rect.width, &rect.height);
+  gtk_cell_renderer_get_padding (cell, &xpad, &ypad);
+  rect.x += cell_area->x + xpad;
+  rect.y += cell_area->y + ypad;
+  rect.width -= 2 * xpad;
+  rect.height -= 2 * ypad;
+  if (rect.width <= 0 || rect.height <= 0)
+    return;
+
+  if (pcb_cell->color)
+    {
+      GdkRGBA parsed;
+      if (gdk_rgba_parse (&parsed, pcb_cell->color)) color = parsed;
+    }
+  if (flags & GTK_CELL_RENDERER_PRELIT)
+    {
+      color.red = (4.0 * color.red + 1.0) / 5.0;
+      color.green = (4.0 * color.green + 1.0) / 5.0;
+      color.blue = (4.0 * color.blue + 1.0) / 5.0;
+    }
+
+  saved_path = cairo_copy_path (cr);
+  cairo_save (cr);
+  cairo_new_path (cr);
+  gdk_cairo_rectangle (cr, cell_area);
+  cairo_clip (cr);
+  cairo_set_line_width (cr, 1.0);
+  cairo_rectangle (cr, rect.x + 0.5, rect.y + 0.5, rect.width - 1, rect.height - 1);
+  cairo_set_source_rgb (cr, 1, 1, 1);
+  cairo_fill_preserve (cr);
+  cairo_set_source_rgb (cr, 0, 0, 0);
+  cairo_stroke (cr);
+
+  pattern = cairo_pattern_create_radial ((rect.width - 1.0) * 0.75 + rect.x + 0.5,
+                                         (rect.height - 1.0) * 0.75 + rect.y + 0.5,
+                                         0.0,
+                                         (rect.width - 1.0) * 0.50 + rect.x + 0.5,
+                                         (rect.height - 1.0) * 0.50 + rect.y + 0.5,
+                                         (rect.width - 1.0) * 0.71);
+  cairo_pattern_add_color_stop_rgba (pattern, 0.0,
+                                     (color.red * 4.0 + 1.0) / 5.0,
+                                     (color.green * 4.0 + 1.0) / 5.0,
+                                     (color.blue * 4.0 + 1.0) / 5.0, color.alpha);
+  cairo_pattern_add_color_stop_rgba (pattern, 1.0,
+                                     color.red, color.green, color.blue, color.alpha);
+  cairo_set_source (cr, pattern);
+  cairo_pattern_destroy (pattern);
+  if (pcb_cell->active)
+    cairo_rectangle (cr, rect.x + 0.5, rect.y + 0.5, rect.width - 1, rect.height - 1);
+  else
+    {
+      cairo_move_to (cr, rect.x + 1, rect.y + 1);
+      cairo_rel_line_to (cr, rect.width / 2, 0);
+      cairo_rel_line_to (cr, -rect.width / 2, rect.width / 2);
+      cairo_close_path (cr);
+    }
+  cairo_fill (cr);
+  cairo_restore (cr);
+  cairo_new_path (cr);
+  cairo_append_path (cr, saved_path);
+  cairo_path_destroy (saved_path);
+}
+
+/*! \brief Emit the toggled path; GTK requires the unused event/geometry inputs. */
+static gboolean
+ghid_cell_renderer_visibility_activate (GtkCellRenderer *cell, GdkEvent *event,
+                                       GtkWidget *widget, const gchar *path,
+                                       const GdkRectangle *background_area,
+                                       const GdkRectangle *cell_area,
+                                       GtkCellRendererState flags)
+{
+  (void) event;
+  (void) widget;
+  (void) background_area;
+  (void) cell_area;
+  (void) flags;
+  g_signal_emit (cell, toggle_cell_signals[TOGGLED], 0, path);
+  return TRUE;
+}
+
+/*! \brief Read renderer properties and diagnose invalid property IDs. */
+static void
+ghid_cell_renderer_visibility_get_property (GObject *object, guint param_id,
+                                           GValue *value, GParamSpec *pspec)
+{
+  GHidCellRendererVisibility *cell = GHID_CELL_RENDERER_VISIBILITY (object);
+  switch (param_id)
+    {
+    case PROP_ACTIVE: g_value_set_boolean (value, cell->active); break;
+    case PROP_COLOR: g_value_set_string (value, cell->color); break;
+    default: G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec); break;
+    }
+}
+
+/*! \brief Store renderer properties; the renderer owns its color string. */
+static void
+ghid_cell_renderer_visibility_set_property (GObject *object, guint param_id,
+                                           const GValue *value, GParamSpec *pspec)
+{
+  GHidCellRendererVisibility *cell = GHID_CELL_RENDERER_VISIBILITY (object);
+  switch (param_id)
+    {
+    case PROP_ACTIVE: cell->active = g_value_get_boolean (value); break;
+    case PROP_COLOR:
+      g_free (cell->color);
+      cell->color = g_value_dup_string (value);
+      break;
+    default: G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec); break;
+    }
+}
+
+/*! \brief Release the owned color and chain up to GtkCellRenderer. */
+static void
+ghid_cell_renderer_visibility_finalize (GObject *object)
+{
+  GHidCellRendererVisibility *cell = GHID_CELL_RENDERER_VISIBILITY (object);
+  g_free (cell->color);
+  G_OBJECT_CLASS (ghid_cell_renderer_visibility_parent_class)->finalize (object);
+}
+
+/*! \brief Initialize a toggle-capable renderer with a deterministic default color. */
+static void
+ghid_cell_renderer_visibility_init (GHidCellRendererVisibility *cell)
+{
+  cell->color = g_strdup ("black");
+  g_object_set (cell, "mode", GTK_CELL_RENDERER_MODE_ACTIVATABLE, NULL);
+}
+
+/*! \brief Register typed GTK3 virtual methods, properties and the toggled signal. */
+static void
+ghid_cell_renderer_visibility_class_init (GHidCellRendererVisibilityClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GtkCellRendererClass *cell_class = GTK_CELL_RENDERER_CLASS (klass);
+  object_class->get_property = ghid_cell_renderer_visibility_get_property;
+  object_class->set_property = ghid_cell_renderer_visibility_set_property;
+  object_class->finalize = ghid_cell_renderer_visibility_finalize;
+  cell_class->get_size = ghid_cell_renderer_visibility_get_size;
+  cell_class->render = ghid_cell_renderer_visibility_render;
+  cell_class->activate = ghid_cell_renderer_visibility_activate;
+  g_object_class_install_property (object_class, PROP_ACTIVE,
+    g_param_spec_boolean ("active", _("Visibility state"), _("Visibility of the layer"),
+                          FALSE, G_PARAM_READWRITE));
+  g_object_class_install_property (object_class, PROP_COLOR,
+    g_param_spec_string ("color", _("Layer color"), _("Layer color"),
+                         "black", G_PARAM_READWRITE));
+  toggle_cell_signals[TOGGLED] = g_signal_new ("toggled",
+    G_OBJECT_CLASS_TYPE (object_class), G_SIGNAL_RUN_LAST,
+    G_STRUCT_OFFSET (GHidCellRendererVisibilityClass, toggled),
+    NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
+}
+
+/*! \brief Return a new renderer; normal GTK floating-reference rules apply. */
+GtkCellRenderer *
+ghid_cell_renderer_visibility_new (void)
+{
+  return g_object_new (GHID_CELL_RENDERER_VISIBILITY_TYPE, NULL);
+}
+'''
+
+
+def transform(source, root, relative, tool):
+  """Replace the reviewed module as one coordinated change; retain its license."""
+  if relative != 'src/hid/gtk/ghid-cell-renderer-visibility.c':
+    return source, 'Outside the visibility-renderer migration.'
+  text = source.decode()
+  if IMPLEMENTATION in text:
+    return source, 'Already converted; production source is authoritative.'
+  if hashlib.sha256(source).hexdigest() != ORIGINAL_SHA256:
+    raise ValueError('Visibility renderer differs from the reviewed original')
+  prefix = text[:text.index('#include <glib.h>')]
+  return (prefix + IMPLEMENTATION).encode(), (
+    'Coordinated GTK3 cell-renderer signature, borrowed Cairo, RGBA, '
+    'style borders, typed GObject registration and color ownership.')
+
+
+if __name__ == '__main__':
+  raise SystemExit(main('visibility-renderer', transform, 'python3'))

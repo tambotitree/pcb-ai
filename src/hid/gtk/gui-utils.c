@@ -36,6 +36,8 @@
 #endif
 
 #include "gui.h"
+#include "pcb-pointer.h"
+#include "pcb-grid.h"
 #include <gdk/gdkkeysyms.h>
 
 #ifdef HAVE_LIBDMALLOC
@@ -78,8 +80,8 @@ free_glist_and_data (GList ** list_head)
 gboolean
 ghid_is_modifier_key_sym (gint ksym)
 {
-  if (ksym == GDK_Shift_R || ksym == GDK_Shift_L
-      || ksym == GDK_Control_R || ksym == GDK_Control_L)
+  if (ksym == GDK_KEY_Shift_R || ksym == GDK_KEY_Shift_L
+      || ksym == GDK_KEY_Control_R || ksym == GDK_KEY_Control_L)
     return TRUE;
   return FALSE;
 }
@@ -94,8 +96,7 @@ ghid_modifier_keys_state (GdkModifierType * state)
   GHidPort *out = &ghid_port;
 
   if (!state)
-    gdk_window_get_pointer (gtk_widget_get_window (out->drawing_area),
-                            NULL, NULL, &mask);
+    pcb_pointer_query_window (gtk_widget_get_window (out->drawing_area), NULL, NULL, &mask);
   else
     mask = *state;
 
@@ -132,8 +133,7 @@ ghid_button_state (GdkModifierType * state)
   GHidPort *out = &ghid_port;
 
   if (!state)
-    gdk_window_get_pointer (gtk_widget_get_window (out->drawing_area),
-                            NULL, NULL, &mask);
+    pcb_pointer_query_window (gtk_widget_get_window (out->drawing_area), NULL, NULL, &mask);
   else
     mask = *state;
 
@@ -162,34 +162,20 @@ ghid_draw_area_update (GHidPort * port, GdkRectangle * rect)
 
 
 gchar *
-ghid_get_color_name (GdkColor * color)
+ghid_get_color_name (GdkRGBA *color)
 {
-  gchar *name;
-
-  if (!color)
-    name = g_strdup ("#000000");
-  else
-    name = g_strdup_printf ("#%2.2x%2.2x%2.2x",
-			    (color->red >> 8) & 0xff,
-			    (color->green >> 8) & 0xff,
-			    (color->blue >> 8) & 0xff);
-  return name;
+  if (!color) return g_strdup ("#000000");
+  return g_strdup_printf ("#%02x%02x%02x",
+    (unsigned int) (CLAMP (color->red, 0, 1) * 255 + 0.5),
+    (unsigned int) (CLAMP (color->green, 0, 1) * 255 + 0.5),
+    (unsigned int) (CLAMP (color->blue, 0, 1) * 255 + 0.5));
 }
 
 void
-ghid_map_color_string (char *color_string, GdkColor * color)
+ghid_map_color_string (char *text, GdkRGBA *color)
 {
-  static GdkColormap *colormap = NULL;
-  GHidPort *out = &ghid_port;
-
-  if (!color || !out->top_window)
-    return;
-  if (colormap == NULL)
-    colormap = gtk_widget_get_colormap (out->top_window);
-  if (color->red || color->green || color->blue)
-    gdk_colormap_free_colors (colormap, color, 1);
-  gdk_color_parse (color_string, color);
-  gdk_color_alloc (colormap, color);
+  if (color && (!text || !gdk_rgba_parse (color, text)))
+    *color = (GdkRGBA) {1, 1, 1, 1};
 }
 
 
@@ -289,14 +275,16 @@ ghid_coord_entry (GtkWidget * box, GtkWidget ** coord_entry, Coord value,
       if (right_align && string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+	  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 	  gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 2);
 	}
       gtk_box_pack_start (GTK_BOX (box), entry_widget, FALSE, FALSE, 2);
       if (!right_align && string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
+	  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 	  gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 2);
 	}
     }
@@ -338,14 +326,16 @@ ghid_spin_button (GtkWidget * box, GtkWidget ** spin_button, gfloat value,
       if (right_align && string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+	  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 	  gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 2);
 	}
       gtk_box_pack_start (GTK_BOX (box), spin_but, FALSE, FALSE, 2);
       if (!right_align && string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
+	  gtk_label_set_xalign (GTK_LABEL (label), 0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
 	  gtk_box_pack_start (GTK_BOX (box), label, TRUE, TRUE, 2);
 	}
     }
@@ -378,25 +368,27 @@ ghid_table_coord_entry (GtkWidget * table, gint row, gint column,
 
   if (right_align)
     {
-      gtk_table_attach_defaults (GTK_TABLE (table), entry_widget,
+      pcb_grid_attach_expanding (GTK_GRID (table), entry_widget,
 				 column + 1, column + 2, row, row + 1);
       if (string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-	  gtk_table_attach_defaults (GTK_TABLE (table), label,
+	  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+	  pcb_grid_attach_expanding (GTK_GRID (table), label,
 				     column, column + 1, row, row + 1);
 	}
     }
   else
     {
-      gtk_table_attach_defaults (GTK_TABLE (table), entry_widget,
+      pcb_grid_attach_expanding (GTK_GRID (table), entry_widget,
 				 column, column + 1, row, row + 1);
       if (string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	  gtk_table_attach_defaults (GTK_TABLE (table), label,
+	  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+	  pcb_grid_attach_expanding (GTK_GRID (table), label,
 				     column + 1, column + 2, row, row + 1);
 	}
     }
@@ -436,25 +428,27 @@ ghid_table_spin_button (GtkWidget * table, gint row, gint column,
 
   if (right_align)
     {
-      gtk_table_attach_defaults (GTK_TABLE (table), spin_but,
+      pcb_grid_attach_expanding (GTK_GRID (table), spin_but,
 				 column + 1, column + 2, row, row + 1);
       if (string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-	  gtk_table_attach_defaults (GTK_TABLE (table), label,
+	  gtk_label_set_xalign (GTK_LABEL (label), 1.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+	  pcb_grid_attach_expanding (GTK_GRID (table), label,
 				     column, column + 1, row, row + 1);
 	}
     }
   else
     {
-      gtk_table_attach_defaults (GTK_TABLE (table), spin_but,
+      pcb_grid_attach_expanding (GTK_GRID (table), spin_but,
 				 column, column + 1, row, row + 1);
       if (string)
 	{
 	  label = gtk_label_new (string);
-	  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-	  gtk_table_attach_defaults (GTK_TABLE (table), label,
+	  gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+	  pcb_grid_attach_expanding (GTK_GRID (table), label,
 				     column + 1, column + 2, row, row + 1);
 	}
     }
@@ -475,9 +469,9 @@ ghid_range_control (GtkWidget * box, GtkWidget ** scale_res,
 					      low, high, step0, step1, 0.0);
 
   if (horizontal)
-    scale = gtk_hscale_new (GTK_ADJUSTMENT (adj));
+    scale = gtk_scale_new (GTK_ORIENTATION_HORIZONTAL, GTK_ADJUSTMENT (adj));
   else
-    scale = gtk_vscale_new (GTK_ADJUSTMENT (adj));
+    scale = gtk_scale_new (GTK_ORIENTATION_VERTICAL, GTK_ADJUSTMENT (adj));
   gtk_scale_set_value_pos (GTK_SCALE (scale), pos);
   gtk_scale_set_draw_value (GTK_SCALE (scale), set_draw_value);
   gtk_scale_set_digits (GTK_SCALE (scale), digits);
@@ -512,7 +506,7 @@ ghid_scrolled_vbox (GtkWidget * box, GtkWidget ** scr,
 				  h_policy, v_policy);
   gtk_box_pack_start (GTK_BOX (box), scrolled, TRUE, TRUE, 0);
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled),
+  gtk_container_add (GTK_CONTAINER (scrolled),
 					 vbox);
   if (scr)
     *scr = scrolled;
@@ -587,7 +581,8 @@ ghid_category_vbox (GtkWidget * box, const gchar * category_header,
       s = g_strconcat ("<span weight=\"bold\">", category_header,
 		       "</span>", NULL);
       gtk_label_set_markup (GTK_LABEL (label), s);
-      gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+      gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+  gtk_label_set_yalign (GTK_LABEL (label), 0.5);
       gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, header_pad);
       g_free (s);
     }
@@ -678,12 +673,11 @@ ghid_dialog_report (gchar * title, gchar * message)
   dialog = gtk_dialog_new_with_buttons (title ? title : "PCB",
 					GTK_WINDOW (top_win),
 					GTK_DIALOG_DESTROY_WITH_PARENT,
-					GTK_STOCK_OK, GTK_RESPONSE_NONE,
+					_("_OK"), GTK_RESPONSE_NONE,
 					NULL);
-  g_signal_connect_swapped (GTK_OBJECT (dialog), "response",
+  g_signal_connect_swapped (G_OBJECT (dialog), "response",
 			    G_CALLBACK (gtk_widget_destroy),
-			    GTK_OBJECT (dialog));
-  gtk_window_set_wmclass (GTK_WINDOW (dialog), "PCB_Dialog", "PCB");
+			    G_OBJECT (dialog));
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 

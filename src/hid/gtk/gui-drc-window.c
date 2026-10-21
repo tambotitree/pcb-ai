@@ -57,7 +57,7 @@ static int num_violations = 0;
 /* Remember user window resizes. */
 static gint
 drc_window_configure_event_cb (GtkWidget * widget,
-			       GdkEventConfigure * ev, gpointer data)
+			       GdkEventConfigure * ev G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   GtkAllocation allocation;
 
@@ -70,20 +70,20 @@ drc_window_configure_event_cb (GtkWidget * widget,
 }
 
 static void
-drc_close_cb (gpointer data)
+drc_close_cb (gpointer data G_GNUC_UNUSED)
 {
   gtk_widget_destroy (drc_window);
   drc_window = NULL;
 }
 
 static void
-drc_refresh_cb (gpointer data)
+drc_refresh_cb (gpointer data G_GNUC_UNUSED)
 {
   hid_actionl ("DRC", NULL);
 }
 
 static void
-drc_destroy_cb (GtkWidget * widget, gpointer data)
+drc_destroy_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNUSED)
 {
   drc_window = NULL;
 }
@@ -96,7 +96,7 @@ enum {
 
 
 static void
-selection_changed_cb (GtkTreeSelection *selection, gpointer user_data)
+selection_changed_cb (GtkTreeSelection *selection, gpointer user_data G_GNUC_UNUSED)
 {
   GtkTreeModel *model;
   GtkTreeIter iter;
@@ -132,7 +132,7 @@ selection_changed_cb (GtkTreeSelection *selection, gpointer user_data)
 
 static void
 row_activated_cb (GtkTreeView *view, GtkTreePath *path,
-		  GtkTreeViewColumn *column, gpointer user_data)
+		  GtkTreeViewColumn *column G_GNUC_UNUSED, gpointer user_data G_GNUC_UNUSED)
 {
   GtkTreeModel *model = gtk_tree_view_get_model (view);
   GtkTreeIter iter;
@@ -181,9 +181,9 @@ ghid_drc_violation_finalize (GObject * object)
   GhidDrcViolation *gviolation = GHID_DRC_VIOLATION (object);
 
   pcb_drc_violation_free(gviolation->v);
-  
+
   if (gviolation->pixmap != NULL)
-    g_object_unref (gviolation->pixmap);
+    cairo_surface_destroy (gviolation->pixmap);
 
   G_OBJECT_CLASS (ghid_drc_violation_parent_class)->finalize (object);
 }
@@ -258,8 +258,8 @@ ghid_drc_violation_set_property (GObject * object, guint property_id,
 
     case PROP_PIXMAP:
       if (gviolation->pixmap)
-	    g_object_unref (gviolation->pixmap); /* Frees our old reference */
-      gviolation->pixmap = (GdkDrawable *)g_value_dup_object (value); /* Takes a new reference */
+	    cairo_surface_destroy (gviolation->pixmap); /* Frees our old reference */
+      gviolation->pixmap = g_value_dup_boxed (value); /* Takes a new reference */
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -282,7 +282,7 @@ ghid_drc_violation_set_property (GObject * object, guint property_id,
  */
 static void
 ghid_drc_violation_get_property (GObject * object, guint property_id,
-				 GValue * value, GParamSpec * pspec)
+				 GValue * value G_GNUC_UNUSED, GParamSpec * pspec)
 {
   switch (property_id)
     {
@@ -302,7 +302,7 @@ ghid_drc_violation_get_property (GObject * object, guint property_id,
  *  \param [in]  klass       The GhidDrcViolationClass we are initialising
  */
 static void
-ghid_drc_violation_class_init (GhidViolationRendererClass * klass)
+ghid_drc_violation_class_init (GhidDrcViolationClass *klass)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
@@ -376,10 +376,10 @@ ghid_drc_violation_class_init (GhidViolationRendererClass * klass)
 							 "",
 							 G_PARAM_WRITABLE));
   g_object_class_install_property (gobject_class, PROP_PIXMAP,
-				   g_param_spec_object ("pixmap",
+				   g_param_spec_boxed ("pixmap",
 							"",
 							"",
-							GDK_TYPE_DRAWABLE,
+							CAIRO_GOBJECT_TYPE_SURFACE,
 							G_PARAM_WRITABLE));
 }
 
@@ -394,6 +394,14 @@ ghid_drc_violation_class_init (GhidViolationRendererClass * klass)
  *
  *  \return the GType identifier associated with GhidViolationRenderer.
  */
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+ghid_drc_violation_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  ghid_drc_violation_class_init ((GhidDrcViolationClass *) klass);
+}
+
 GType
 ghid_drc_violation_get_type ()
 {
@@ -405,12 +413,13 @@ ghid_drc_violation_get_type ()
 	sizeof (GhidDrcViolationClass),
 	NULL,			/* base_init */
 	NULL,			/* base_finalize */
-	(GClassInitFunc) ghid_drc_violation_class_init,
+	ghid_drc_violation_class_init_adapter,
 	NULL,			/* class_finalize */
 	NULL,			/* class_data */
 	sizeof (GhidDrcViolation),
 	0,			/* n_preallocs */
 	NULL,			/* instance_init */
+        NULL /* value_table */
       };
 
       ghid_drc_violation_type =
@@ -423,10 +432,10 @@ ghid_drc_violation_get_type ()
 
 
 GhidDrcViolation *ghid_drc_violation_new (DrcViolationType *violation,
-					  GdkDrawable *pixmap)
+					  cairo_surface_t *pixmap)
 {
 
-  GhidDrcViolation * gv = 
+  GhidDrcViolation * gv =
       (GhidDrcViolation *)g_object_new (GHID_TYPE_DRC_VIOLATION, NULL);
 
   gv->v = (DrcViolationType*) malloc(sizeof(DrcViolationType));
@@ -556,7 +565,7 @@ ghid_violation_renderer_set_property (GObject * object, guint property_id,
  */
 static void
 ghid_violation_renderer_get_property (GObject * object, guint property_id,
-				  GValue * value, GParamSpec * pspec)
+				  GValue * value G_GNUC_UNUSED, GParamSpec * pspec)
 {
   switch (property_id)
     {
@@ -569,7 +578,7 @@ ghid_violation_renderer_get_property (GObject * object, guint property_id,
 static void
 ghid_violation_renderer_get_size (GtkCellRenderer      *cell,
 				  GtkWidget            *widget,
-				  GdkRectangle         *cell_area,
+				  const GdkRectangle         *cell_area,
 				  gint                 *x_offset,
 				  gint                 *y_offset,
 				  gint                 *width,
@@ -590,52 +599,33 @@ ghid_violation_renderer_get_size (GtkCellRenderer      *cell,
 
 
 static void
-ghid_violation_renderer_render (GtkCellRenderer      *cell,
-				GdkDrawable          *window,
-				GtkWidget            *widget,
-				GdkRectangle         *background_area,
-				GdkRectangle         *cell_area,
-				GdkRectangle         *expose_area,
-				GtkCellRendererState  flags)
+ghid_violation_renderer_render (GtkCellRenderer *cell, cairo_t *cr, GtkWidget *widget,
+                                const GdkRectangle *background_area,
+                                const GdkRectangle *cell_area, GtkCellRendererState flags)
 {
-  GdkDrawable *mydrawable;
-  GtkStyle *style = gtk_widget_get_style (widget);
   GhidViolationRenderer *renderer = GHID_VIOLATION_RENDERER (cell);
-  GhidDrcViolation *gviolation = renderer->violation;
-  int pixmap_size = VIOLATION_PIXMAP_PIXEL_SIZE - 2 * VIOLATION_PIXMAP_PIXEL_BORDER;
-
-  cell_area->width -= VIOLATION_PIXMAP_PIXEL_SIZE;
-  GTK_CELL_RENDERER_CLASS (ghid_violation_renderer_parent_class)->render (cell,
-									  window,
-									  widget,
-									  background_area,
-									  cell_area,
-									  expose_area,
-									  flags);
-
-  if (gviolation == NULL)
-    return;
-
-  if (gviolation->pixmap == NULL)
+  GhidDrcViolation *violation = renderer->violation;
+  GdkRectangle text_area = *cell_area;
+  int size = VIOLATION_PIXMAP_PIXEL_SIZE - 2 * VIOLATION_PIXMAP_PIXEL_BORDER;
+  text_area.width = MAX (0, text_area.width - VIOLATION_PIXMAP_PIXEL_SIZE);
+  GTK_CELL_RENDERER_CLASS (ghid_violation_renderer_parent_class)->render (
+    cell, cr, widget, background_area, &text_area, flags);
+  if (!violation) return;
+  if (!violation->pixmap)
     {
-      GdkPixmap *pixmap = ghid_render_pixmap (gviolation->v->x,
-					      gviolation->v->y,
-					      VIOLATION_PIXMAP_PCB_SIZE / pixmap_size,
-					      pixmap_size, pixmap_size,
-					      gdk_drawable_get_depth (window));
-      g_object_set (gviolation, "pixmap", pixmap, NULL);
-      g_object_unref (pixmap);
+      cairo_surface_t *surface = ghid_render_pixmap (violation->v->x, violation->v->y,
+        VIOLATION_PIXMAP_PCB_SIZE / size, size, size, 32);
+      g_object_set (violation, "pixmap", surface, NULL);
+      if (surface) cairo_surface_destroy (surface);
     }
-
-  if (gviolation->pixmap == NULL)
-    return;
-
-  mydrawable = GDK_DRAWABLE (gviolation->pixmap);
-
-  gdk_draw_drawable (window, style->fg_gc[gtk_widget_get_state (widget)],
-		     mydrawable, 0, 0,
-		     cell_area->x + cell_area->width + VIOLATION_PIXMAP_PIXEL_BORDER,
-		     cell_area->y + VIOLATION_PIXMAP_PIXEL_BORDER, -1, -1);
+  if (!violation->pixmap) return;
+  cairo_save (cr);
+  cairo_rectangle (cr, cell_area->x, cell_area->y, cell_area->width, cell_area->height);
+  cairo_clip (cr);
+  cairo_set_source_surface (cr, violation->pixmap,
+    text_area.x + text_area.width + VIOLATION_PIXMAP_PIXEL_BORDER,
+    text_area.y + VIOLATION_PIXMAP_PIXEL_BORDER);
+  cairo_paint (cr); cairo_restore (cr);
 }
 
 
@@ -680,6 +670,14 @@ ghid_violation_renderer_class_init (GhidViolationRendererClass * klass)
  *
  *  \return the GType identifier associated with GhidViolationRenderer.
  */
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+ghid_violation_renderer_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  ghid_violation_renderer_class_init ((GhidViolationRendererClass *) klass);
+}
+
 GType
 ghid_violation_renderer_get_type ()
 {
@@ -691,12 +689,13 @@ ghid_violation_renderer_get_type ()
 	sizeof (GhidViolationRendererClass),
 	NULL,			/* base_init */
 	NULL,			/* base_finalize */
-	(GClassInitFunc) ghid_violation_renderer_class_init,
+	ghid_violation_renderer_class_init_adapter,
 	NULL,			/* class_finalize */
 	NULL,			/* class_data */
 	sizeof (GhidViolationRenderer),
 	0,			/* n_preallocs */
 	NULL,			/* instance_init */
+        NULL /* value_table */
       };
 
       ghid_violation_renderer_type =
@@ -747,7 +746,6 @@ ghid_drc_window_show (gboolean raise)
   g_signal_connect (G_OBJECT (drc_window), "configure_event",
 		    G_CALLBACK (drc_window_configure_event_cb), NULL);
   gtk_window_set_title (GTK_WINDOW (drc_window), _("PCB DRC"));
-  gtk_window_set_wmclass (GTK_WINDOW (drc_window), "PCB_DRC", "PCB");
   gtk_window_resize (GTK_WINDOW (drc_window),
                      ghidgui->drc_window_width, ghidgui->drc_window_height);
 
@@ -775,7 +773,6 @@ ghid_drc_window_show (gboolean raise)
                                "double-click to also warp the mouse\n"
                                "pointer there.");
 
-  gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (drc_list), TRUE);
   g_signal_connect (gtk_tree_view_get_selection (GTK_TREE_VIEW (drc_list)), "changed",
 		    G_CALLBACK (selection_changed_cb), NULL);
   g_signal_connect (drc_list, "row-activated",
@@ -797,18 +794,18 @@ ghid_drc_window_show (gboolean raise)
 					       "violation", DRC_VIOLATION_OBJ_COL,
 					       NULL);
 
-  hbox = gtk_hbutton_box_new ();
+  hbox = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbox), GTK_BUTTONBOX_END);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
   gtk_box_set_spacing (GTK_BOX (hbox), 6);
 
-  button = gtk_button_new_from_stock (GTK_STOCK_REFRESH);
+  button = gtk_button_new_with_mnemonic (_("_Refresh"));
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (drc_refresh_cb), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
 
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
+  button = gtk_button_new_with_mnemonic (_("_Close"));
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (drc_close_cb), NULL);
   gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);

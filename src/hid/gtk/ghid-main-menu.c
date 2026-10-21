@@ -46,13 +46,11 @@
 
 void Message (const char *, ...);
 
-static int action_counter;
 
 struct _GHidMainMenu
 {
   GtkMenuBar parent;
 
-  GtkActionGroup *action_group;
   GtkAccelGroup *accel_group;
 
   gint layer_view_pos;
@@ -70,8 +68,8 @@ struct _GHidMainMenu
   gint n_layer_picks;
   gint n_route_styles;
 
-  GCallback action_cb;
-  void (*special_key_cb) (const char *accel, GtkAction *action,
+  GHidMenuActivateFunc action_cb;
+  void (*special_key_cb) (const char *accel, GtkWidget *action,
                           const Resource *node);
 };
 
@@ -83,6 +81,14 @@ struct _GHidMainMenuClass
 /* TODO: write finalize function */
 
 /* SIGNAL HANDLERS */
+/*! \brief Dispatch a menu activation through the typed resource callback. */
+static void
+menu_activate_cb (GtkWidget *item, GHidMainMenu *menu)
+{
+  const Resource *node = g_object_get_data (G_OBJECT (item), "resource");
+  menu->action_cb (item, node);
+}
+
 
 /* RESOURCE HANDLER */
 
@@ -94,14 +100,14 @@ struct _GHidMainMenuClass
  * what would appear in gpcb-menu.res and the "out" string is what we
  * have to feed to gtk.  I was able to find these by using xev to find
  * the keycode and then looked at gtk+-2.10.9/gdk/keynames.txt (from the
- * gtk source distribution) to figure out the names that go with the 
+ * gtk source distribution) to figure out the names that go with the
  * codes.
  */
 static gchar *
 translate_accelerator (const char *text)
 {
   GString *ret_val = g_string_new ("");
-  static struct { const char *in, *out; } key_table[] = 
+  static struct { const char *in, *out; } key_table[] =
   {
     {"Enter", "Return"},
     {"Alt",   "<alt>"},
@@ -229,7 +235,7 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
       char *menu_label;
       const char *res_val;
       const Resource *sub_res = res->v[i].subres;
-      GtkAction *action = NULL;
+      GtkWidget *action = NULL;
 
       switch (resource_type (res->v[i]))
         {
@@ -241,7 +247,7 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
           res_val = resource_value (sub_res, "m");   /* mnemonic */
           if (res_val)
             mnemonic = res_val[0];
-          /* The accelerator resource will have two values, like 
+          /* The accelerator resource will have two values, like
            *   a={"Ctrl-Q" "Ctrl<Key>q"}
            * The first Gtk ignores. The second needs to be translated. */
           if (tmp_res)
@@ -281,13 +287,10 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
               /* SUBMENU */
               GtkWidget *submenu = gtk_menu_new ();
               GtkWidget *item = gtk_menu_item_new_with_mnemonic (menu_label);
-              GtkWidget *tearoff = gtk_tearoff_menu_item_new ();
 
               gtk_menu_shell_append (shell, item);
               gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
-              /* add tearoff to menu */
-              gtk_menu_shell_append (GTK_MENU_SHELL (submenu), tearoff);
               /* recurse on the newly-added submenu */
               ghid_main_menu_real_add_resource (menu,
                                                 GTK_MENU_SHELL (submenu),
@@ -298,19 +301,12 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
               /* NON-SUBMENU: MENU ITEM */
               const char *checked = resource_value (sub_res, "checked");
               const char *label = resource_value (sub_res, "sensitive");
-              const char *tip = resource_value (sub_res, "tip");
               if (checked)
                 {
                   /* TOGGLE ITEM */
-                  gchar *name = g_strdup_printf ("MainMenuAction%d",
-                                                 action_counter++);
-
-                  action = GTK_ACTION (gtk_toggle_action_new (name, menu_label,
-                                                              tip, NULL));
-                  /* checked=foo       is a binary flag (checkbox)
-                   * checked=foo,bar   is a flag compared to a value (radio) */
-                  gtk_toggle_action_set_draw_as_radio
-                    (GTK_TOGGLE_ACTION (action), !!strchr (checked, ','));
+                  action = gtk_check_menu_item_new_with_mnemonic (menu_label);
+                  gtk_check_menu_item_set_draw_as_radio
+                    (GTK_CHECK_MENU_ITEM (action), !!strchr (checked, ','));
                 }
               else if (label && strcmp (label, "false") == 0)
                 {
@@ -322,24 +318,29 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
               else
                 {
                   /* NORMAL ITEM */
-                  gchar *name = g_strdup_printf ("MainMenuAction%d", action_counter++);
-                  action = gtk_action_new (name, menu_label, tip, NULL);
+                  action = gtk_menu_item_new_with_mnemonic (menu_label);
                 }
             }
           /* Connect accelerator, if there is one */
           if (action)
             {
-              GtkWidget *item;
-              gtk_action_set_accel_group (action, menu->accel_group);
-              gtk_action_group_add_action_with_accel (menu->action_group,
-                                                      action, accel);
-              gtk_action_connect_accelerator (action);
-              g_signal_connect (G_OBJECT (action), "activate", menu->action_cb,
-                                (gpointer) sub_res);
-              g_object_set_data (G_OBJECT (action), "resource",
-                                 (gpointer) sub_res);
-              item = gtk_action_create_menu_item (action);
-              gtk_menu_shell_append (shell, item);
+              guint key;
+              GdkModifierType modifiers;
+              gulong handler;
+              gtk_widget_set_tooltip_text (action, resource_value (sub_res, "tip"));
+              if (accel && *accel)
+                {
+                  gtk_accelerator_parse (accel, &key, &modifiers);
+                  if (key)
+                    gtk_widget_add_accelerator (action, "activate", menu->accel_group,
+                                                key, modifiers, GTK_ACCEL_VISIBLE);
+                }
+              handler = g_signal_connect (action, "activate",
+                                           G_CALLBACK (menu_activate_cb), menu);
+              g_object_set_data_full (G_OBJECT (action), "activate-handler",
+                                      g_memdup2 (&handler, sizeof handler), g_free);
+              g_object_set_data (G_OBJECT (action), "resource", (gpointer) sub_res);
+              gtk_menu_shell_append (shell, action);
               menu->actions = g_list_append (menu->actions, action);
               menu->special_key_cb (accel, action, sub_res);
             }
@@ -433,15 +434,32 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
 static void
 ghid_main_menu_init (GHidMainMenu *mm)
 {
-  /* Hookup signal handlers */
+  (void) mm;
 }
 
 static void
 ghid_main_menu_class_init (GHidMainMenuClass *klass)
 {
+  (void) klass;
 }
 
 /* PUBLIC FUNCTIONS */
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+ghid_main_menu_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  ghid_main_menu_class_init ((GHidMainMenuClass *) klass);
+}
+
+/*! \brief Adapt GLib instance initialization to the typed widget. */
+static void
+ghid_main_menu_init_adapter (GTypeInstance *instance, gpointer klass)
+{
+  (void) klass;
+  ghid_main_menu_init ((GHidMainMenu *) instance);
+}
+
 GType
 ghid_main_menu_get_type (void)
 {
@@ -454,12 +472,13 @@ ghid_main_menu_get_type (void)
           sizeof (GHidMainMenuClass),
           NULL, /* base_init */
           NULL, /* base_finalize */
-          (GClassInitFunc) ghid_main_menu_class_init,
+          ghid_main_menu_class_init_adapter,
           NULL, /* class_finalize */
           NULL, /* class_data */
           sizeof (GHidMainMenu),
           0,    /* n_preallocs */
-          (GInstanceInitFunc) ghid_main_menu_init,
+          ghid_main_menu_init_adapter,
+        NULL /* value_table */
         };
 
       mm_type = g_type_register_static (GTK_TYPE_MENU_BAR,
@@ -476,15 +495,14 @@ ghid_main_menu_get_type (void)
  * \return a freshly-allocated GHidMainMenu
  */
 GtkWidget *
-ghid_main_menu_new (GCallback action_cb,
+ghid_main_menu_new (GHidMenuActivateFunc action_cb,
                     void (*special_key_cb) (const char *accel,
-                                            GtkAction *action,
+                                            GtkWidget *action,
                                             const Resource *node))
 {
   GHidMainMenu *mm = g_object_new (GHID_MAIN_MENU_TYPE, NULL);
 
   mm->accel_group = gtk_accel_group_new ();
-  mm->action_group = gtk_action_group_new ("MainMenu");
 
   mm->layer_view_pos = 0;
   mm->layer_pick_pos = 0;
@@ -550,23 +568,20 @@ ghid_main_menu_get_popup (GHidMainMenu *menu, const char *name)
  */
 void
 ghid_main_menu_update_toggle_state (GHidMainMenu *menu,
-                                    void (*cb) (GtkAction *,
+                                    void (*cb) (GtkWidget *,
                                                 const char *toggle_flag,
                                                 const char *active_flag))
 {
   GList *list;
   for (list = menu->actions; list; list = list->next)
     {
-      Resource *res = g_object_get_data (G_OBJECT (list->data), "resource");
-      const char *tf = g_object_get_data (G_OBJECT (list->data),
-                                          "checked-flag");
-      const char *af = g_object_get_data (G_OBJECT (list->data),
-                                          "active-flag");
-      g_signal_handlers_block_by_func (G_OBJECT (list->data),
-                                       menu->action_cb, res);
-      cb (GTK_ACTION (list->data), tf, af);
-      g_signal_handlers_unblock_by_func (G_OBJECT (list->data),
-                                         menu->action_cb, res);
+      GtkWidget *item = GTK_WIDGET (list->data);
+      const gulong *handler = g_object_get_data (G_OBJECT (item), "activate-handler");
+      const char *tf = g_object_get_data (G_OBJECT (item), "checked-flag");
+      const char *af = g_object_get_data (G_OBJECT (item), "active-flag");
+      if (handler) g_signal_handler_block (item, *handler);
+      cb (item, tf, af);
+      if (handler) g_signal_handler_unblock (item, *handler);
     }
 }
 
@@ -650,4 +665,3 @@ ghid_main_menu_get_accel_group (GHidMainMenu *menu)
 {
   return menu->accel_group;
 }
-

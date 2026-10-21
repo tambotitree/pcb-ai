@@ -44,7 +44,7 @@
 #include "object_list.h"
 #include "pcb-printf.h" /* Units */
 /* PlowsPolygon, original_polygon, LinePoly, ArcPoly, Touching */
-#include "polygon.h" 
+#include "polygon.h"
 #include "undo.h" /* Lock/Unlock Undo*/
 
 object_list * drc_violation_list = 0;
@@ -58,15 +58,15 @@ static DRCObject thing1, thing2;
 bool
 SetThing (int n, int type, void *ptr1, void *ptr2, void *ptr3)
 {
-  if (n == 1) 
+  if (n == 1)
   {
     thing1.ptr1 = ptr1;
     thing1.ptr2 = ptr2;
     thing1.ptr3 = ptr3;
     thing1.type = type;
     thing1.id = ((AnyObjectType *)ptr2)->ID;
-  } 
-  else 
+  }
+  else
   {
     thing2.ptr1 = ptr1;
     thing2.ptr2 = ptr2;
@@ -80,7 +80,7 @@ SetThing (int n, int type, void *ptr1, void *ptr2, void *ptr3)
 static Cardinal drcerr_count;   /*!< Count of drc errors */
 
 /*!< Count of duplicate errors. This is purely for development purposes. */
-static Cardinal drcdup_count;   
+static Cardinal drcdup_count;
 
 static void
 append_drc_violation (DrcViolationType *violation)
@@ -108,10 +108,10 @@ LocateError (Coord *x, Coord *y)
   AnyObjectType *t1 = (AnyObjectType*)(thing1.ptr3),
                 *t2 = (AnyObjectType*)(thing2.ptr3);
   BoxType b = clip_box(&t1->BoundingBox, &t2->BoundingBox);
-  
+
   *x = (b.X1 + b.X2) / 2;
   *y = (b.Y1 + b.Y2) / 2;
-  
+
   return;
 }
 */
@@ -154,7 +154,7 @@ DRCFind (int What, void *ptr1, void *ptr2, void *ptr3)
   DrcViolationType *violation;
   int flag;
   object_list * vobjs = object_list_new(2, sizeof(DRCObject));
-  
+
   if (PCB->Shrink != 0)
   {
     /* Set the DRC and SELECTED flags on all objects that overlap with the
@@ -169,7 +169,7 @@ DRCFind (int What, void *ptr1, void *ptr2, void *ptr3)
      */
     start_do_it_and_dump (What, ptr1, ptr2, ptr3, DRCFLAG | SELECTEDFLAG, false, -PCB->Shrink, false);
     /* ok now the shrunk net has the SELECTEDFLAG set */
-    
+
     /* Now build the list without shrinking objects, and set the FOUND
      * flag in the process. If a new object is found, the connectivity has
      * changed, indicating that the minimum overlap rule is violated for
@@ -208,12 +208,12 @@ DRCFind (int What, void *ptr1, void *ptr2, void *ptr3)
     }
     DumpList ();
   }
-  
+
   /* Now check the bloated condition.
    *
    * TODO: Why isn't this wrapped in if (PCB->Bloat > 0) ?
    */
-  
+
   /* Reset all of the flags */
   ClearFlagOnAllObjects (FOUNDFLAG | SELECTEDFLAG, false);
   /* Set the DRC and SELECTED flags on all objects that overlap with the
@@ -222,7 +222,7 @@ DRCFind (int What, void *ptr1, void *ptr2, void *ptr3)
    *
    * See above for additional notes.
    */
-  
+
   /* Set the selected flag on anything connected to the pin */
   start_do_it_and_dump (What, ptr1, ptr2, ptr3, SELECTEDFLAG, false, 0, false);
   /* Now bloat everything, and find things are connected now that weren't
@@ -254,7 +254,7 @@ DRCFind (int What, void *ptr1, void *ptr2, void *ptr3)
     DumpList ();
     start_do_it_and_dump (thing2.type, thing2.ptr1, thing2.ptr2, thing2.ptr3, flag, true, 0, false);
     /* Now we have to start over because we lost our list when we
-     * highlighted the net. 
+     * highlighted the net.
      * If we just start over, FOUNDFLAG will be set on objects we've
      * already found, so, we won't re-add them to the lists we just
      * cleared. So, we have to clear that flag everywhere first.
@@ -287,7 +287,7 @@ new_polygon_not_connected_violation ( LayerType *l, PolygonType *poly )
   object_list_clear(vobjs);
   object_list_append(vobjs, &thing1);
   object_list_append(vobjs, &thing2);
-  
+
   switch (thing1.type)
   {
   case LINE_TYPE:
@@ -322,7 +322,7 @@ new_polygon_not_connected_violation ( LayerType *l, PolygonType *poly )
       vobjs);
   append_drc_violation (violation);
   pcb_drc_violation_free (violation);
-  
+
   object_list_delete(vobjs);
 
 }
@@ -386,7 +386,7 @@ new_polygon_clearance_violation ( LayerType *l, PolygonType *poly )
       vobjs);
   append_drc_violation (violation);
   pcb_drc_violation_free (violation);
-  
+
   object_list_delete(vobjs);
 
 }
@@ -473,8 +473,8 @@ obj_touches_poly (DRCObject * obj, PolygonType * poly, Cardinal layer)
     return IsArcInPolygon(arc, poly);
   case PIN_TYPE:
   case VIA_TYPE:
-    return ViaIsOnLayerGroup (pin, GetLayerGroupNumberByNumber (layer)) 
-             && !TEST_FLAG (HOLEFLAG, pin) 
+    return ViaIsOnLayerGroup (pin, GetLayerGroupNumberByNumber (layer))
+             && !TEST_FLAG (HOLEFLAG, pin)
              && IsPinInPolygon (pin,poly);
 
   case PAD_TYPE:
@@ -511,7 +511,7 @@ is_obj_in_polygon(DRCObject * obj, PolygonType * poly, Cardinal layer)
     break;
   case PIN_TYPE:
   case VIA_TYPE:
-    if (!ViaIsOnLayerGroup (pin, GetLayerGroupNumberByNumber (layer)) 
+    if (!ViaIsOnLayerGroup (pin, GetLayerGroupNumberByNumber (layer))
              || TEST_FLAG (HOLEFLAG, pin))
       return 0;
     pa_obj = PinPoly(pin, pin->Thickness + 2*PCB->Bloat, 0);
@@ -550,14 +550,14 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
   LineType *line = (LineType *) ptr2;
 
   /* If we're here, we know that the polygon and object have overlapping
-   * bounding boxes. If the object (or it's clearance) isn't actually inside 
-   * the polygon, we don't care. */ 
+   * bounding boxes. If the object (or it's clearance) isn't actually inside
+   * the polygon, we don't care. */
   if (!is_obj_in_polygon(&thing1, polygon, GetLayerNumber(PCB->Data, layer)))
     return 0;
- 
+
   /* Thing 1 is the object on which PlowsPolygon was called */
   SetThing (2, POLYGON_TYPE, layer, polygon, polygon);
-  
+
   switch (type)
   {
   case LINE_TYPE:
@@ -565,13 +565,13 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
     /* Only lines and arcs use the clearline flag */
     clearflag = TEST_FLAG (CLEARLINEFLAG, line);
     if (clearflag && (clearance < 2 * PCB->Bloat))
-    {         
+    {
       /* The line should clear the polygon, but the clearance is
-       * insufficient. 
+       * insufficient.
        *
-       * This doesn't necessarily mean that there are two pieces of copper 
-       * with insufficient space between them. It's possible that one 
-       * object is completely within the * clearance of another object, 
+       * This doesn't necessarily mean that there are two pieces of copper
+       * with insufficient space between them. It's possible that one
+       * object is completely within the * clearance of another object,
        * for example.
        *
        * In order to decide if there really is an error, we need a more
@@ -581,7 +581,7 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
        *
        * We have to turn off the CLEARLINEFLAG for the object to be tested
        * for intersection, however, we don't have to recompute the polygon
-       * contours. 
+       * contours.
        * */
 
       CLEAR_FLAG (CLEARLINEFLAG, line);
@@ -594,11 +594,11 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
        if (obj_touches_poly(&thing1, polygon, GetLayerNumber(PCB->Data, layer)))
         /* The bloated line touched the polygon, so there's a violation. */
         new_polygon_clearance_violation (layer, polygon);
-     
+
       /* Restore the state of the object */
       bloat_obj (&thing1, -2*PCB->Bloat);
-      SET_FLAG (CLEARLINEFLAG, line);  
-    
+      SET_FLAG (CLEARLINEFLAG, line);
+
     }
     else if (clearflag == 0)
     {
@@ -608,7 +608,7 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
 
 
       ClearFlagOnAllObjects (DRCFLAG, false);
-      start_do_it_and_dump (thing1.type, ptr1, ptr2, ptr2, DRCFLAG, 
+      start_do_it_and_dump (thing1.type, ptr1, ptr2, ptr2, DRCFLAG,
                             false, 0, false);
 
       /* Now everything that touches the line should have the DRCFLAG set. */
@@ -640,7 +640,7 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
     if (clearance < 2 * PCB->Bloat)
     {
       /* The clearance is too small, but it could be cleared by other
-       * objects. 
+       * objects.
        * */
       bloat_obj(&thing1, 2*PCB->Bloat);
       if (obj_touches_poly(&thing1, polygon, GetLayerNumber(PCB->Data, layer)))
@@ -660,7 +660,7 @@ drc_callback (DataType *data, LayerType *layer, PolygonType *polygon,
 /*!
  * \brief Create a new line width violation.
  * */
-static void 
+static void
 new_line_width_violation(DRCObject * obj)
 {
   DrcViolationType * violation;
@@ -695,7 +695,7 @@ new_line_width_violation(DRCObject * obj)
   pcb_drc_violation_update_location(violation);
   append_drc_violation (violation);
   pcb_drc_violation_free (violation);
-  
+
 }
 
 /*!
@@ -715,7 +715,7 @@ DRCAll (void)
   int tmpcnt;
   int nopastecnt = 0;
   struct drc_info info;
-  
+
   if (!drc_violation_list)
   {
     drc_violation_list = object_list_new(10, sizeof(DrcViolationType));
@@ -724,7 +724,7 @@ DRCAll (void)
     object_list_clear(drc_violation_list);
     if (gui->drc_gui != NULL) gui->drc_gui->reset_drc_dialog_message();
   }
-  
+
   /* This phony violation informs user about what DRC does NOT catch.  */
   violation = pcb_drc_violation_new (
       _("WARNING: DRC doesn't catch everything"),
@@ -738,19 +738,19 @@ DRCAll (void)
   pcb_drc_violation_free (violation);
 
   /* Create this violation now, but don't add it yet. We'll add it at the
-   * end if we detect any objects of concern. 
+   * end if we detect any objects of concern.
    * Note: Creating the object will create a new empty object list that we
-   *       can use to keep track of objects of concern. 
+   *       can use to keep track of objects of concern.
    * */
   min_copper_warning = pcb_drc_violation_new(
         "Warning: DRC minimum copper overlap",
         "DRC does not catch all minimum copper overlap violations for\n"
         "objects with thickness &lt; 2 x (min overlap).",
-        0, 0, 0, TRUE, 0, 0, 0); 
+        0, 0, 0, TRUE, 0, 0, 0);
 
   drcerr_count = 0;
   drcdup_count = 0;
-  
+
   /* Since the searching functions only operate on visible layers, we need
    * to make sure that everything is turned on in order to check the entire
    * design.
@@ -759,22 +759,22 @@ DRCAll (void)
    *       run the DRC on... ?
    *
    */
-  
+
   /* Save the layer order and visibility settings so we can restore it later */
   SaveStackAndVisibility ();
   /* Turn on everything */
   ResetStackAndVisibility ();
   hid_action ("LayersChanged");
   InitConnectionLookup ();
-  
+
   /* We'll do this again when we're done, and use undo to restore state. */
   if (ClearFlagOnAllObjects (FOUNDFLAG | DRCFLAG | SELECTEDFLAG, true)){
     undo_flags = 1;
     IncrementUndoSerialNumber ();
   }
-  
+
   LockUndo(); /* Don't need to add all of these things */
-  
+
   ELEMENT_LOOP (PCB->Data);
   {
     PIN_LOOP (element);
@@ -786,25 +786,25 @@ DRCAll (void)
 
     PAD_LOOP (element);
     {
-      
+
       /* count up how many pads have no solderpaste openings */
       if (TEST_FLAG (NOPASTEFLAG, pad))
         nopastecnt++;
-      
+
       if (!TEST_FLAG (DRCFLAG, pad))
         DRCFind (PAD_TYPE, (void *) element, (void *) pad, (void *) pad);
     }
     END_LOOP;
   }
   END_LOOP;
-  
+
   VIA_LOOP (PCB->Data);
   {
     if (!TEST_FLAG (DRCFLAG, via))
       DRCFind (VIA_TYPE, (void *) via, (void *) via, (void *) via);
   }
   END_LOOP;
-  
+
   /*
    * In the following, PlowsPolygon checks for the overlapping of bounding
    * boxes of objects and polygons, however, if the clearance is less than
@@ -813,7 +813,7 @@ DRCAll (void)
    *
    * Bloating by PCB->Bloat ensures that the box is at least large enough to
    * deal with the design rule. If it's larger, it's okay, we'll get rid of
-   * the false positives in the callback. 
+   * the false positives in the callback.
    * */
 
   info.flag = SELECTEDFLAG;
@@ -825,7 +825,7 @@ DRCAll (void)
     expand_obj_bbox(&thing1, 2*PCB->Bloat);
     PlowsPolygon (PCB->Data, LINE_TYPE, layer, line, drc_callback, &info);
     SetLineBoundingBox(line);
-      
+
     if (line->Thickness < PCB->minWid)
     {
       drcerr_count++;
@@ -836,7 +836,7 @@ DRCAll (void)
       object_list_append(min_copper_warning->objects, &thing1);
   }
   ENDALL_LOOP;
-  
+
   COPPERARC_LOOP (PCB->Data);
   {
     SetThing (1, ARC_TYPE, layer, arc, arc);
@@ -978,9 +978,9 @@ DRCAll (void)
       object_list_append(min_copper_warning->objects, &thing1);
   }
   END_LOOP;
-  
+
   FreeConnectionLookupMemory ();
-  
+
   /* check silkscreen minimum widths outside of elements */
   /* XXX - need to check text and polygons too! */
   SILKLINE_LOOP (PCB->Data);
@@ -1006,7 +1006,7 @@ DRCAll (void)
     }
   }
   ENDALL_LOOP;
-  
+
   /* check silkscreen minimum widths inside of elements */
   /* XXX - need to check text and polygons too! */
   ELEMENT_LOOP (PCB->Data);
@@ -1029,14 +1029,14 @@ DRCAll (void)
       object_list_append(vobjs, &thing1);
       title = _("Element %s has %i silk lines which are too thin");
       name = (char *)UNKNOWN (NAMEONPCB_NAME (element));
-      
+
       /* -4 is for the %s and %i place-holders */
       /* +11 is the max printed length for a 32 bit integer */
       /* +1 is for the \0 termination */
       buflen = strlen (title) - 4 + strlen (name) + 11 + 1;
       buffer = (char *)malloc (buflen);
       snprintf (buffer, buflen, title, name, tmpcnt);
-      
+
       violation = pcb_drc_violation_new (buffer,
         _("Process specifications dictate a minimum silkscreen\n"
           "feature-width that can reliably be reproduced"),
@@ -1052,7 +1052,7 @@ DRCAll (void)
     }
   }
   END_LOOP;
-   
+
   if (PCB->Shrink > 0)
   {
     /* If we found any objects that are too thin, add the warning to the
@@ -1075,13 +1075,13 @@ DRCAll (void)
 
   ClearFlagOnAllObjects ((FOUNDFLAG | DRCFLAG | SELECTEDFLAG), false);
   UnlockUndo ();
-  
+
   if (undo_flags)  Undo(false);
-  
+
   RestoreStackAndVisibility ();
   hid_action ("LayersChanged");
   gui->invalidate_all ();
-  
+
   if (nopastecnt > 0)
   {
     Message (ngettext ("Warning: %d pad has the nopaste flag set.\n",
@@ -1102,7 +1102,7 @@ static const char drc_syntax[] = N_("DRC()");
 static const char drc_help[] = N_("Invoke the DRC check.");
 
 /* %start-doc actions DRC
- 
+
 Note that the design rule check uses the current board rule settings,
 not the current style settings.
 
@@ -1112,7 +1112,7 @@ static int
 ActionDRCheck (int argc, char **argv, Coord x, Coord y)
 {
   int count;
-  
+
   if (gui->drc_gui == NULL || gui->drc_gui->log_drc_overview)
   {
     Message (_("%m+Rules are minspace %$mS, minoverlap %$mS "
@@ -1146,7 +1146,7 @@ ActionDRCReport (int argc, char **argv, Coord x, Coord y)
   FILE * fp;
   char starliner[81];
   char buffer[80];
-  
+
   if (!drc_violation_list)
   {
   Message("DRCReport: Must run DRC check first.\n");
@@ -1157,7 +1157,7 @@ ActionDRCReport (int argc, char **argv, Coord x, Coord y)
   starliner[80] = '\0';
   if (argc == 1) fp = fopen(argv[0], "w");
   else fp = stdout;
-  
+
   for (i=0; i < drc_violation_list->count; i++){
     len = sprintf(buffer, "Violation %d", i);
     fprintf(fp, "%s\n%*s\n%s\n", starliner, 40+len/2, buffer, starliner);
@@ -1176,7 +1176,7 @@ static int
 ActionDRCReview (int argc, char **argv, Coord x, Coord y)
 {
   int i=0, cont=0;
-  
+
   if (!drc_violation_list)
   {
   Message("DRCReview: Must run DRC check first.\n");
@@ -1193,10 +1193,9 @@ ActionDRCReview (int argc, char **argv, Coord x, Coord y)
 }
 
 HID_Action drc_action_list[] = {
-  {"DRC", 0, ActionDRCheck, drc_help, drc_syntax},
-  {"DRCReport", 0, ActionDRCReport, drc_report_help, drc_report_syntax},
-  {"DRCReview", 0, ActionDRCReview, drc_review_help, drc_review_syntax},
+  {.name = "DRC", .need_coord_msg = 0, .trigger_cb = ActionDRCheck, .description = drc_help, .syntax = drc_syntax},
+  {.name = "DRCReport", .need_coord_msg = 0, .trigger_cb = ActionDRCReport, .description = drc_report_help, .syntax = drc_report_syntax},
+  {.name = "DRCReview", .need_coord_msg = 0, .trigger_cb = ActionDRCReview, .description = drc_review_help, .syntax = drc_review_syntax},
 };
 
 REGISTER_ACTIONS (drc_action_list)
-

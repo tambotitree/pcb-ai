@@ -87,8 +87,8 @@ static GtkWidget *library_window;
 
 
 static gint
-library_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev,
-				   gpointer data)
+library_window_configure_event_cb (GtkWidget * widget, GdkEventConfigure * ev G_GNUC_UNUSED,
+				   gpointer data G_GNUC_UNUSED)
 {
   GtkAllocation allocation;
 
@@ -124,8 +124,8 @@ enum
  *  \param [in] user_data
  */
 static void
-library_window_callback_response (GtkDialog * dialog,
-				  gint arg1, gpointer user_data)
+library_window_callback_response (GtkDialog * dialog G_GNUC_UNUSED,
+				  gint arg1, gpointer user_data G_GNUC_UNUSED)
 {
   switch (arg1)
     {
@@ -150,7 +150,7 @@ library_window_callback_response (GtkDialog * dialog,
  *
  */
 void
-ghid_library_window_create (GHidPort * out)
+ghid_library_window_create (GHidPort * out G_GNUC_UNUSED)
 {
   GtkWidget *current_tab, *entry_filter;
   GtkNotebook *notebook;
@@ -170,8 +170,6 @@ ghid_library_window_create (GHidPort * out)
                      ghidgui->library_window_height);
 
   gtk_window_set_title (GTK_WINDOW (library_window), _("PCB Library"));
-  gtk_window_set_wmclass (GTK_WINDOW (library_window), "PCB_Library",
-                          "PCB");
 
   gtk_widget_realize (library_window);
   if (Settings.AutoPlace)
@@ -290,8 +288,8 @@ lib_model_filter_visible_func (GtkTreeModel * model,
 static void
 tree_row_activated (GtkTreeView       *tree_view,
                     GtkTreePath       *path,
-                    GtkTreeViewColumn *column,
-                    gpointer           user_data)
+                    GtkTreeViewColumn *column G_GNUC_UNUSED,
+                    gpointer           user_data G_GNUC_UNUSED)
 {
   GtkTreeModel *model;
   GtkTreeIter iter;
@@ -321,7 +319,7 @@ tree_row_activated (GtkTreeView       *tree_view,
 static gboolean
 tree_row_key_pressed (GtkTreeView *tree_view,
                       GdkEventKey *event,
-                      gpointer     user_data)
+                      gpointer     user_data G_GNUC_UNUSED)
 {
   GtkTreeSelection *selection;
   GtkTreeModel *model;
@@ -332,7 +330,7 @@ tree_row_key_pressed (GtkTreeView *tree_view,
 
   /* Handle both lower- and uppercase `c' */
   if (((event->state & default_mod_mask) != GDK_CONTROL_MASK)
-      || ((event->keyval != GDK_c) && (event->keyval != GDK_C)))
+      || ((event->keyval != GDK_KEY_c) && (event->keyval != GDK_KEY_C)))
     return FALSE;
 
   selection = gtk_tree_view_get_selection (tree_view);
@@ -487,7 +485,7 @@ library_window_filter_timeout (gpointer data)
  *  \param [in] user_data The library dialog.
  */
 static void
-library_window_callback_filter_entry_changed (GtkEditable * editable,
+library_window_callback_filter_entry_changed (GtkEditable * editable G_GNUC_UNUSED,
 					      gpointer user_data)
 {
   GhidLibraryWindow *library_window = GHID_LIBRARY_WINDOW (user_data);
@@ -526,7 +524,7 @@ library_window_callback_filter_entry_changed (GtkEditable * editable,
  *  \param [in] user_data The library dialog.
  */
 static void
-library_window_callback_filter_button_clicked (GtkButton * button,
+library_window_callback_filter_button_clicked (GtkButton * button G_GNUC_UNUSED,
 					       gpointer user_data)
 {
   GhidLibraryWindow *library_window = GHID_LIBRARY_WINDOW (user_data);
@@ -542,7 +540,7 @@ library_window_callback_filter_button_clicked (GtkButton * button,
  * sources and the leaves are the footprints.
  */
 static GtkTreeModel *
-create_lib_tree_model (GhidLibraryWindow * library_window)
+create_lib_tree_model (GhidLibraryWindow * library_window G_GNUC_UNUSED)
 {
   GtkTreeStore *tree;
   char *rel_path, empty_string[] = ""; /* writable */
@@ -692,7 +690,7 @@ create_lib_treeview (GhidLibraryWindow * library_window)
   /* -- library selection view -- */
 
   /* vertical box for footprint selection and search entry */
-  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_VBOX,
+  vbox = GTK_WIDGET (g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_VERTICAL,
 				   /* GtkContainer */
 				   "border-width", 5,
 				   /* GtkBox */
@@ -761,7 +759,7 @@ create_lib_treeview (GhidLibraryWindow * library_window)
 
 
   /* -- filter area -- */
-  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_HBOX,
+  hbox = GTK_WIDGET (g_object_new (GTK_TYPE_BOX, "orientation", GTK_ORIENTATION_HORIZONTAL,
 				   /* GtkBox */
 				   "homogeneous", FALSE, "spacing", 3, NULL));
 
@@ -803,8 +801,7 @@ create_lib_treeview (GhidLibraryWindow * library_window)
 				     "relief", GTK_RELIEF_NONE, NULL));
 
   gtk_container_add (GTK_CONTAINER (button),
-		     gtk_image_new_from_stock (GTK_STOCK_CLEAR,
-					       GTK_ICON_SIZE_SMALL_TOOLBAR));
+		     gtk_label_new_with_mnemonic (_("_Clear")));
   g_signal_connect (button,
 		    "clicked",
 		    G_CALLBACK
@@ -823,8 +820,7 @@ create_lib_treeview (GhidLibraryWindow * library_window)
 				     /* GtkButton */
 				     "relief", GTK_RELIEF_NONE, NULL));
   gtk_container_add (GTK_CONTAINER (button),
-		     gtk_image_new_from_stock (GTK_STOCK_REFRESH,
-					       GTK_ICON_SIZE_SMALL_TOOLBAR));
+		     gtk_label_new_with_mnemonic (_("_Refresh")));
   /* add the refresh button to the filter area */
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   g_signal_connect (button,
@@ -875,7 +871,7 @@ library_window_constructor (GType type,
 		"homogeneous", FALSE, NULL);
 
   /* horizontal pane containing selection and preview */
-  hpaned = GTK_WIDGET (g_object_new (GTK_TYPE_HPANED,
+  hpaned = GTK_WIDGET (g_object_new (GTK_TYPE_PANED, "orientation", GTK_ORIENTATION_HORIZONTAL,
 				     /* GtkContainer */
 				     "border-width", 5, NULL));
   library_window->hpaned = hpaned;
@@ -897,15 +893,11 @@ library_window_constructor (GType type,
   frame = GTK_WIDGET (g_object_new (GTK_TYPE_FRAME,
 				    /* GtkFrame */
 				    "label", _("Preview"), NULL));
-  alignment = GTK_WIDGET (g_object_new (GTK_TYPE_ALIGNMENT,
-					/* GtkAlignment */
-					"left-padding", 5,
-					"right-padding", 5,
-					"top-padding", 5,
-					"bottom-padding", 5,
-					"xscale", 1.0,
-					"yscale", 1.0,
-					"xalign", 0.5, "yalign", 0.5, NULL));
+  alignment = GTK_WIDGET (g_object_new (GTK_TYPE_BOX,
+                                         "orientation", GTK_ORIENTATION_VERTICAL,
+                                         "margin-start", 5, "margin-end", 5,
+                                         "margin-top", 5, "margin-bottom", 5,
+                                         NULL));
   preview = (GtkWidget *)g_object_new (GHID_TYPE_PINOUT_PREVIEW,
 			  /* GhidPinoutPreview */
 			  "element-data", NULL,
@@ -927,7 +919,7 @@ library_window_constructor (GType type,
   /* now add buttons in the action area */
   gtk_dialog_add_buttons (GTK_DIALOG (library_window),
 			  /*  - close button */
-			  GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
+			  _("_Close"), GTK_RESPONSE_CLOSE, NULL);
 
   return object;
 }
@@ -959,6 +951,14 @@ library_window_class_init (GhidLibraryWindowClass * klass)
 }
 
 
+/*! \brief Adapt GLib class initialization to the typed class. */
+static void
+library_window_class_init_adapter (gpointer klass, gpointer data)
+{
+  (void) data;
+  library_window_class_init ((GhidLibraryWindowClass *) klass);
+}
+
 GType
 ghid_library_window_get_type ()
 {
@@ -970,12 +970,13 @@ ghid_library_window_get_type ()
 	sizeof (GhidLibraryWindowClass),
 	NULL,			/* base_init */
 	NULL,			/* base_finalize */
-	(GClassInitFunc) library_window_class_init,
+	library_window_class_init_adapter,
 	NULL,			/* class_finalize */
 	NULL,			/* class_data */
 	sizeof (GhidLibraryWindow),
 	0,			/* n_preallocs */
-	NULL			/* instance_init */
+	NULL			/* instance_init */,
+        NULL /* value_table */
       };
 
       library_window_type = g_type_register_static (GTK_TYPE_DIALOG,

@@ -1,0 +1,702 @@
+{
+  "schema_version": 1,
+  "ruleset_version": 12,
+  "policy": "One-time source migrations; no conversion in normal builds. Compiler hints and gschem examples inform reviewed rules.",
+  "gschem_reference_root": "../ (companion geda-ai checkout; references for human review only)",
+  "rules": [
+    {
+      "id": "typed-scroll-adjustments",
+      "path": "src/hid/gtk/gui.h",
+      "pattern": "\\bGtkObject\\s*\\*h_adjustment\\s*,\\s*\\*v_adjustment\\s*;",
+      "replacement": "GtkAdjustment *h_adjustment, *v_adjustment;",
+      "reason": "Both fields hold gtk_adjustment_new results, not AtkObject instances.",
+      "old_api": "GtkObject adjustment fields",
+      "target_api": "GtkAdjustment",
+      "compiler_suggestion": null,
+      "gschem_examples": [
+        "gschem/include/gschem_page_view.h:48",
+        "gschem/src/x_window.c:943"
+      ],
+      "conversion_state": "applied"
+    },
+    {
+      "id": "dialog-object-signal-cast",
+      "path": "src/hid/gtk/gui-utils.c",
+      "pattern": "\\bGTK_OBJECT\\s*\\(\\s*dialog\\s*\\)",
+      "replacement": "G_OBJECT (dialog)",
+      "reason": "The response-signal connection accepts the existing dialog as a GObject.",
+      "old_api": "GTK_OBJECT(dialog)",
+      "target_api": "G_OBJECT(dialog)",
+      "compiler_suggestion": null,
+      "gschem_examples": [
+        "gschem/src/gschem_toplevel.c:283"
+      ],
+      "conversion_state": "applied"
+    },
+    {
+      "id": "horizontal-scrollbar",
+      "path": "src/hid/gtk/gui-top-window.c",
+      "pattern": "\\bgtk_hscrollbar_new\\s*\\(",
+      "replacement": "gtk_scrollbar_new (GTK_ORIENTATION_HORIZONTAL, ",
+      "reason": "GTK3 constructor takes an explicit orientation and the same adjustment.",
+      "old_api": "gtk_hscrollbar_new",
+      "target_api": "gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, adjustment)",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "conversion_state": "applied"
+    },
+    {
+      "id": "vertical-scrollbar",
+      "path": "src/hid/gtk/gui-top-window.c",
+      "pattern": "\\bgtk_vscrollbar_new\\s*\\(",
+      "replacement": "gtk_scrollbar_new (GTK_ORIENTATION_VERTICAL, ",
+      "reason": "GTK3 constructor takes an explicit orientation and the same adjustment.",
+      "old_api": "gtk_vscrollbar_new",
+      "target_api": "gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, adjustment)",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "conversion_state": "applied"
+    },
+    {
+      "id": "time-value-lifetime",
+      "pattern": "\\b(?:GTimeVal|g_file_info_get_modification_time)\\b",
+      "replacement": null,
+      "reason": "Completed by timestamp_conversion.py using gschem timespec precedent; do not rerun or substitute GDateTime.",
+      "old_api": "GTimeVal / g_file_info_get_modification_time",
+      "target_api": "struct timespec + stat timestamp members",
+      "compiler_suggestion": "GDateTime",
+      "gschem_examples": [
+        "gschem/src/gschem_change_notification.c:166",
+        "gschem/src/x_highlevel.c:49"
+      ],
+      "conversion_state": "applied"
+    },
+    {
+      "id": "style-context",
+      "pattern": "\\bgtk_widget_get_style\\b",
+      "replacement": null,
+      "reason": "Use context queries, not GtkStyle fields; xthickness/ythickness need an explicit padding/border decision.",
+      "old_api": "gtk_widget_get_style",
+      "target_api": "gtk_widget_get_style_context + context query",
+      "compiler_suggestion": "gtk_widget_get_style_context",
+      "gschem_examples": [
+        "gschem/src/gschem_fill_swatch_cell_renderer.c:241",
+        "gschem/src/gschem_multiattrib_dockable.c:2679"
+      ],
+      "conversion_state": "needs_coordinated_rule",
+      "applied_contexts": [
+        {
+          "path": "src/hid/gtk/ghid-cell-renderer-visibility.c",
+          "converter": "tools/visibility_renderer_conversion.py",
+          "date": "2026-10-20",
+          "checks": "strict production object and standalone rendering/activation/lifetime fixture passed"
+        }
+      ]
+    },
+    {
+      "id": "rgba-color",
+      "pattern": "\\bgdk_color_parse\\b",
+      "replacement": null,
+      "reason": "Reverse parse argument order, use floating-point 0..1 channels and migrate all /65535 arithmetic and drawing consumers together.",
+      "old_api": "gdk_color_parse / GdkColor",
+      "target_api": "gdk_rgba_parse(&rgba, text) / GdkRGBA",
+      "compiler_suggestion": "gdk_rgba_parse",
+      "gschem_examples": [
+        "gschem/src/x_color.c:61",
+        "gschem/src/gschem_swatch_column_renderer.c:251"
+      ],
+      "conversion_state": "needs_coordinated_rule",
+      "applied_contexts": [
+        {
+          "path": "src/hid/gtk/ghid-cell-renderer-visibility.c",
+          "converter": "tools/visibility_renderer_conversion.py",
+          "date": "2026-10-20",
+          "checks": "strict production object and standalone rendering/activation/lifetime fixture passed"
+        }
+      ]
+    },
+    {
+      "id": "draw-context-lifecycle",
+      "pattern": "\\bgdk_cairo_create\\b",
+      "replacement": null,
+      "reason": "GTK3 cell renderers borrow cairo_t from GTK: change the virtual-method signature and never destroy that context. Direct-window drawing is a separate frame lifecycle.",
+      "old_api": "gdk_cairo_create",
+      "target_api": "Use GTK-provided cairo_t in cell renderer; frame API for direct window drawing",
+      "compiler_suggestion": "gdk_window_begin_draw_frame + gdk_drawing_context_get_cairo_context",
+      "gschem_examples": [
+        "gschem/src/gschem_swatch_column_renderer.c:182",
+        "gschem/src/x_stroke.c:120"
+      ],
+      "conversion_state": "needs_coordinated_rule",
+      "applied_contexts": [
+        {
+          "path": "src/hid/gtk/ghid-cell-renderer-visibility.c",
+          "converter": "tools/visibility_renderer_conversion.py",
+          "date": "2026-10-20",
+          "checks": "strict production object and standalone rendering/activation/lifetime fixture passed"
+        }
+      ]
+    },
+    {
+      "id": "cell-renderer-cairo-signature",
+      "path": "src/hid/gtk/ghid-cell-renderer-visibility.c",
+      "pattern": "\\bghid_cell_renderer_visibility_render\\s*\\(\\s*GtkCellRenderer\\s*\\*cell\\s*,\\s*GdkWindow\\b",
+      "replacement": null,
+      "old_api": "GtkCellRenderer.render with GdkWindow and expose_area",
+      "target_api": "render(cell, cairo_t *cr, widget, const background_area, const cell_area, flags)",
+      "compiler_suggestion": null,
+      "gschem_examples": [
+        "gschem/src/gschem_swatch_column_renderer.c:182",
+        "gschem/src/gschem_fill_swatch_cell_renderer.c:225"
+      ],
+      "conversion_state": "applied",
+      "reason": "Preserve clipping and Cairo state with save/restore; GTK owns the context. Convert the callback signature and body as one rule.",
+      "applied_contexts": [
+        {
+          "path": "src/hid/gtk/ghid-cell-renderer-visibility.c",
+          "converter": "tools/visibility_renderer_conversion.py",
+          "date": "2026-10-20",
+          "checks": "strict production object and standalone rendering/activation/lifetime fixture passed"
+        }
+      ]
+    },
+    {
+      "id": "queue-redraw-gtkhid-main.c",
+      "path": "src/hid/gtk/gtkhid-main.c",
+      "pattern": "\\bgdk_window_process_all_updates\\s*\\(\\s*\\)",
+      "replacement": "gtk_widget_queue_draw (gport->drawing_area)",
+      "old_api": "gdk_window_process_all_updates",
+      "target_api": "gtk_widget_queue_draw",
+      "compiler_suggestion": null,
+      "gschem_examples": [
+        "gschem/src/x_event.c"
+      ],
+      "reason": "Schedule drawing through GTK3 instead of forcing display-wide synchronous updates. Pointer coordinates are already computed independently of painting.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "queue-redraw-gtkhid-gl.c",
+      "path": "src/hid/gtk/gtkhid-gl.c",
+      "pattern": "\\bgdk_window_process_all_updates\\s*\\(\\s*\\)",
+      "replacement": "gtk_widget_queue_draw (gport->drawing_area)",
+      "old_api": "gdk_window_process_all_updates",
+      "target_api": "gtk_widget_queue_draw",
+      "compiler_suggestion": null,
+      "gschem_examples": [
+        "gschem/src/x_event.c"
+      ],
+      "reason": "Schedule drawing through GTK3 instead of forcing display-wide synchronous updates. Pointer coordinates are already computed independently of painting.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "display-beep",
+      "path": "src/hid/gtk/gtkhid-main.c",
+      "pattern": "\\bgdk_beep\\s*\\(\\s*\\)",
+      "replacement": "gdk_display_beep (gtk_widget_get_display (gport->drawing_area))",
+      "old_api": "gdk_beep",
+      "target_api": "gdk_display_beep",
+      "compiler_suggestion": "gdk_display_beep",
+      "gschem_examples": [],
+      "reason": "Send the bell request to the display that owns the drawing widget.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "progress-dialog-alignment",
+      "path": "src/hid/gtk/gtkhid-main.c",
+      "pattern": "\\balignment = gtk_alignment_new \\(0\\., 0\\., 1\\., 1\\.\\);\\s*gtk_alignment_set_padding \\(GTK_ALIGNMENT \\(alignment\\), 8, 8, 8, 8\\);",
+      "replacement": "alignment = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);\n  gtk_widget_set_margin_top (alignment, 8);\n  gtk_widget_set_margin_bottom (alignment, 8);\n  gtk_widget_set_margin_start (alignment, 8);\n  gtk_widget_set_margin_end (alignment, 8);",
+      "old_api": "GtkAlignment",
+      "target_api": "GtkBox and GtkWidget margins",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "The sole alignment wrapper fills both axes and provides uniform eight-pixel padding; a single-child box and margins preserve that intent.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "popup-event-anchor",
+      "path": "src/hid/gtk/gtkhid-main.c",
+      "pattern": "\\bgtk_menu_popup\\s*\\(\\s*menu,\\s*NULL,\\s*NULL,\\s*NULL,\\s*NULL,\\s*0,\\s*gtk_get_current_event_time\\s*\\(\\s*\\)\\s*\\);",
+      "replacement": "{\n        GdkEvent *event = gtk_get_current_event ();\n        GdkEventType type = event ? gdk_event_get_event_type (event) : GDK_NOTHING;\n        if (type == GDK_BUTTON_PRESS || type == GDK_BUTTON_RELEASE ||\n            type == GDK_MOTION_NOTIFY || type == GDK_SCROLL ||\n            type == GDK_TOUCH_BEGIN || type == GDK_TOUCH_END)\n          gtk_menu_popup_at_pointer (menu, event);\n        else\n          gtk_menu_popup_at_widget (menu, ghid_port.drawing_area,\n                                     GDK_GRAVITY_CENTER, GDK_GRAVITY_NORTH_WEST,\n                                     event);\n        if (event) gdk_event_free (event);\n      }",
+      "old_api": "gtk_menu_popup",
+      "target_api": "gtk_menu_popup_at_pointer / gtk_menu_popup_at_widget",
+      "compiler_suggestion": "gtk_menu_popup_at_widget, gtk_menu_popup_at_pointer, gtk_menu_popup_at_rect",
+      "gschem_examples": [
+        "gschem/src/x_event.c:283",
+        "gschem/src/gschem_messages_dockable.c:532"
+      ],
+      "reason": "Mouse events retain pointer placement; keyboard or programmatic invocations anchor to the drawing widget. The copied current event is freed.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "remove-window-manager-classes",
+      "pattern": "\\bgtk_window_set_wmclass\\s*\\(\\s*GTK_WINDOW\\s*\\(\\s*\\w+\\s*\\)\\s*,\\s*\"[^\"\\n]*\"\\s*,\\s*\"[^\"\\n]*\"\\s*\\);",
+      "replacement": null,
+      "old_api": "gtk_window_set_wmclass",
+      "target_api": "remove obsolete desktop window-manager hint",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "User explicitly excludes optional desktop policy integration; preserve application titles, transient parents and modality.",
+      "conversion_state": "dedicated-converter"
+    },
+    {
+      "id": "key-name-3270_BackTab",
+      "pattern": "\\bGDK_3270_BackTab\\b",
+      "replacement": "GDK_KEY_3270_BackTab",
+      "old_api": "GDK_3270_BackTab",
+      "target_api": "GDK_KEY_3270_BackTab",
+      "compiler_suggestion": "GDK_KEY_3270_BackTab",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Alt_L",
+      "pattern": "\\bGDK_Alt_L\\b",
+      "replacement": "GDK_KEY_Alt_L",
+      "old_api": "GDK_Alt_L",
+      "target_api": "GDK_KEY_Alt_L",
+      "compiler_suggestion": "GDK_KEY_Alt_L",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Alt_R",
+      "pattern": "\\bGDK_Alt_R\\b",
+      "replacement": "GDK_KEY_Alt_R",
+      "old_api": "GDK_Alt_R",
+      "target_api": "GDK_KEY_Alt_R",
+      "compiler_suggestion": "GDK_KEY_Alt_R",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-C",
+      "pattern": "\\bGDK_C\\b",
+      "replacement": "GDK_KEY_C",
+      "old_api": "GDK_C",
+      "target_api": "GDK_KEY_C",
+      "compiler_suggestion": "GDK_KEY_C",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Control_L",
+      "pattern": "\\bGDK_Control_L\\b",
+      "replacement": "GDK_KEY_Control_L",
+      "old_api": "GDK_Control_L",
+      "target_api": "GDK_KEY_Control_L",
+      "compiler_suggestion": "GDK_KEY_Control_L",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Control_R",
+      "pattern": "\\bGDK_Control_R\\b",
+      "replacement": "GDK_KEY_Control_R",
+      "old_api": "GDK_Control_R",
+      "target_api": "GDK_KEY_Control_R",
+      "compiler_suggestion": "GDK_KEY_Control_R",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Down",
+      "pattern": "\\bGDK_Down\\b",
+      "replacement": "GDK_KEY_Down",
+      "old_api": "GDK_Down",
+      "target_api": "GDK_KEY_Down",
+      "compiler_suggestion": "GDK_KEY_Down",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Escape",
+      "pattern": "\\bGDK_Escape\\b",
+      "replacement": "GDK_KEY_Escape",
+      "old_api": "GDK_Escape",
+      "target_api": "GDK_KEY_Escape",
+      "compiler_suggestion": "GDK_KEY_Escape",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-ISO_Left_Tab",
+      "pattern": "\\bGDK_ISO_Left_Tab\\b",
+      "replacement": "GDK_KEY_ISO_Left_Tab",
+      "old_api": "GDK_ISO_Left_Tab",
+      "target_api": "GDK_KEY_ISO_Left_Tab",
+      "compiler_suggestion": "GDK_KEY_ISO_Left_Tab",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-ISO_Level3_Shift",
+      "pattern": "\\bGDK_ISO_Level3_Shift\\b",
+      "replacement": "GDK_KEY_ISO_Level3_Shift",
+      "old_api": "GDK_ISO_Level3_Shift",
+      "target_api": "GDK_KEY_ISO_Level3_Shift",
+      "compiler_suggestion": "GDK_KEY_ISO_Level3_Shift",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Left",
+      "pattern": "\\bGDK_Left\\b",
+      "replacement": "GDK_KEY_Left",
+      "old_api": "GDK_Left",
+      "target_api": "GDK_KEY_Left",
+      "compiler_suggestion": "GDK_KEY_Left",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Return",
+      "pattern": "\\bGDK_Return\\b",
+      "replacement": "GDK_KEY_Return",
+      "old_api": "GDK_Return",
+      "target_api": "GDK_KEY_Return",
+      "compiler_suggestion": "GDK_KEY_Return",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Right",
+      "pattern": "\\bGDK_Right\\b",
+      "replacement": "GDK_KEY_Right",
+      "old_api": "GDK_Right",
+      "target_api": "GDK_KEY_Right",
+      "compiler_suggestion": "GDK_KEY_Right",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Shift_L",
+      "pattern": "\\bGDK_Shift_L\\b",
+      "replacement": "GDK_KEY_Shift_L",
+      "old_api": "GDK_Shift_L",
+      "target_api": "GDK_KEY_Shift_L",
+      "compiler_suggestion": "GDK_KEY_Shift_L",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Shift_Lock",
+      "pattern": "\\bGDK_Shift_Lock\\b",
+      "replacement": "GDK_KEY_Shift_Lock",
+      "old_api": "GDK_Shift_Lock",
+      "target_api": "GDK_KEY_Shift_Lock",
+      "compiler_suggestion": "GDK_KEY_Shift_Lock",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Shift_R",
+      "pattern": "\\bGDK_Shift_R\\b",
+      "replacement": "GDK_KEY_Shift_R",
+      "old_api": "GDK_Shift_R",
+      "target_api": "GDK_KEY_Shift_R",
+      "compiler_suggestion": "GDK_KEY_Shift_R",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Tab",
+      "pattern": "\\bGDK_Tab\\b",
+      "replacement": "GDK_KEY_Tab",
+      "old_api": "GDK_Tab",
+      "target_api": "GDK_KEY_Tab",
+      "compiler_suggestion": "GDK_KEY_Tab",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-Up",
+      "pattern": "\\bGDK_Up\\b",
+      "replacement": "GDK_KEY_Up",
+      "old_api": "GDK_Up",
+      "target_api": "GDK_KEY_Up",
+      "compiler_suggestion": "GDK_KEY_Up",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "key-name-c",
+      "pattern": "\\bGDK_c\\b",
+      "replacement": "GDK_KEY_c",
+      "old_api": "GDK_c",
+      "target_api": "GDK_KEY_c",
+      "compiler_suggestion": "GDK_KEY_c",
+      "gschem_examples": [],
+      "reason": "Verified exact GDK_KEY_ definition in installed GTK3 gdkkeysyms.h; event and modifier constants are excluded.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "horizontal-button-box",
+      "pattern": "\\bgtk_hbutton_box_new\\s*\\(\\s*\\)",
+      "replacement": "gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL)",
+      "old_api": "gtk_hbutton_box_new",
+      "target_api": "gtk_button_box_new",
+      "compiler_suggestion": "gtk_button_box_new",
+      "gschem_examples": [],
+      "reason": "Seven reviewed horizontal button boxes retain their orientation and existing layout policies.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "text-button-close",
+      "pattern": "\\bgtk_button_new_from_stock\\s*\\(\\s*GTK_STOCK_CLOSE\\s*\\)",
+      "replacement": "gtk_button_new_with_mnemonic (_(\"_Close\"))",
+      "old_api": "gtk_button_new_from_stock(GTK_STOCK_CLOSE)",
+      "target_api": "gtk_button_new_with_mnemonic",
+      "compiler_suggestion": "gtk_button_new_with_label",
+      "gschem_examples": [],
+      "reason": "Use an explicit translated mnemonic label; callbacks remain intact and no icon/theme lookup is introduced.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "text-button-refresh",
+      "pattern": "\\bgtk_button_new_from_stock\\s*\\(\\s*GTK_STOCK_REFRESH\\s*\\)",
+      "replacement": "gtk_button_new_with_mnemonic (_(\"_Refresh\"))",
+      "old_api": "gtk_button_new_from_stock(GTK_STOCK_REFRESH)",
+      "target_api": "gtk_button_new_with_mnemonic",
+      "compiler_suggestion": "gtk_button_new_with_label",
+      "gschem_examples": [],
+      "reason": "Use an explicit translated mnemonic label; callbacks remain intact and no icon/theme lookup is introduced.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "text-button-add",
+      "pattern": "\\bgtk_button_new_from_stock\\s*\\(\\s*GTK_STOCK_ADD\\s*\\)",
+      "replacement": "gtk_button_new_with_mnemonic (_(\"_Add\"))",
+      "old_api": "gtk_button_new_from_stock(GTK_STOCK_ADD)",
+      "target_api": "gtk_button_new_with_mnemonic",
+      "compiler_suggestion": "gtk_button_new_with_label",
+      "gschem_examples": [],
+      "reason": "Use an explicit translated mnemonic label; callbacks remain intact and no icon/theme lookup is introduced.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "text-button-delete",
+      "pattern": "\\bgtk_button_new_from_stock\\s*\\(\\s*GTK_STOCK_DELETE\\s*\\)",
+      "replacement": "gtk_button_new_with_mnemonic (_(\"_Delete\"))",
+      "old_api": "gtk_button_new_from_stock(GTK_STOCK_DELETE)",
+      "target_api": "gtk_button_new_with_mnemonic",
+      "compiler_suggestion": "gtk_button_new_with_label",
+      "gschem_examples": [],
+      "reason": "Use an explicit translated mnemonic label; callbacks remain intact and no icon/theme lookup is introduced.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "scrolled-container-add",
+      "pattern": "\\bgtk_scrolled_window_add_with_viewport\\s*\\(\\s*GTK_SCROLLED_WINDOW\\b",
+      "replacement": "gtk_container_add (GTK_CONTAINER",
+      "old_api": "gtk_scrolled_window_add_with_viewport",
+      "target_api": "gtk_container_add",
+      "compiler_suggestion": "gtk_container_add",
+      "gschem_examples": [],
+      "reason": "GTK3 scrolled windows create the viewport automatically for these grid/box children. Both sites were inspected.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "layer-direction-button-up",
+      "path": "src/hid/gtk/gui-config.c",
+      "pattern": "\\bbutton = gtk_button_new\\s*\\(\\s*\\);\\s*arrow = gtk_arrow_new\\s*\\(\\s*GTK_ARROW_UP,\\s*GTK_SHADOW_ETCHED_IN\\s*\\);\\s*gtk_container_add\\s*\\(\\s*GTK_CONTAINER\\s*\\(\\s*button\\s*\\),\\s*arrow\\s*\\);",
+      "replacement": "button = gtk_button_new_with_mnemonic (_(\"_Up\"));",
+      "old_api": "gtk_arrow_new",
+      "target_api": "gtk_button_new_with_mnemonic",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Two layer move controls use explicit Up/Down text; preserve their command callbacks without adding icon/theme lookup.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "layer-direction-button-down",
+      "path": "src/hid/gtk/gui-config.c",
+      "pattern": "\\bbutton = gtk_button_new\\s*\\(\\s*\\);\\s*arrow = gtk_arrow_new\\s*\\(\\s*GTK_ARROW_DOWN,\\s*GTK_SHADOW_ETCHED_IN\\s*\\);\\s*gtk_container_add\\s*\\(\\s*GTK_CONTAINER\\s*\\(\\s*button\\s*\\),\\s*arrow\\s*\\);",
+      "replacement": "button = gtk_button_new_with_mnemonic (_(\"_Down\"));",
+      "old_api": "gtk_arrow_new",
+      "target_api": "gtk_button_new_with_mnemonic",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Two layer move controls use explicit Up/Down text; preserve their command callbacks without adding icon/theme lookup.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "remove-layer-arrow-variable",
+      "path": "src/hid/gtk/gui-config.c",
+      "pattern": "\\bGtkWidget \\*hbox, \\*arrow;",
+      "replacement": "GtkWidget *hbox;",
+      "old_api": "GtkArrow child variable",
+      "target_api": "no unused child variable",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Both arrow children are replaced by text buttons in the same conversion.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "drc-class-initializer-type",
+      "path": "src/hid/gtk/gui-drc-window.c",
+      "pattern": "\\bghid_drc_violation_class_init\\s*\\(GhidViolationRendererClass\\s*\\*\\s*klass\\)",
+      "replacement": "ghid_drc_violation_class_init (GhidDrcViolationClass *klass)",
+      "old_api": "Incorrect class type on DRC violation initializer",
+      "target_api": "GhidDrcViolationClass",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "GTypeInfo registers GhidDrcViolationClass, matching the struct and adapter; the initializer previously named the separate renderer class.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "object-vbox",
+      "pattern": "\\bg_object_new\\s*\\(\\s*GTK_TYPE_VBOX\\s*,",
+      "replacement": "g_object_new (GTK_TYPE_BOX, \"orientation\", GTK_ORIENTATION_VERTICAL,",
+      "old_api": "Legacy oriented box/pane type",
+      "target_api": "GtkBox/GtkPaned with explicit orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Reviewed object constructors retain orientation; subclass fields and registration must agree.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "object-hbox",
+      "pattern": "\\bg_object_new\\s*\\(\\s*GTK_TYPE_HBOX\\s*,",
+      "replacement": "g_object_new (GTK_TYPE_BOX, \"orientation\", GTK_ORIENTATION_HORIZONTAL,",
+      "old_api": "Legacy oriented box/pane type",
+      "target_api": "GtkBox/GtkPaned with explicit orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Reviewed object constructors retain orientation; subclass fields and registration must agree.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "object-hpaned",
+      "pattern": "\\bg_object_new\\s*\\(\\s*GTK_TYPE_HPANED\\s*,",
+      "replacement": "g_object_new (GTK_TYPE_PANED, \"orientation\", GTK_ORIENTATION_HORIZONTAL,",
+      "old_api": "Legacy oriented box/pane type",
+      "target_api": "GtkBox/GtkPaned with explicit orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Reviewed object constructors retain orientation; subclass fields and registration must agree.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "vbox-class-type",
+      "pattern": "\\bGtkVBoxClass\\b",
+      "replacement": "GtkBoxClass",
+      "old_api": "Legacy oriented box/pane type",
+      "target_api": "GtkBox/GtkPaned with explicit orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Reviewed object constructors retain orientation; subclass fields and registration must agree.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "vbox-instance-type",
+      "pattern": "\\bGtkVBox\\b",
+      "replacement": "GtkBox",
+      "old_api": "Legacy oriented box/pane type",
+      "target_api": "GtkBox/GtkPaned with explicit orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Reviewed object constructors retain orientation; subclass fields and registration must agree.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "vbox-registered-type",
+      "pattern": "\\bGTK_TYPE_VBOX\\b",
+      "replacement": "GTK_TYPE_BOX",
+      "old_api": "Legacy oriented box/pane type",
+      "target_api": "GtkBox/GtkPaned with explicit orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Reviewed object constructors retain orientation; subclass fields and registration must agree.",
+      "conversion_state": "ready"
+    },
+    {
+      "id": "trackball-vertical-orientation",
+      "path": "src/hid/gtk/gui-trackball.c",
+      "pattern": "\\bgtk_widget_set_size_request \\(GTK_WIDGET \\(ball\\), 140, 140\\);",
+      "replacement": "gtk_orientable_set_orientation (GTK_ORIENTABLE (ball), GTK_ORIENTATION_VERTICAL);\n  gtk_widget_set_size_request (GTK_WIDGET (ball), 140, 140);",
+      "old_api": "GtkVBox implicit orientation",
+      "target_api": "explicit GtkBox orientation",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "The converted trackball subclass retains its previous vertical packing. GL remains disabled; this is source conversion only.",
+      "conversion_state": "ready",
+      "skip_if_contains": "gtk_orientable_set_orientation (GTK_ORIENTABLE (ball), GTK_ORIENTATION_VERTICAL);"
+    },
+    {
+      "id": "remove-legacy-gdk-enter",
+      "path": "src/hid/gtk/gui-misc.c",
+      "pattern": "\\bGDK_THREADS_ENTER\\s*\\(\\s*\\);",
+      "replacement": "",
+      "old_api": "GDK_THREADS_ENTER",
+      "target_api": "GTK main-thread event dispatch",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Only call follows the nested UI-thread coordinate event loop. No global GDK lock is initialized or worker thread created in this checkout. GLib thread support remains available.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "remove-legacy-gdk-leave",
+      "path": "src/hid/gtk/gui-misc.c",
+      "pattern": "\\bGDK_THREADS_LEAVE\\s*\\(\\s*\\);",
+      "replacement": "/* Run the nested input loop on the UI thread without the obsolete GDK lock. */",
+      "old_api": "GDK_THREADS_LEAVE",
+      "target_api": "GTK main-thread event dispatch",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "reason": "Mate of the removed ENTER call; keep nested GLib event dispatch, handlers and timers unchanged. Worker synchronization must use its own GLib mutexes, not this removed global GUI lock.",
+      "conversion_state": "applied"
+    },
+    {
+      "id": "drawing-area-application-background",
+      "path": "src/hid/gtk/gui-top-window.c",
+      "pattern": "gdk_window_set_back_pixmap\\s*\\(gtk_widget_get_window\\s*\\(gport->drawing_area\\),\\s*NULL,\\s*FALSE\\);",
+      "replacement": "/* The Cairo draw handler supplies the canvas background and contents. */\n  gtk_widget_set_app_paintable (gport->drawing_area, TRUE);",
+      "reason": "Replace legacy background-clearing policy; Cairo backing surface and GTK3 draw presentation remain unchanged.",
+      "old_api": "gdk_window_set_back_pixmap(window, NULL, FALSE)",
+      "target_api": "gtk_widget_set_app_paintable",
+      "compiler_suggestion": null,
+      "gschem_examples": [],
+      "conversion_state": "reviewed"
+    },
+    {
+      "id": "hscale-explicit-orientation",
+      "pattern": "\\bgtk_hscale_new\\s*\\(",
+      "replacement": "gtk_scale_new (GTK_ORIENTATION_HORIZONTAL, ",
+      "reason": "GTK3 unified scale constructor retains adjustment and explicit orientation.",
+      "old_api": "gtk_hscale_new",
+      "target_api": "gtk_scale_new",
+      "compiler_suggestion": "gtk_scale_new",
+      "gschem_examples": [],
+      "conversion_state": "reviewed"
+    },
+    {
+      "id": "vscale-explicit-orientation",
+      "pattern": "\\bgtk_vscale_new\\s*\\(",
+      "replacement": "gtk_scale_new (GTK_ORIENTATION_VERTICAL, ",
+      "reason": "GTK3 unified scale constructor retains adjustment and explicit orientation.",
+      "old_api": "gtk_vscale_new",
+      "target_api": "gtk_scale_new",
+      "compiler_suggestion": "gtk_scale_new",
+      "gschem_examples": [],
+      "conversion_state": "reviewed"
+    }
+  ]
+}
