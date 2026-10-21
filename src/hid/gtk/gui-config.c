@@ -776,6 +776,20 @@ ghid_config_files_read (gint * argc, gchar *** argv)
   (*argv)++;
   parse_optionv (argc, argv, TRUE);
 
+  /* Old preference files may contain zero sizes; GTK3 rejects those. */
+  if (ghidgui->top_window_width <= 0) ghidgui->top_window_width = 1100;
+  if (ghidgui->top_window_height <= 0) ghidgui->top_window_height = 760;
+  if (ghidgui->log_window_width <= 0) ghidgui->log_window_width = 700;
+  if (ghidgui->log_window_height <= 0) ghidgui->log_window_height = 350;
+  if (ghidgui->drc_window_width <= 0) ghidgui->drc_window_width = 700;
+  if (ghidgui->drc_window_height <= 0) ghidgui->drc_window_height = 500;
+  if (ghidgui->library_window_width <= 0) ghidgui->library_window_width = 700;
+  if (ghidgui->library_window_height <= 0) ghidgui->library_window_height = 500;
+  if (ghidgui->netlist_window_width <= 0) ghidgui->netlist_window_width = 700;
+  if (ghidgui->netlist_window_height <= 0) ghidgui->netlist_window_height = 500;
+  if (ghidgui->keyref_window_width <= 0) ghidgui->keyref_window_width = 700;
+  if (ghidgui->keyref_window_height <= 0) ghidgui->keyref_window_height = 500;
+
   if (board_size_override
       && sscanf (board_size_override, "%dx%d", &width, &height) == 2)
     {

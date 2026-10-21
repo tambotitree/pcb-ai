@@ -405,3 +405,48 @@ builds with strict flags. Standalone GTK checks pass for rendering variants,
 clipping/Cairo preservation, color fallback, toggle signal and finalization.
 The shared drawing-header blockers remain in the next object. See the GUI list
 and API table for the rule, precedent and validation details.
+
+### AI Assist visual/edit follow-up (2026-10-21)
+
+- [x] Fresh viewport PNG and explicit Send image option.
+- [x] At most one automatic image continuation per turn, with visible status.
+- [x] Selected-pad width proposal, explicit Apply, undo and image redraw.
+- [x] Enlarge existing selected plated-via copper rings; drill/position/layers unchanged.
+- [x] Shared operation registry and selection manifest (components/pads/vias/holes/traces).
+- [ ] Add separate surface pads over vias, with layer/geometry/connectivity contracts.
+- [ ] General lookup/connectivity tools and constrained routing/creation operations.
+- [ ] Missing-reference dialogue: resolve existing objects or gather placement and part ID/pinout.
+- [ ] Add length/area resizing and object highlighting with stable identifiers.
+- [ ] Broaden DRC/clearance validation and provider vision-capability discovery.
+
+### Reviewed JSON patches (2026-10-21)
+
+- [x] Exact memory-only unified diff staging, supplied-document whitelist and
+  SHA-256 snapshot checks; reject fuzzy context, unknown paths and mixed actions.
+- [x] Plan -> Act -> review popup -> Implement for live PCB edits. Review displays
+  summary, diff, native parser validation and before/after viewport images.
+- [x] Cancel leaves the board untouched; Implement rechecks snapshot/selection,
+  updates live geometry/image and provides one whole-board native Undo/Redo.
+- [x] Test invalid native PCB rejection and cancellation in the GTK process.
+- [ ] Explicitly attach a schematic from its owning editor, validate with the
+  native gEDA parser and coordinate undo before enabling `.sch` application.
+  Never infer a paired file or silently edit it on disk.
+- [ ] Expose optional model sampling controls (including temperature); preserve
+  provider defaults for models that do not accept those parameters.
+- [ ] Broaden geometry/DRC validation beyond native syntax and operation bounds.
+
+### Release checkpoint 0.1.3-20261021
+
+- User confirmed visible circular-pad edits through AI Assist and requested an
+  annotated tag, commit and push. Keep generated objects, scratch candidates,
+  logs and credentials out of the commit.
+- Includes multi-provider AI Assist, selection context, optional viewport PNG,
+  Plan/Act/review/Implement, exact host-generated patches, native Undo/Redo and
+  runtime visibility preservation, plus GTK startup/menu lifetime fixes.
+- Current validation: 32 offline tests; native GUI regression including actual
+  canvas pad pixels; live gpt-4 disposable-fixture proposal and native export.
+- Remaining scope limits: explicit schematic integration, model sampling controls,
+  layer-count edits and full geometry/DRC validation.
+
+- Release checks: both full GTK and batch rebuilds pass at 0.1.3-20261021;
+  32 AI tests, three version tests and the final native GUI regression pass.

@@ -64,6 +64,57 @@ and a two-resistor board with a routed copper connection. The fixture is
 **not for manufacturing**; this screenshot demonstrates the editor rendering,
 not a verified production board.
 
+## AI Assist
+
+Open **Window → AI Assist…** to discuss the current board, including unsaved
+edits. **Plan** sends the question and develops a proposal without changing the
+board. Continue discussing until its scope is right; **Act** opens a review
+window and **Implement** applies the reviewed proposal. Missing details leave
+Act disabled. The dialog and transport are adapted from gEDA-ai: choose Ollama, OpenAI,
+DeepSeek, OpenRouter, or a compatible endpoint, then load or enter a model.
+Enter a key in the masked field or select a credentials `.env`. Otherwise keys
+are discovered in the process environment, launch-directory `.env`,
+`$GEDADATADIR/.env` (also `$GEDADATA/.env`), the configured PCB data directory,
+and `$HOME/.env`, in that order. An explicitly selected file precedes automatic
+file discovery; files without the selected provider's key are skipped. Python 3
+is used for the HTTP helper; it requires only the standard library.
+
+Each Send includes a fresh native PCB snapshot, omitting vector font glyph
+geometry to save context space. Labels and board design data remain included;
+normal saved PCB files retain their fonts.
+
+- **Send image with next message** attaches a fresh PNG of the current visible
+  viewport and layers. Use a model that supports images.
+- **Allow automatic image request** lets the model ask for one PNG continuation
+  per turn. Disable it for text-only models. No old image is reused after edits.
+- Select pads (or an element containing pads) before asking to resize their
+  **width**. A supported proposal enables **Act**. The
+  editor checks the original board/selection, pad locks and width limits,
+  groups the changes into one undo step, then redraws the board and PNG preview.
+  Endpoints remain fixed; solder-mask width follows the editor's normal resize
+  behavior. This does not scale pad length/area.
+- Select plated vias and request an increase in **outer copper diameter**, with
+  an explicit amount (for example, 20% larger). Implement enlarges the via rings,
+  retaining drill holes, positions and layer spans. It does not create separate
+  surface pads or convert unplated holes.
+
+Selection, proposal validation, dispatch, undo and redraw are shared across
+registered operations. Selected traces include layer/endpoints/clearance in the
+context, and components include references and bounds. The model uses these
+identities rather than inferring selection from pixels. If a requested reference
+or circuit cannot be found, it should ask whether to create it and request
+placement plus a part ID or pinout/footprint. Native routing and component-creation operations are not exposed yet; other
+geometry edits can be proposed as reviewed PCB patches.
+
+The assistant cannot run arbitrary actions or replace the board file. Run DRC
+and inspect any changes before manufacture; this is not automatic clearance or
+connectivity certification. Keys are not saved in the provider preferences.
+
+Offline protocol checks: `python3 tools/test_ai_chat_backend.py` and
+`python3 tools/test_ai_visual_protocol.py`. The macOS native test runner
+`tools/test_ai_visual_native.py --board PATH` uses a disposable copy of a
+board containing two two-pad elements and a loopback-only mock provider.
+
 ## Modernization approach
 
 Work proceeds in consultation with the maintainer, one reviewable step at a time:
@@ -118,17 +169,55 @@ make -j1
 This requires the modern Homebrew GTK3/Cairo development dependencies. It is a
 source-build checkpoint; no supported binary package is provided yet.
 
+## Reviewing AI design patches
+
+The assistant returns a `<pcb-ai-proposal>` section containing JSON with a
+summary and numbered replacements (or a legacy exact unified diff) for
+`current.pcb`, the live board snapshot including unsaved edits. The host generates the diff from the frozen source, preserving original context
+and spacing. It checks the SHA-256 base hash and every context line, then parses a private staged PCB.
+An invalid proposal gets at most one automatic model correction request. If it
+still fails, the dialog reports the validation reason; no edit is applied.
+**Act** opens the proposed diff, parser result, and before/after viewport tabs.
+**Back to planning** leaves the board untouched; **Implement** rechecks the frozen
+board and selection before updating it. One native Undo/Redo restores/reapplies
+the complete board. Runtime layer/object visibility is preserved. Layer-count
+changes are currently unsupported by patch application. Save the board normally afterward; no source design file is
+silently overwritten.
+
+The parser check is not electrical or manufacturing validation. Run DRC and
+inspect the proposed geometry, connectivity and layer changes. A 3 mm pad can
+short nearby pads on the small two-resistor fixture. Native resize proposals
+show their target selection and constraints; their geometry is rechecked at
+Implement. Only patch proposals currently provide an after-preview tab.
+
+The editor currently supplies **only the open PCB**. A paired `.sch` document is
+not inferred or edited. Explicit schematic attachment, native schematic
+validation and coordinated cross-editor undo remain follow-up work.
+
+Offline checks:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 tools/test_ai_design_patch.py
+PYTHONDONTWRITEBYTECODE=1 python3 tools/test_ai_visual_protocol.py
+PYTHONDONTWRITEBYTECODE=1 python3 tools/test_ai_chat_backend.py
+G_DEBUG=fatal-criticals python3 tools/test_ai_visual_native.py \
+  --board upgrade_data/scratch/two-resistor-test/arranged.pcb
+```
+
+The last test uses a disposable board, private GTK process and loopback mock
+provider; it makes no real model requests.
+
 ## Release identity
 
 The authoritative version is the literal `AC_INIT` version in `configure.ac`.
-The current development checkpoint is `0.1.2-20261021`. The GTK3 executable
+The current development checkpoint is `0.1.3-20261021`. The GTK3 executable
 builds and displays the two-resistor board. Batch/PostScript smoke tests pass;
 physical manufacturing and full GUI operation remain unverified.
 Versions follow `MAJOR.MINOR.PATCH-YYYYMMDD`, matching gEDA-ai's release format.
 
 ```sh
 python3 tools/version.py show
-python3 tools/version.py set 0.1.2-20261021  # example next version
+python3 tools/version.py set 0.1.3-20261021  # example next version
 python3 tools/version.py check
 ```
 
@@ -146,7 +235,7 @@ and create an annotated tag with the exact version printed by the helper
 (no `v` prefix). After `make dist`, validate both identities before publishing:
 
 ```sh
-python3 tools/version.py check --tag --archive pcb-ai-0.1.2-20261021.tar.gz
+python3 tools/version.py check --tag --archive pcb-ai-0.1.3-20261021.tar.gz
 ```
 
 `--tag` requires a clean checkout and the matching annotated tag at HEAD.

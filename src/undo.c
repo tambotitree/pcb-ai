@@ -185,6 +185,7 @@ typedef struct
     ID; /*!< Object ID. */
   union /* Some additional information. */
   {
+    PCBType *BoardSwap;
     ChangeNameType ChangeName;
     MoveType Move;
     RemovedPointType RemovedPoint;
@@ -284,6 +285,10 @@ GetUndoSlot (int CommandType, int ID, int Kind)
   for (ptr = &UndoList[UndoN]; RedoN; ptr++, RedoN--)
     switch (ptr->Type)
       {
+      case UNDO_BOARD_SWAP:
+        FreePCBMemory (ptr->Data.BoardSwap);
+        free (ptr->Data.BoardSwap);
+        break;
       case UNDO_CHANGENAME:
 	free (ptr->Data.ChangeName.Name);
 	break;
@@ -1148,6 +1153,15 @@ PerformUndo (UndoListType *ptr)
 {
   switch (ptr->Type)
     {
+    case UNDO_BOARD_SWAP:
+      {
+        PCBType *previous = PCB;
+        SetMode (ARROW_MODE);
+        PCB = ptr->Data.BoardSwap;
+        ptr->Data.BoardSwap = previous;
+        hid_action ("PCBChanged");
+        return UNDO_BOARD_SWAP;
+      }
     case UNDO_CHANGENAME:
       if (UndoChangeName (ptr))
 	return (UNDO_CHANGENAME);
@@ -1414,13 +1428,18 @@ ClearUndoList (bool Force)
 {
   UndoListType *undo;
 
-  if (UndoN
+  if ((UndoN || RedoN)
       && (Force || gui->confirm_dialog ("OK to clear 'undo' buffer?", 0)))
     {
       /* release memory allocated by objects in undo list */
-      for (undo = UndoList; UndoN; undo++, UndoN--)
+      for (undo = UndoList; UndoN + RedoN; undo++, UndoN ? UndoN-- : RedoN--)
 	{
-	  if (undo->Type == UNDO_CHANGENAME)
+	  if (undo->Type == UNDO_BOARD_SWAP)
+            {
+              FreePCBMemory (undo->Data.BoardSwap);
+              free (undo->Data.BoardSwap);
+            }
+          if (undo->Type == UNDO_CHANGENAME)
 	    free (undo->Data.ChangeName.Name);
 	}
       free (UndoList);
@@ -1956,4 +1975,14 @@ bool
 Undoing (void)
 {
   return (Locked);
+}
+
+/* Retain the previous complete board as one reversible review transaction.
+ * Caller has switched PCB to the staged design. Ownership passes to undo.
+ */
+void
+AddBoardSwapToUndoList (PCBType *previous)
+{
+  UndoListType *undo = GetUndoSlot (UNDO_BOARD_SWAP, 0, NO_TYPE);
+  undo->Data.BoardSwap = previous;
 }

@@ -74,3 +74,10 @@ EXTRA_DIST += tools/topbar_appearance_conversion.py
 EXTRA_DIST += tools/xpm_stream_conversion.py
 
 EXTRA_DIST += screenshots/two_resistors.jpg
+
+# Copied gEDA-ai HTTP helper; Python stdlib only, no credentials distributed.
+aihelperdir = $(datadir)/pcb/ai
+dist_aihelper_DATA = ai/chat_backend.py ai/assist_protocol.py ai/design_patch.py
+EXTRA_DIST += tools/test_ai_chat_backend.py
+
+EXTRA_DIST += tools/test_ai_design_patch.py tools/test_ai_visual_protocol.py tools/test_ai_visual_native.py tools/test_ai_visual_native.c

@@ -64,16 +64,28 @@ ghid_status_line_set_text (const gchar * text)
   ghid_label_set_markup (ghidgui->status_line_label, text);
 }
 
+/* Preserve the largest cursor-label width using GTK3 preferred-size APIs. */
+static void
+cursor_label_set_text (GtkWidget *label, const gchar *text)
+{
+  gint minimum, natural, previous, height;
+  ghid_label_set_markup (label, text);
+  gtk_widget_get_preferred_width (label, &minimum, &natural);
+  gtk_widget_get_size_request (label, &previous, &height);
+  if (natural > previous)
+    gtk_widget_set_size_request (label, natural, height);
+}
+
 void
 ghid_cursor_position_label_set_text (gchar * text)
 {
-  ghid_label_set_markup (ghidgui->cursor_position_absolute_label, text);
+  cursor_label_set_text (ghidgui->cursor_position_absolute_label, text);
 }
 
 void
 ghid_cursor_position_relative_label_set_text (gchar * text)
 {
-  ghid_label_set_markup (ghidgui->cursor_position_relative_label, text);
+  cursor_label_set_text (ghidgui->cursor_position_relative_label, text);
 }
 
 static GdkCursorType

@@ -323,10 +323,27 @@ hid/common/hidlist.h : Makefile
 	  echo "HID_DEF($${e})" >> $@; \
 	done
 
-libgtk_a_CPPFLAGS = -I$(top_srcdir) -I./hid/gtk
+libgtk_a_CPPFLAGS = -I$(top_srcdir) -I./hid/gtk \
+  -DPCB_AI_PYTHON='"$(PCB_AI_PYTHON)"' \
+  -DPCB_AI_SOURCE_HELPER='"$(abs_top_srcdir)/ai/chat_backend.py"'
 # Keep migration diagnostics local to GTK; configure probes and core are separate.
 libgtk_a_CFLAGS = $(AM_CFLAGS) -Wall -Wextra -Werror -Wpedantic
 LIBGTK_SRCS = \
+	hid/gtk/pcb_ai_selection.c \
+	hid/gtk/pcb_ai_pad.c \
+	hid/gtk/pcb_ai_via.c \
+	hid/gtk/pcb_ai_visual.c \
+	hid/gtk/pcb_ai_edit.c \
+	hid/gtk/pcb_ai_patch.c \
+	hid/gtk/pcb_ai_review.c \
+	hid/gtk/pcb_ai_chat.c \
+	hid/gtk/pcb_ai_chat_settings.c \
+	hid/gtk/pcb_ai_chat_json.c \
+	hid/gtk/pcb_ai_chat.h \
+	hid/gtk/pcb_ai_chat_internal.h \
+	hid/gtk/pcb_ai_board.c \
+	hid/gtk/pcb_ai_dialog.c \
+	hid/gtk/pcb-runtime.h \
 	hid/gtk/pcb-pointer.h \
 	hid/gtk/pcb-grid.h \
 	hid/gtk/pcb-xpm.h \

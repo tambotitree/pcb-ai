@@ -121,7 +121,7 @@ static void WriteViaData (FILE *, DataType *);
 static void WritePCBRatData (FILE *);
 static void WriteElementData (FILE *, DataType *);
 static void WriteLayerData (FILE *, Cardinal, LayerType *);
-static int WritePCB (FILE *);
+static int WritePCB (FILE *, bool, bool);
 static int WritePCBFile (char *);
 static int WritePipe (char *, bool);
 static int ParseLibraryTree (void);
@@ -890,7 +890,7 @@ WriteBuffer (FILE * FP)
  * \brief Writes PCB to file.
  */
 static int
-WritePCB (FILE * FP)
+WritePCB (FILE * FP, bool notify, bool include_font)
 {
   Cardinal i;
   if (Settings.SaveMetricOnly)
@@ -900,7 +900,10 @@ WritePCB (FILE * FP)
 
   WritePCBInfoHeader (FP);
   WritePCBDataHeader (FP);
-  WritePCBFontData (FP);
+  if (include_font)
+    WritePCBFontData (FP);
+  else
+    fputs ("# AI context: vector font glyph geometry omitted; board design retained.\n", FP);
   WriteAttributeList (FP, &PCB->Attributes, "");
   WriteViaData (FP, PCB->Data);
   WriteElementData (FP, PCB->Data);
@@ -909,17 +912,25 @@ WritePCB (FILE * FP)
     WriteLayerData (FP, i, &(PCB->Data->Layer[i]));
   WritePCBNetlistData (FP);
 
-  if (ferror (FP))
+  if (notify && ferror (FP))
     Message (_("Error writing PCB file\n"));
-  else
+  else if (notify)
     Message (_("PCB file saved\n"));
 
   return (STATUS_OK);
 }
 
-/*!
- * \brief Writes PCB to file.
- */
+/* Write a live board for read-only AI context, preserving writer settings. */
+int
+pcb_write_board_snapshot (FILE *stream)
+{
+  enum e_allow previous = set_allow_readable (0);
+  int result = WritePCB (stream, false, false);
+  set_allow_readable (previous);
+  return ferror (stream) ? STATUS_ERROR : result;
+}
+
+/*! \brief Write the current PCB to the named file. */
 static int
 WritePCBFile (char *Filename)
 {
@@ -931,7 +942,7 @@ WritePCBFile (char *Filename)
       OpenErrorMessage (Filename);
       return (STATUS_ERROR);
     }
-  result = WritePCB (fp);
+  result = WritePCB (fp, true, true);
 
   if (ferror (fp))
     Message (_("Error writing PCB backup file %s\n"), Filename);
@@ -997,7 +1008,7 @@ WritePipe (char *Filename, bool thePcb)
 	  result = 0;
 	}
       else
-	result = WritePCB (fp);
+	result = WritePCB (fp, true, true);
     }
   else
     result = WriteBuffer (fp);

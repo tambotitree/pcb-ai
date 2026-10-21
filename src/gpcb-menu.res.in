@@ -479,6 +479,7 @@ MainMenu =
    {"Command Entry" Command() a={":" "<Key>:"}}
    {"Pinout" Display(Pinout) a={"Shift-D" "Shift<Key>d"}}
    -
+   {"AI Assist..." AiAssist()}
    {"About..." About()}
   }
 }

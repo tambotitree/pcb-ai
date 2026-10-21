@@ -39,6 +39,8 @@
 FILE *CheckAndOpenFile (char *, bool, bool, bool *, bool *);
 FILE *OpenConnectionDataFile (void);
 int SavePCB (char *);
+int pcb_write_board_snapshot (FILE *stream);
+char *pcb_board_snapshot (void);
 int LoadPCB (char *);
 int RevertPCB (void);
 void EnableAutosave (void);

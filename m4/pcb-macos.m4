@@ -41,3 +41,23 @@ On macOS install Homebrew bison, or set YACC to a modern bison command.])
   AC_MSG_RESULT([$PCB_BISON_VERSION ($YACC)])
   AC_SUBST([PCB_BISON_VERSION])
 ])
+
+ dnl PCB_GTK_RUNTIME_SCHEMAS
+ dnl Standalone Homebrew executables need the merged GTK schema directory.
+AC_DEFUN([PCB_GTK_RUNTIME_SCHEMAS], [
+  pcb_gtk_schema_dir=""
+  case "$build_os" in
+    darwin*)
+      AC_PATH_PROG([PCB_BREW], [brew])
+      AS_IF([test -n "$PCB_BREW"], [
+        pcb_runtime_prefix=`"$PCB_BREW" --prefix 2>/dev/null`
+        AS_IF([test -f "$pcb_runtime_prefix/share/glib-2.0/schemas/gschemas.compiled"], [
+          pcb_gtk_schema_dir="$pcb_runtime_prefix/share/glib-2.0/schemas"
+        ])
+      ])
+      ;;
+  esac
+  AC_DEFINE_UNQUOTED([PCB_GTK_SCHEMA_DIR], ["$pcb_gtk_schema_dir"],
+    [Fallback GTK schema directory for standalone Homebrew launches.])
+  AC_MSG_NOTICE([GTK runtime schema fallback: $pcb_gtk_schema_dir])
+])

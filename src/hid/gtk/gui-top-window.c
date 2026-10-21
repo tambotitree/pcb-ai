@@ -76,6 +76,7 @@
 #include "ghid-route-style-selector.h"
 #include "gtkhid.h"
 #include "gui.h"
+#include "pcb-runtime.h"
 #include "hid.h"
 #include "../hidint.h"
 #include "hid/common/hid_resource.h"
@@ -132,8 +133,8 @@ GHidPort ghid_port, *gport;
 
 static gchar *bg_image_file;
 
-static struct { GtkWidget *action; const Resource *node; }
-  ghid_hotkey_actions[256];
+typedef struct { GtkWidget *action; const Resource *node; } GHidHotkeyAction;
+static GHidHotkeyAction ghid_hotkey_actions[256];
 #define N_HOTKEY_ACTIONS \
         (sizeof (ghid_hotkey_actions) / sizeof (ghid_hotkey_actions[0]))
 
@@ -705,35 +706,6 @@ grid_units_button_cb (GtkWidget * widget G_GNUC_UNUSED, gpointer data G_GNUC_UNU
     hid_actionl ("SetUnits", "mm", NULL);
 }
 
-/*!
- * \brief The two following callbacks are used to keep the absolute
- * and relative cursor labels from growing and shrinking as you
- * move the cursor around.
- */
-static void
-absolute_label_size_req_cb (GtkWidget * widget G_GNUC_UNUSED,
-			    GtkRequisition *req, gpointer data G_GNUC_UNUSED)
-{
-
-  static gint w = 0;
-  if (req->width > w)
-    w = req->width;
-  else
-    req->width = w;
-}
-
-static void
-relative_label_size_req_cb (GtkWidget * widget G_GNUC_UNUSED,
-			    GtkRequisition *req, gpointer data G_GNUC_UNUSED)
-{
-
-  static gint w = 0;
-  if (req->width > w)
-    w = req->width;
-  else
-    req->width = w;
-}
-
 static void
 make_cursor_position_labels (GtkWidget * hbox, GHidPort * port G_GNUC_UNUSED)
 {
@@ -762,8 +734,6 @@ make_cursor_position_labels (GtkWidget * hbox, GHidPort * port G_GNUC_UNUSED)
   label = gtk_label_new ("");
   gtk_container_add (GTK_CONTAINER (frame), label);
   ghidgui->cursor_position_absolute_label = label;
-  g_signal_connect (G_OBJECT (label), "size-request",
-		    G_CALLBACK (absolute_label_size_req_cb), NULL);
 
 
   /* The relative cursor position label
@@ -775,8 +745,6 @@ make_cursor_position_labels (GtkWidget * hbox, GHidPort * port G_GNUC_UNUSED)
   label = gtk_label_new (" __.__  __.__ ");
   gtk_container_add (GTK_CONTAINER (frame), label);
   ghidgui->cursor_position_relative_label = label;
-  g_signal_connect (G_OBJECT (label), "size-request",
-		    G_CALLBACK (relative_label_size_req_cb), NULL);
 
 }
 
@@ -1780,6 +1748,7 @@ ghid_parse_arguments (int *argc, char ***argv)
    */
   gtk_disable_setlocale ();
 
+  pcb_gtk_runtime_init ();
   gtk_init (argc, argv);
 
   gport = &ghid_port;
@@ -2015,6 +1984,17 @@ REGISTER_ACTIONS (gtk_topwindow_action_list)
  * This function is called as new accelerators are added when the menus
  * are being built.
  */
+/* Clear borrowed accelerator pointers when a menu item is destroyed/rebuilt. */
+static void
+hotkey_item_destroyed_cb (GtkWidget *item, GHidHotkeyAction *binding)
+{
+  if (binding->action == item)
+    {
+      binding->action = NULL;
+      binding->node = NULL;
+    }
+}
+
 static void
 ghid_check_special_key (const char *accel, GtkWidget *action,
                         const Resource *node)
@@ -2082,6 +2062,7 @@ ghid_check_special_key (const char *accel, GtkWidget *action,
 
       ghid_hotkey_actions[ind].action = action;
       ghid_hotkey_actions[ind].node = node;
+      g_signal_connect (action, "destroy", G_CALLBACK (hotkey_item_destroyed_cb), &ghid_hotkey_actions[ind]);
 #ifdef DEBUG_MENUS
       printf ("Adding \"special\" hotkey to ghid_hotkey_actions[%u] :"
 	      " %s (%s)\n", ind, accel, name);

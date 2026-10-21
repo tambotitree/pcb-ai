@@ -50,6 +50,7 @@ int SaveUndoSerialNumber (void);
 int RestoreUndoSerialNumber (void);
 int MergeUndoSerialRange (int, int);
 void ClearUndoList (bool);
+void AddBoardSwapToUndoList (PCBType *previous);
 void MoveObjectToRemoveUndoList (int, void *, void *, void *);
 void AddObjectToRemovePointUndoList (int, void *, void *, Cardinal);
 void AddObjectToInsertPointUndoList (int, void *, void *, void *);

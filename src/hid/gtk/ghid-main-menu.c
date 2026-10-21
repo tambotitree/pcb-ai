@@ -90,6 +90,13 @@ menu_activate_cb (GtkWidget *item, GHidMainMenu *menu)
 }
 
 
+/* A cached menu item is a borrowed widget: remove it when GTK destroys it. */
+static void
+menu_item_destroyed_cb (GtkWidget *item, GHidMainMenu *menu)
+{
+  menu->actions = g_list_remove (menu->actions, item);
+}
+
 /* RESOURCE HANDLER */
 
 /*!
@@ -342,6 +349,7 @@ ghid_main_menu_real_add_resource (GHidMainMenu *menu, GtkMenuShell *shell,
               g_object_set_data (G_OBJECT (action), "resource", (gpointer) sub_res);
               gtk_menu_shell_append (shell, action);
               menu->actions = g_list_append (menu->actions, action);
+              g_signal_connect_object (action, "destroy", G_CALLBACK (menu_item_destroyed_cb), menu, 0);
               menu->special_key_cb (accel, action, sub_res);
             }
           /* Scan rest of resource in case there is more work */

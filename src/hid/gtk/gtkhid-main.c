@@ -16,6 +16,7 @@
 #include "error.h"
 #include "../hidint.h"
 #include "gui.h"
+#include "pcb_ai_chat.h"
 #include "pcb-pointer.h"
 #include "pcb-grid.h"
 #include "hid/common/hidnogui.h"
@@ -2244,7 +2245,17 @@ Busy (int argc G_GNUC_UNUSED, char **argv G_GNUC_UNUSED, Coord x G_GNUC_UNUSED, 
   return 0;
 }
 
+/* Open the copied gEDA-ai chat with PCB's current live board. */
+static int
+AiAssist (int argc G_GNUC_UNUSED, char **argv G_GNUC_UNUSED,
+          Coord x G_GNUC_UNUSED, Coord y G_GNUC_UNUSED)
+{
+  pcb_ai_assist_dialog (GTK_WINDOW (gport->top_window));
+  return 0;
+}
+
 HID_Action ghid_main_action_list[] = {
+  {.name = "AiAssist", .trigger_cb = AiAssist, .description = "Chat about the current PCB", .syntax = "AiAssist()"},
   {.name = "About", .need_coord_msg = 0, .trigger_cb = About, .description = about_help, .syntax = about_syntax},
   {.name = "Benchmark", .need_coord_msg = 0, .trigger_cb = Benchmark, .description = benchmark_help, .syntax = benchmark_syntax},
   {.name = "Busy", .need_coord_msg = 0, .trigger_cb = Busy, .description = busy_help, .syntax = busy_syntax},

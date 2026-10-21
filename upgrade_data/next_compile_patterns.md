@@ -1,5 +1,255 @@
 # Next compile patterns
 
+Visible geometry after reviewed board swap (2026-10-21):
+
+- User observed a blank main canvas after Implement. Parsed PCB runtime
+  visibility flags were all false: layer On, ElementOn, PinOn, ViaOn, RatOn
+  and InvisibleObjectsOn are not saved by the board text serializer.
+- Staging now copies the live board's visibility and active drawing mode. Layer
+  count changes are rejected for now so the global LayerStack stays valid.
+  Existing hidden-layer choices are preserved rather than forcing everything on.
+- Earlier image test compared two PNGs but could pass when the new image was
+  blank. Strengthened it with visibility assertions and actual copper-pad pixel
+  checks through BOTH offscreen HID rendering and the real GTK canvas expose
+  callback, after Implement. Review/Undo/Redo and mock-helper flow still pass.
+- Full strict GTK build passes. Native test with fatal GTK criticals passes.
+  Logs: scratch/ai-visibility-build.log and scratch/ai-visibility-native.log.
+  Restart the rebuilt executable; this fix is C, not just a Python helper edit.
+
+
+Host-generated diffs from numbered replacements (2026-10-21):
+
+- User reached real validation: hand-written model diff context did not match
+  the snapshot even after retry. Keep exact matching; do not add fuzzy patching.
+- Supply numbered source lines and accept inclusive original-snapshot line ranges
+  plus replacement text. Host constructs the unified diff with difflib, then runs
+  the same exact patch validation and native review/Implement/Undo pipeline.
+- Require the original base hash, valid disjoint ranges, bounded newline-terminated
+  text, whitelisted document and all existing font/size checks. Never infer line
+  numbers after earlier replacements or accept stale source.
+- 32 offline tests pass, including original tabs/context retention, multiple
+  ranges with line-count changes, overlap/range/stale/mixed-form rejection.
+  Native mock-provider regression uses tagged numbered replacements through the
+  real helper and confirms enabled Act, review, Implement and Undo.
+  Log: scratch/ai-numbered-patch-native.log.
+- User explicitly authorized the live OpenAI gpt-4 fixture test after automatic
+  approval review initially rejected transmission. Live request returned one
+  validated patch with numbered replacements; all four pad centers stayed at
+  +/-15 mil and endpoints became coincident, width 118.11 mil (~3 mm).
+  Native batch parser/PostScript export accepted and rendered the candidate.
+  Scratch artifacts: ai-live-numbered.pcb/.ps and ai-live-numbered-export.log.
+  No live board was changed. This verifies transport/proposal/rendering, not
+  design correctness: requested pads overlap and model retained the old small
+  mask openings. Broader geometry validation remains a recorded follow-up.
+
+
+Expose proposal validation errors, bounded correction (2026-10-21):
+
+- The generic main exception handler mislabeled protocol ValueErrors (bad JSON,
+  stale base hashes, invalid hunks, operation bounds) as Invalid chat request.
+  User wording is not the cause of a rejected model-generated proposal.
+- prepare_assist validates the generated proposal and requests one corrected
+  response with fixed validator feedback. It retains the original source/hash
+  and all strict checks. A second failure reports its specific safe reason and
+  confirms no board changes; no retry loop and no automatic implementation.
+- Two offline tests verify bad-hash correction, preserved source context, bounded
+  retry and visible malformed-JSON error. All 30 offline tests pass.
+
+
+Explicit proposal section and Act activation (2026-10-21):
+
+- User saw a JSON patch embedded in Markdown/prose, silently treated as chat.
+  Agreed delimiter: <pcb-ai-proposal> JSON </pcb-ai-proposal>. Extract exactly
+  one section; accept one legacy JSON fence surrounded by prose. Invalid or
+  ambiguous structured proposals report errors instead of silently disabling Act.
+- Tag alone never authorizes edits: base hash, exact diff, path and native parser
+  checks remain. Act opens review; Implement is still the edit boundary.
+- Prompt also preserves each pad's distinct center instead of moving every pad
+  to the Element origin, as the user's shown proposal incorrectly did.
+- 28 offline tests pass. Native mock-provider regression now returns prose plus
+  tagged JSON through the actual Python helper and verifies enabled Act, review,
+  Implement and Undo. Existing PNG continuation and native edit checks pass.
+  Log: scratch/ai-tagged-patch-native.log. No real API request or source board edit.
+
+
+Correct embedded editing capability guidance (2026-10-21):
+
+- User observed repeated false claims that PCB text cannot change square pads to
+  round and that patch review has no visual preview. Current prompt still mixed
+  selection-only native-operation wording with general patch capabilities.
+- Clarified native operations versus general patches; concrete requested edits
+  should produce proposals without another conversational permission loop.
+  Implement is the approval boundary. Current system contract follows history,
+  so old assistant refusals do not define the current editing capabilities.
+- Added pad syntax guidance verified against file.c and draw_helpers.c: remove
+  square for round ends; coincident endpoints are needed for a true circle.
+  Preserve flags, units, pad/net identity and distinguish mask from copper/drill.
+  Describe actual overlap/connection issues, not fictional format limitations.
+- All 26 offline protocol/backend tests pass. This is a prompt change, not a
+  claim that a live model has now produced a correct patch. No real API call.
+
+
+Reviewed JSON design patches (2026-10-21):
+
+- Disk-full write failed before editing sources; after reboot 14 GiB was free.
+- New design_patch.py stages exact unified diffs in memory with base SHA-256,
+  explicit document scope, hunk counts and context checks. No shell patch command.
+- JSON patches are encoded through the trusted helper envelope. current.pcb is
+  the live unsaved snapshot, not arbitrary model-supplied filesystem access.
+- Act now opens a modal review popup; Implement alone applies. Parser failure
+  disables Implement. Summary/diff and native before/after viewport are shown.
+  The configured FileCommand is disabled while parsing private staged PCB text;
+  the original font and filename survive compact-context round trips.
+- Native whole-board undo record retains inactive boards and exchanges them on
+  Undo/Redo. Redo pruning/undo clearing free inactive boards without RemovePCB's
+  recursive ClearUndoList side effect. Existing earlier object undo survives.
+- Current scope is the live PCB. Explicit .sch attachment and cross-editor undo,
+  model sampling controls, and broader DRC checks are recorded follow-ups.
+- Offline tests: 13 backend + 6 visual + 7 exact-patch tests pass. Native GTK
+  regression with fatal criticals passes review/cancel/Implement, changed image,
+  board Undo/Redo and invalid parser rejection, existing selected pad/via edits,
+  menu lifetime, and one asynchronous PNG continuation. No real API calls.
+  Both full GTK and batch builds pass. Logs: scratch/ai-patch-build.log,
+  scratch/ai-patch-batch-build.log and scratch/ai-patch-native.log.
+
+
+Menu lifetime and GTK3 startup warnings (2026-10-21):
+
+- User crash report pcb-2026-10-21-123113.ips matches PID 53585 and the reported
+  launch. Faulting stack is g_type_check_instance_cast -> menu toggle sync ->
+  menu activation callback. User reports no deliberate menu click.
+- A native regression reproduced invalid-widget criticals when a cached menu
+  item was destroyed and toggle state was refreshed. GHidMainMenu's borrowed
+  item list now removes destroyed items; special hotkey bindings similarly clear
+  borrowed widget/resource pointers. No attempt is made to cast/test a freed
+  object as a validity check.
+- Removed GTK2 size-request signal callbacks. Cursor text setters preserve their
+  largest preferred width using GTK3 preferred-size and size-request methods.
+  Loaded/saved zero window dimensions receive usable defaults, retaining valid
+  user sizes for the main window and auxiliary dialogs.
+- Full GTK build passes. Native regression with a disposable copy of the user's
+  preferences and G_DEBUG=fatal-criticals passes startup, actual AI menu activation,
+  destroyed-item toggle refresh, pad/via operations, image exchange and Plan/Act.
+  Log: scratch/menu-runtime-regression.log; baseline invalid-widget diagnostics:
+  scratch/menu-lifetime-before.log. User must restart the rebuilt executable;
+  this does not claim every unrelated runtime failure is fixed.
+
+Explicit Plan / Act interaction (2026-10-21):
+
+- Plan sends questions and develops proposals, never mutating the board. Act
+  remains disabled without a validated registered operation. Discussion and
+  missing-reference/parameter clarification produce no action. New planning
+  requests invalidate the previous proposal; Act retains frozen-state guards.
+- Model prompt acknowledges the native operation bridge instead of presenting
+  the assistant as guidance-only. It explains the exact supported limitations,
+  asks for missing details, and must not claim an edit before Act.
+- Full GTK build passes; 13 transport and 6 visual protocol tests pass. Native
+  mock-provider regression explicitly verifies Plan leaves pad width unchanged,
+  the Act button applies the reviewed operation, and Undo restores it. Existing
+  via, selection and automatic-image checks also pass.
+  Logs: scratch/ai-plan-act-build.log and scratch/ai-plan-act-native.log.
+
+Shared operation registry and selected-via enlargement (2026-10-21):
+
+- Separate generic selection manifest, operation registry, request-state guards
+  and redraw/UI from typed pad and via implementations. No natural-language
+  phrase is hard-coded. The registry validates supported names and parameter
+  bounds; backend contracts require matching selected object kinds.
+- Manifest includes selected component references/bounds, pad identities, plated
+  via diameters/drills/layers, unplated holes, and trace layers/endpoints/clearance.
+  It is authoritative; images supply visual context, not selection identity.
+- Via enlargement changes outer copper diameter only, preserving drills, XY and
+  layer spans. Native ChangeObjectSize maintains mask/polygon/index behavior;
+  group preflight rejects locked/invalid sets, and one Undo restores all vias.
+- Native regression confirms selected vias change, unselected via does not,
+  masks/undo work and drill/position/layer spans remain fixed. Existing pad and
+  automatic-image exchange checks still pass. Thirteen transport and six visual
+  protocol tests pass. Logs: scratch/ai-operations-native.log and
+  scratch/ai-operations-build.log.
+- Model instructions require asking rather than inventing missing references or
+  circuit groups. Creation requires placement and part ID or pinout/footprint.
+  General lookup/connectivity operations, component creation and constrained
+  routing remain explicit follow-up work, not advertised as implemented.
+
+Visual AI exchange and selected-pad editing (2026-10-21):
+
+- New Send image control attaches a freshly rendered, lossless PNG of the
+  current viewport/layers (maximum dimension 1280; encoded PNG bounded to 8 MiB).
+  Optional automatic requests perform at most one asynchronous image continuation
+  against the same frozen board snapshot; changed boards must be resent.
+- assist_protocol.py validates model JSON, then emits a base64/INI envelope.
+  Plain prose cannot execute actions. Only scale_selected_pad_width with finite
+  10..200 percent is accepted, and only for pads selected before the request.
+- Explicit Apply rejects changed board/selection, locked pads and invalid widths;
+  native ChangeObjectSize maintains mask geometry, spatial indices and polygon
+  updates. Resize is grouped into one undo step. Apply redraws both canvas and
+  image preview. This is not a substitute for DRC/manufacturing review.
+- New-pad creation over vias, pad length/area scaling and arbitrary object edits
+  remain follow-up work; do not advertise them as implemented.
+- Full GTK build passes with strict GTK warnings. Thirteen transport tests and
+  five visual protocol tests pass. A private native regression plugin confirms
+  two selected pad widths/masks change, an unselected pad does not, one undo
+  restores both, stale selection is rejected, and PNG pixels change after Apply.
+  Initial image test was over-zoomed due to coordinate units; a dimension-based
+  viewport makes the real before/after check meaningful.
+- Loopback mock-provider integration confirms text -> requested PNG -> typed
+  proposal, with exactly two HTTP requests and no external API or real keys.
+  Native runner uses only a disposable board copy. Logs: scratch/ai-native-test.log,
+  scratch/ai-visual-full-build.log. Provider/model image support remains a user
+  choice; disable automatic images for text-only models.
+- OpenAI content-part formatting checked against official Chat Completions API:
+  https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create
+
+AI context-limit fix (2026-10-21):
+
+- Reproduced the gpt-4 HTTP 400 using the two-resistor fixture: OpenAI's safe
+  structured code is context_length_exceeded. Native serialization embeds all
+  vector font strokes, exhausting this model's context on a tiny board.
+- AI snapshot writer now omits only font glyph geometry and marks that omission.
+  Normal save/backup paths still include fonts. Labels, components, attributes,
+  nets and routed geometry remain in the AI context.
+- Equivalent compact fixture is 1,633 bytes versus 31,178 bytes; the same
+  authenticated gpt-4 request succeeds and identifies R1 and R2. GTK build
+  passes; 13 transport tests pass, including private/actionable context errors.
+- Provider error messages are not echoed wholesale. Recognized structured error
+  codes yield actionable context/model/quota diagnostics without exposing keys
+  or request data. Other errors retain the generic HTTP status.
+
+Shared GTK GSettings startup fix (2026-10-21):
+
+- Menu dialogs could abort with "No GSettings schemas are installed" even
+  though Homebrew's merged gschemas.compiled exists. Configure now discovers
+  the Homebrew prefix and records its schema directory. pcb-runtime.h applies
+  that existing directory before gtk_init, respecting an explicit
+  GSETTINGS_SCHEMA_DIR. This covers GTK dialogs globally, not only AI Assist.
+- Full GTK build passes. A schema lookup succeeds with XDG_DATA_DIRS deliberately
+  pointing to an empty location and GSETTINGS_SCHEMA_DIR initially unset. The
+  local asynchronous chat/pending-close fixture passes under the same missing
+  default-data setup. No desktop settings are modified.
+- If the detected schema installation is removed, the fallback does not invent
+  files; reinstall the dependency or supply a valid schema path. Other unrelated
+  menu crashes still need individual diagnosis.
+
+PCB AI Assist copied from gEDA-ai (2026-10-21):
+
+- Copy the GTK chat, provider controls, JSON encoder and standard-library Python
+  transport, retaining licensing. Adapt context to PCB layout and separate
+  pcb-ai preference storage. Expose Window -> AI Assist and AiAssist().
+- Native writer now accepts notification control; a read-only stream wrapper
+  preserves coordinate formatting policy. The board adapter captures unsaved
+  state through a private tmpfile, without SavePCB filename/dirty-state effects.
+- New GTK modules pass existing strict flags, including declaration placement.
+  Eleven copied transport tests pass. A local GTK fixture verifies two sends
+  capture changing board context, asynchronous replies, and closing while a
+  helper is pending. No external API calls or real credentials used in tests.
+- Credential discovery also searches GEDADATADIR/GEDADATA and HOME .env files,
+  after explicit key/environment and selected/launch-directory files. Tests
+  isolate HOME and working directory and use dummy keys only. Twelve transport
+  tests pass.
+- Installed helper lives under share/pcb/ai; source-tree builds fall back to
+  their copied helper. Python3 is located by configure. GUI interaction and
+  real-provider testing remain for the maintainer.
+
 Unified GTK3 scales and linked executable (2026-10-21):
 
 - Whole-project C/header search found only two legacy scale constructors, both

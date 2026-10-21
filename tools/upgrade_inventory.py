@@ -135,7 +135,19 @@ def main():
     'tools/drawing_backend_rules.py', 'tools/drawing_ui_rules.py', 'tools/menu_conversion.py', 'tools/gtype_conversion.py', 'tools/menu_actions_conversion.py', 'tools/selector_actions_conversion.py', 'tools/dialog_layout_conversion.py', 'src/hid/gtk/pcb-grid.h', 'tools/callback_conversion.py', 'tools/pointer_conversion.py', 'src/hid/gtk/pcb-pointer.h', 'tools/hid_initializer_conversion.py', 'tools/hid_bounds_conversion.py', 'tools/hid_flags_conversion.py', 'tools/benchmark_conversion.py', 'tools/combo_conversion.py', 'tools/desktop_hints_conversion.py', 'tools/array_loop_conversion.py', 'tools/dialog_stock_conversion.py', 'tools/reverse_loop_conversion.py', 'tools/layer_loop_conversion.py',
     'tools/render_cache_conversion.py', 'tools/sentinel_audit.py',
     'tools/topbar_appearance_conversion.py', 'tools/xpm_stream_conversion.py',
-    'src/hid/gtk/pcb-cairo.h', 'src/hid/gtk/pcb-cairo.c'})
+    'src/hid/gtk/pcb-cairo.h', 'src/hid/gtk/pcb-cairo.c',
+    'ai/chat_backend.py', 'tools/test_ai_chat_backend.py',
+    'src/hid/gtk/pcb_ai_board.c', 'src/hid/gtk/pcb_ai_chat.c',
+    'src/hid/gtk/pcb_ai_chat_settings.c', 'src/hid/gtk/pcb_ai_chat_json.c',
+    'src/hid/gtk/pcb_ai_chat.h', 'src/hid/gtk/pcb_ai_chat_internal.h',
+    'src/hid/gtk/pcb_ai_dialog.c', 'src/hid/gtk/pcb-runtime.h',
+    'src/hid/gtk/pcb_ai_visual.c', 'src/hid/gtk/pcb_ai_edit.c',
+    'ai/assist_protocol.py', 'tools/test_ai_visual_protocol.py',
+    'tools/test_ai_visual_native.c', 'tools/test_ai_visual_native.py',
+    'src/hid/gtk/pcb_ai_selection.c', 'src/hid/gtk/pcb_ai_pad.c',
+    'src/hid/gtk/pcb_ai_via.c', 'src/hid/gtk/pcb_ai_patch.c',
+    'src/hid/gtk/pcb_ai_review.c', 'ai/design_patch.py',
+    'tools/test_ai_design_patch.py'})
   project_version = read_version((root / 'configure.ac').read_text())
   entries = []
   for path in paths:
