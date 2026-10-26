@@ -450,3 +450,19 @@ and API table for the rule, precedent and validation details.
 
 - Release checks: both full GTK and batch rebuilds pass at 0.1.3-20261021;
   32 AI tests, three version tests and the final native GUI regression pass.
+
+### Usable empty-board startup size (2026-10-26)
+
+- [x] Match gschem's two-thirds monitor work-area default and 1280x720 minimum
+  where the display permits, preserving larger saved sizes within the monitor.
+- [x] Rebuild GTK and test empty startup with fresh preferences and a disposable
+  copy of the user's old small preferences. Both start at 1280x720 here.
+- [x] Full native GUI regression passes at the new size, including visible pad
+  pixels, reviewed patches, native Undo/Redo and local mock-provider flow.
+
+### Release 0.1.4-20261026
+
+- User approved tagging/pushing the matching laptop-sized startup checkpoint.
+- Empty boards and old small preferences start at a usable 1280x720 where the
+  monitor allows; retain larger saved sizes within the usable screen.
+- Full GTK build and empty-board/full native GUI regressions pass.

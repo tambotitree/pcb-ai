@@ -55,15 +55,19 @@ def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, default=root / 'upgrade_data/scratch/build-gtk3')
-    parser.add_argument('--board', type=Path, required=True)
+    parser.add_argument('--board', type=Path)
+    parser.add_argument('--startup-only', action='store_true', help='Check an empty board without contacting a provider')
     parser.add_argument('--preferences', type=Path, help='Copy this preference file into the disposable HOME')
     args = parser.parse_args()
+    if not args.startup_only and args.board is None:
+        parser.error('--board is required for the full regression')
     build = args.build.resolve()
     flags = shlex.split(subprocess.check_output(['pkg-config', '--cflags', '--libs', 'gtk+-3.0'], text=True))
     with tempfile.TemporaryDirectory(prefix='pcb-ai-native-') as directory:
         work = Path(directory)
         (work / 'plugins').mkdir()
-        shutil.copyfile(args.board, work / 'fixture.pcb')
+        if args.board:
+            shutil.copyfile(args.board, work / 'fixture.pcb')
         if args.preferences:
             (work / '.pcb').mkdir()
             shutil.copyfile(args.preferences, work / '.pcb/preferences')
@@ -73,19 +77,24 @@ def main():
                         '-I' + str(root / 'src/hid/gtk'),
                         str(root / 'tools/test_ai_visual_native.c'),
                         '-o', str(work / 'plugins/ai_visual.so'), *flags], check=True)
-        server = ThreadingHTTPServer(('127.0.0.1', 0), Provider)
-        threading.Thread(target=server.serve_forever, daemon=True).start()
+        server = None if args.startup_only else ThreadingHTTPServer(('127.0.0.1', 0), Provider)
+        if server:
+            threading.Thread(target=server.serve_forever, daemon=True).start()
         env = os.environ.copy()
-        env.update(HOME=str(work), XDG_CONFIG_HOME=str(work / 'config'),
-                   PCB_AI_TEST_ENDPOINT=f'http://127.0.0.1:{server.server_port}/v1/chat/completions')
+        env.update(HOME=str(work), XDG_CONFIG_HOME=str(work / 'config'))
+        if args.startup_only:
+            env['PCB_AI_TEST_STARTUP_ONLY'] = '1'
+        if server:
+            env['PCB_AI_TEST_ENDPOINT'] = f'http://127.0.0.1:{server.server_port}/v1/chat/completions'
         subprocess.run([str(build / 'src/pcb'), '--font-path', str(root / 'src'),
                         '--lib-path', str(root / 'lib'), '--lib-newlib', str(root / 'newlib'),
                         '--lib-command-dir', str(build / 'lib'), '--action-string',
-                        'AiVisualRegression()', str(work / 'fixture.pcb')],
+                        'AiVisualRegression()', *([str(work / 'fixture.pcb')] if args.board else [])],
                        cwd=work, env=env, check=True, timeout=30)
-        server.shutdown()
-        server.server_close()
-        assert len(Provider.calls) == 3, "Expected one image continuation followed by one tagged patch request"
+        if server:
+            server.shutdown()
+            server.server_close()
+        assert args.startup_only or len(Provider.calls) == 3, "Expected one image continuation followed by one tagged patch request"
 
 
 if __name__ == '__main__':

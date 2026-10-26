@@ -11,6 +11,27 @@
 
 static Coord expected_plan_width;
 
+/* A blank board needs the same useful main-window size as a loaded one. */
+static gboolean
+check_startup_size (gpointer unused G_GNUC_UNUSED)
+{
+  GtkWindow *window = GTK_WINDOW (gport->top_window);
+  GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (window));
+  GdkMonitor *monitor = gdk_display_get_monitor_at_window (display,
+    gtk_widget_get_window (GTK_WIDGET (window)));
+  GdkRectangle work;
+  gint width, height;
+  g_assert_nonnull (monitor);
+  gdk_monitor_get_workarea (monitor, &work);
+  gtk_window_get_size (window, &width, &height);
+  g_assert_cmpint (width, >=, MIN (1280, work.width));
+  g_assert_cmpint (height, >=, MIN (720, work.height));
+  g_print ("PASS: usable PCB startup size %dx%d.\n", width, height);
+  if (g_getenv ("PCB_AI_TEST_STARTUP_ONLY") != NULL)
+    exit (0);
+  return G_SOURCE_REMOVE;
+}
+
 /* Test actual foreground pixels, not merely that two PNGs differ. */
 static void
 check_pad_visible (PadType *pad)
@@ -324,6 +345,7 @@ check_native (gpointer unused G_GNUC_UNUSED)
   GtkWidget *panel = pcb_ai_chat_new (GTK_WINDOW (gport->top_window));
   PcbAiChat *chat;
   gchar *before, *after;
+  check_startup_size (NULL);
   check_menu_lifetime ();
   g_object_ref_sink (panel);
   gtk_container_add (GTK_CONTAINER (host), panel);
@@ -383,7 +405,7 @@ static int
 run_test (int argc G_GNUC_UNUSED, char **argv G_GNUC_UNUSED,
           Coord x G_GNUC_UNUSED, Coord y G_GNUC_UNUSED)
 {
-  g_timeout_add (500, check_native, NULL);
+  g_timeout_add (500, g_getenv ("PCB_AI_TEST_STARTUP_ONLY") != NULL ? check_startup_size : check_native, NULL);
   return 0;
 }
 

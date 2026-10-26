@@ -210,14 +210,14 @@ provider; it makes no real model requests.
 ## Release identity
 
 The authoritative version is the literal `AC_INIT` version in `configure.ac`.
-The current development checkpoint is `0.1.3-20261021`. The GTK3 executable
+The current development checkpoint is `0.1.4-20261026`. The GTK3 executable
 builds and displays the two-resistor board. Batch/PostScript smoke tests pass;
 physical manufacturing and full GUI operation remain unverified.
 Versions follow `MAJOR.MINOR.PATCH-YYYYMMDD`, matching gEDA-ai's release format.
 
 ```sh
 python3 tools/version.py show
-python3 tools/version.py set 0.1.3-20261021  # example next version
+python3 tools/version.py set 0.1.4-20261026  # example next version
 python3 tools/version.py check
 ```
 
@@ -235,7 +235,7 @@ and create an annotated tag with the exact version printed by the helper
 (no `v` prefix). After `make dist`, validate both identities before publishing:
 
 ```sh
-python3 tools/version.py check --tag --archive pcb-ai-0.1.3-20261021.tar.gz
+python3 tools/version.py check --tag --archive pcb-ai-0.1.4-20261026.tar.gz
 ```
 
 `--tag` requires a clean checkout and the matching annotated tag at HEAD.
@@ -259,3 +259,18 @@ licenses. PCB is GNU GPL software; see [COPYING](COPYING) and individual source
 headers for applicable terms. The upstream [README](README) retains the original
 project information. The pcb-ai name does not imply endorsement by the upstream
 maintainers or the GNU Project.
+
+## Startup window size
+
+PCB-ai defaults to two-thirds of the usable monitor width and height, with a
+1280x720 minimum where the display permits. Tiny saved preferences are raised;
+larger saved sizes are retained and clamped to the monitor work area. This also
+applies when starting with an empty board. Sizes use GTK logical pixels.
+
+The isolated empty-board startup check is:
+
+```sh
+G_DEBUG=fatal-criticals python3 tools/test_ai_visual_native.py --startup-only
+```
+
+It uses temporary settings and does not contact an AI provider.

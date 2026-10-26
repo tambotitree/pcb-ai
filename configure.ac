@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Authoritative release identity; tools/version.py updates and validates it.
-AC_INIT([pcb-ai],[0.1.3-20261021],[https://github.com/tambotitree/pcb-ai/issues],[pcb-ai])
+AC_INIT([pcb-ai],[0.1.4-20261026],[https://github.com/tambotitree/pcb-ai/issues],[pcb-ai])
 AC_CONFIG_SRCDIR([src/draw.c])
 AC_PREREQ([2.73])
 AM_INIT_AUTOMAKE([1.9])

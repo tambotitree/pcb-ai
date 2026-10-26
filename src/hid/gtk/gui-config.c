@@ -759,6 +759,33 @@ load_rc_files (void)
 }
 
 
+/* Keep startup usable on laptop displays, including old tiny preferences.
+ * GTK monitor work areas and window sizes both use logical pixels.
+ */
+static void
+ghid_config_startup_size (void)
+{
+  GdkDisplay *display = gdk_display_get_default ();
+  GdkMonitor *monitor = display != NULL ? gdk_display_get_primary_monitor (display) : NULL;
+  GdkRectangle work = {0, 0, 1280, 720};
+  gint minimum_width, minimum_height;
+  if (monitor == NULL && display != NULL && gdk_display_get_n_monitors (display) > 0)
+    monitor = gdk_display_get_monitor (display, 0);
+  if (monitor != NULL)
+    gdk_monitor_get_workarea (monitor, &work);
+  work.width = MAX (1, work.width);
+  work.height = MAX (1, work.height);
+  minimum_width = MIN (1280, work.width);
+  minimum_height = MIN (720, work.height);
+  if (ghidgui->top_window_width <= 0 || ghidgui->top_window_height <= 0)
+    {
+      ghidgui->top_window_width = MAX (minimum_width, work.width * 2 / 3);
+      ghidgui->top_window_height = MAX (minimum_height, work.height * 2 / 3);
+    }
+  ghidgui->top_window_width = CLAMP (ghidgui->top_window_width, minimum_width, work.width);
+  ghidgui->top_window_height = CLAMP (ghidgui->top_window_height, minimum_height, work.height);
+}
+
 void
 ghid_config_files_read (gint * argc, gchar *** argv)
 {
@@ -777,8 +804,7 @@ ghid_config_files_read (gint * argc, gchar *** argv)
   parse_optionv (argc, argv, TRUE);
 
   /* Old preference files may contain zero sizes; GTK3 rejects those. */
-  if (ghidgui->top_window_width <= 0) ghidgui->top_window_width = 1100;
-  if (ghidgui->top_window_height <= 0) ghidgui->top_window_height = 760;
+  ghid_config_startup_size ();
   if (ghidgui->log_window_width <= 0) ghidgui->log_window_width = 700;
   if (ghidgui->log_window_height <= 0) ghidgui->log_window_height = 350;
   if (ghidgui->drc_window_width <= 0) ghidgui->drc_window_width = 700;

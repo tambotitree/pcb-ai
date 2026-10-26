@@ -1,5 +1,17 @@
 # Next compile patterns
 
+Laptop-sized empty-board startup (2026-10-26):
+
+- Match gschem sizing: two-thirds usable monitor width/height, minimum 1280x720
+  where possible, raise old tiny preferences and clamp larger ones to work area.
+  Apply after config/options load and before GTK window creation; auxiliary
+  dialog defaults are unchanged. Logical pixels avoid Retina over-sizing.
+- Extended private regression runner with --startup-only (no mock server or AI
+  calls). Fresh/old copied preference cases both start at 1280x720 on this monitor.
+- Full GTK rebuild and existing native regression pass, including actual canvas
+  pad pixels and the reviewed patch/Undo pipeline. User settings/designs untouched.
+
+
 Visible geometry after reviewed board swap (2026-10-21):
 
 - User observed a blank main canvas after Implement. Parsed PCB runtime
